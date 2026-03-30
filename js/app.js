@@ -384,7 +384,7 @@ if (btnExportCsv) {
         }
 
         // Prepare CSV Content
-        let csvContent = "Partido,Local,Visitante,Pronostico,Fecha Modificacion\\n";
+        let csvContent = "Partido;Local;Visitante;Pronostico;Fecha Modificacion\r\n";
         
         const sortedIds = madePredictions.sort((a,b) => {
             const tA = predictionsState[a].updatedAt ? new Date(predictionsState[a].updatedAt).getTime() : 0;
@@ -410,11 +410,11 @@ if (btnExportCsv) {
             }
             
             // Clean up team names just in case they have commas
-            const local = match.homeTeam.replace(/,/g, '');
-            const away = match.awayTeam.replace(/,/g, '');
+            const local = match.homeTeam.replace(/;/g, '');
+            const away = match.awayTeam.replace(/;/g, '');
             const matchName = `${local} vs ${away}`;
 
-            csvContent += `"${matchName}","${local}","${away}","${resText}","${dateStr}"\\n`;
+            csvContent += `"${matchName}";"${local}";"${away}";"${resText}";"${dateStr}"\r\n`;
         });
 
         // Trigger Download
