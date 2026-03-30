@@ -21,6 +21,9 @@ const btnNavMatches = document.getElementById("nav-matches");
 const btnNavRanking = document.getElementById("nav-ranking");
 const btnExportCsv = document.getElementById("btn-export-csv");
 const loader = document.getElementById("global-loader");
+const loginError = document.getElementById("login-error");
+const userAliasDisplay = document.getElementById("user-alias-display");
+const userPointsDisplay = document.getElementById("user-points-display");
 
 // STATE
 let matchesState = [];
