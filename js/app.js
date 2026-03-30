@@ -20,6 +20,7 @@ const stageTabsContainer = document.getElementById("stage-tabs");
 const btnNavMatches = document.getElementById("nav-matches");
 const btnNavRanking = document.getElementById("nav-ranking");
 const btnExportCsv = document.getElementById("btn-export-csv");
+const btnSubmitGoogle = document.getElementById("btn-submit-google");
 const loader = document.getElementById("global-loader");
 const loginError = document.getElementById("login-error");
 const userAliasDisplay = document.getElementById("user-alias-display");
@@ -428,5 +429,69 @@ if (btnExportCsv) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    });
+}
+
+// =======================
+// GOOGLE SHEETS SUBMIT LOGIC
+// =======================
+if (btnSubmitGoogle) {
+    btnSubmitGoogle.addEventListener("click", async () => {
+        const madePredictions = Object.keys(predictionsState).filter(id => predictionsState[id].result);
+        if (madePredictions.length === 0) {
+            alert("No tienes pronósticos guardados para enviar.");
+            return;
+        }
+
+        const btnOriginalText = btnSubmitGoogle.innerHTML;
+        btnSubmitGoogle.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Guardando...';
+        btnSubmitGoogle.disabled = true;
+
+        // Construir datos
+        const dataToSend = {
+            alias: userAliasDisplay.textContent,
+            timestamp: new Date().toISOString(),
+            predicciones: {}
+        };
+
+        madePredictions.forEach(id => {
+            const pred = predictionsState[id];
+            const match = matchesState.find(m => m.id === id);
+            if(match) {
+                const matchName = `${match.homeTeam} vs ${match.awayTeam}`;
+                dataToSend.predicciones[matchName] = pred.result;
+            }
+        });
+
+        // ==========================================
+        // URL DEL SCRIPT DE GOOGLE
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeNkKCuTR5aXyE-_l1b0aKzEb6KJEDD-6Bu6GwJDbeBa6bsz0a1zXKJnbDbZZdZ8oX/exec";
+
+        if (!SCRIPT_URL || SCRIPT_URL.includes("REPLACE_ME")) {
+            alert("Falta configurar la URL de Google Sheets en el código.");
+            btnSubmitGoogle.innerHTML = btnOriginalText;
+            btnSubmitGoogle.disabled = false;
+            return;
+        }
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors", // Evita problemas de seguridad CORS desde GitHub Pages
+                headers: {
+                    "Content-Type": "text/plain"
+                },
+                body: JSON.stringify(dataToSend)
+            });
+            
+            alert("¡Tus pronósticos han sido enviados a la base central con éxito!");
+        } catch (error) {
+            console.error(error);
+            alert("Hubo un error al enviar los datos. Intenta nuevamente.");
+        } finally {
+            btnSubmitGoogle.innerHTML = btnOriginalText;
+            btnSubmitGoogle.disabled = false;
+        }
     });
 }

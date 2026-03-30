@@ -170,10 +170,16 @@
                         </h2>
                         <p class="text-xs text-slate-400 mt-1">Historial de pronósticos elegidos</p>
                     </div>
-                    <button id="btn-export-csv" class="bg-brand-600 hover:bg-brand-500 text-white p-2 rounded-lg flex items-center gap-1 text-xs font-semibold transition-colors shadow-sm" title="Descargar como Excel/CSV">
-                        <i class="ph-bold ph-download-simple"></i>
-                        <span class="hidden lg:inline">Exportar</span>
-                    </button>
+                    <div class="flex gap-2">
+                        <button id="btn-submit-google" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg flex items-center gap-1 text-xs font-semibold transition-colors shadow-sm" title="Enviar a la base de datos">
+                            <i class="ph-bold ph-paper-plane-right"></i>
+                            <span class="hidden lg:inline">Enviar</span>
+                        </button>
+                        <button id="btn-export-csv" class="bg-brand-600 hover:bg-brand-500 text-white p-2 rounded-lg flex items-center gap-1 text-xs font-semibold transition-colors shadow-sm" title="Descargar como Excel/CSV">
+                            <i class="ph-bold ph-download-simple"></i>
+                            <span class="hidden lg:inline">Exportar</span>
+                        </button>
+                    </div>
                 </div>
                 <div id="predictions-grid" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24 hide-scrollbar">
                     <!-- Grid injected here via JS -->
