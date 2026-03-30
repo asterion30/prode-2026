@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prode Mundial 2026</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d',
+                            dark: '#0f172a',
+                            card: '#1e293b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body class="bg-brand-dark text-white font-sans antialiased min-h-screen flex items-center justify-center">
+
+    <!-- App Container -->
+    <div id="app-container" class="w-full max-w-5xl md:h-[800px] flex flex-col md:flex-row relative shadow-2xl bg-brand-dark overflow-hidden sm:border sm:border-slate-800 sm:rounded-3xl sm:my-8 hide-scrollbar mx-auto">
+        
+        <!-- ======================= -->
+        <!--  LOGIN VIEW             -->
+        <!-- ======================= -->
+        <section id="login-view" class="flex-1 w-full flex flex-col justify-center items-center p-6 sm:p-10 z-10 transition-all duration-500 min-h-screen md:min-h-0">
+            <div class="mb-8 text-center">
+                <div class="w-24 h-24 bg-brand-500/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
+                    <i class="ph ph-trophy text-5xl text-brand-500"></i>
+                </div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">Prode 2026</h1>
+                <p class="text-slate-400">Pronostica los resultados del Mundial</p>
+            </div>
+
+            <form id="login-form" class="w-full space-y-5">
+                <div>
+                    <label for="alias-input" class="block text-sm font-medium text-slate-300 mb-1">Ingresa tu Alias</label>
+                    <input type="text" id="alias-input" required placeholder="Ej: JuanPerez99" class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white text-lg">
+                </div>
+                <button type="submit" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl shadow-lg transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+                    <span>Entrar a Jugar</span>
+                    <i class="ph-bold ph-arrow-right"></i>
+                </button>
+            </form>
+            
+            <div id="login-error" class="mt-4 text-red-400 text-sm hidden"></div>
+        </section>
+
+        <!-- ======================= -->
+        <!--  MAIN APP VIEW          -->
+        <!-- ======================= -->
+        <section id="main-view" class="flex-1 flex flex-col md:flex-row hidden h-full w-full">
+            
+            <!-- Left Column: Matches & Ranking -->
+            <div class="flex-1 flex flex-col relative h-full md:border-r border-slate-800">
+                <!-- App Header -->
+                <header class="bg-brand-card/80 backdrop-blur-md border-b border-slate-800 p-4 flex justify-between items-center sticky top-0 z-50">
+                    <div class="flex items-center gap-2">
+                        <i class="ph-fill ph-trophy text-brand-500 text-xl"></i>
+                        <h1 class="font-bold text-lg">Prode 2026</h1>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <p id="user-alias-display" class="text-sm font-semibold text-white">Alias</p>
+                            <p id="user-points-display" class="text-xs text-brand-500 font-medium">0 pts</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-slate-700 border-2 border-brand-500 flex items-center justify-center text-lg shadow-sm">
+                            <i class="ph-fill ph-user text-slate-300"></i>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Scrollable Content Area -->
+                <main id="content-area" class="flex-1 overflow-y-auto p-4 space-y-6 pb-24 hide-scrollbar">
+                    
+                    <!-- Matches View -->
+                    <div id="matches-view" class="space-y-4">
+                        <div class="flex flex-col mb-4 gap-4">
+                            <div>
+                                <h2 class="text-xl font-bold flex items-center gap-2">
+                                    <i class="ph-fill ph-calendar text-brand-500"></i> Fixture
+                                </h2>
+                                <p class="text-xs text-slate-400">Desliza para cambiar de fase</p>
+                            </div>
+                            
+                            <!-- Stage Tabs -->
+                            <div class="overflow-x-auto hide-scrollbar pb-1 -mx-4 px-4">
+                                <div id="stage-tabs" class="flex gap-2 min-w-max">
+                                    <!-- Tabs injected via JS -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Matches List Container -->
+                        <div id="matches-list" class="space-y-4">
+                            <!-- Matches injected here via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Ranking View -->
+                    <div id="ranking-view" class="hidden space-y-4">
+                        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i class="ph-fill ph-ranking text-yellow-500"></i> Ranking General
+                        </h2>
+                        <div class="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700/50">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-800">
+                                    <tr>
+                                        <th class="px-4 py-3 font-medium text-slate-300 w-12 text-center">#</th>
+                                        <th class="px-4 py-3 font-medium text-slate-300">Jugador</th>
+                                        <th class="px-4 py-3 font-medium text-brand-500 text-right">Pts</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ranking-list" class="divide-y divide-slate-700/50">
+                                    <!-- Ranking injected here via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                </main>
+
+                <!-- Bottom Navigation (Left Col) -->
+                <nav class="bg-brand-card/90 backdrop-blur-md border-t border-slate-800 absolute bottom-0 w-full z-50">
+                    <ul class="flex justify-around items-center p-2">
+                        <li class="flex-1">
+                            <button id="nav-matches" class="nav-btn w-full flex flex-col items-center gap-1 p-2 text-brand-500 transition-colors">
+                                <i class="ph-fill ph-calendar-blank text-2xl"></i>
+                                <span class="text-[10px] font-medium uppercase tracking-wider">Partidos</span>
+                            </button>
+                        </li>
+                        <li class="flex-1">
+                            <button id="nav-ranking" class="nav-btn w-full flex flex-col items-center gap-1 p-2 text-slate-500 hover:text-slate-300 transition-colors">
+                                <i class="ph-fill ph-chart-bar text-2xl"></i>
+                                <span class="text-[10px] font-medium uppercase tracking-wider">Ranking</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <!-- Right Column: My Predictions Summary -->
+            <aside id="sidebar-predictions" class="w-full md:w-80 lg:w-96 bg-slate-900/50 h-full flex flex-col border-t md:border-t-0 border-slate-800 relative hidden md:flex">
+                <div class="p-4 border-b border-slate-800 sticky top-0 bg-slate-900/90 backdrop-blur-md z-10 flex justify-between items-start">
+                    <div>
+                        <h2 class="font-bold text-white flex items-center gap-2">
+                            <i class="ph-fill ph-list-checks text-brand-500"></i> Mi Grilla
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">Historial de pronósticos elegidos</p>
+                    </div>
+                    <button id="btn-export-csv" class="bg-brand-600 hover:bg-brand-500 text-white p-2 rounded-lg flex items-center gap-1 text-xs font-semibold transition-colors shadow-sm" title="Descargar como Excel/CSV">
+                        <i class="ph-bold ph-download-simple"></i>
+                        <span class="hidden lg:inline">Exportar</span>
+                    </button>
+                </div>
+                <div id="predictions-grid" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24 hide-scrollbar">
+                    <!-- Grid injected here via JS -->
+                    <div class="text-center text-slate-500 text-sm mt-10">Aún no hay predicciones</div>
+                </div>
+            </aside>
+        </section>
+        
+        <!-- Loading Overlay -->
+        <div id="global-loader" class="fixed inset-0 bg-brand-dark/90 backdrop-blur-sm z-[100] flex flex-col items-center justify-center hidden">
+            <i class="ph ph-soccer-ball text-4xl text-brand-500 animate-spin mb-4"></i>
+            <p class="text-brand-500 font-medium tracking-wide animate-pulse">Cargando...</p>
+        </div>
+    </div>
+
+    <!-- Main Module -->
+    <script type="module" src="./js/app.js"></script>
+</body>
+</html>
