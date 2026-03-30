@@ -459,7 +459,12 @@ if (btnSubmitGoogle) {
             const match = matchesState.find(m => m.id === id);
             if(match) {
                 const matchName = `${match.homeTeam} vs ${match.awayTeam}`;
-                dataToSend.predicciones[matchName] = pred.result;
+                
+                let textoResultado = "Empate";
+                if (pred.result === 'L') textoResultado = `Gana ${match.homeTeam}`;
+                if (pred.result === 'V') textoResultado = `Gana ${match.awayTeam}`;
+                
+                dataToSend.predicciones[matchName] = textoResultado;
             }
         });
 
