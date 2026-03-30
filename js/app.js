@@ -466,7 +466,7 @@ if (btnSubmitGoogle) {
         // ==========================================
         // URL DEL SCRIPT DE GOOGLE
         // ==========================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeNkKCuTR5aXyE-_l1b0aKzEb6KJEDD-6Bu6GwJDbeBa6bsz0a1zXKJnbDbZZdZ8oX/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwM66-04lRwkCpDeR7teHlPP8LCkegLB12TTV837zXemUxly3FEyyC0tuqLqSCc_E6y/exec";
 
         if (!SCRIPT_URL || SCRIPT_URL.includes("REPLACE_ME")) {
             alert("Falta configurar la URL de Google Sheets en el código.");
