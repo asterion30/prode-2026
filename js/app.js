@@ -26,6 +26,10 @@ const loginError = document.getElementById("login-error");
 const userAliasDisplay = document.getElementById("user-alias-display");
 const userPointsDisplay = document.getElementById("user-points-display");
 
+const btnMobileGrid = document.getElementById("btn-mobile-grid");
+const btnCloseSidebar = document.getElementById("btn-close-sidebar");
+const sidebarPredictions = document.getElementById("sidebar-predictions");
+
 // STATE
 let matchesState = [];
 let predictionsState = {};
@@ -139,6 +143,24 @@ btnNavRanking.addEventListener("click", () => {
     btnNavMatches.classList.replace("text-brand-500", "text-slate-500");
     btnNavMatches.classList.add("hover:text-slate-300");
 });
+
+if (btnMobileGrid && sidebarPredictions && btnCloseSidebar) {
+    btnMobileGrid.addEventListener("click", () => {
+        sidebarPredictions.classList.remove("hidden");
+        sidebarPredictions.style.display = "flex";
+        setTimeout(() => {
+            sidebarPredictions.classList.remove("translate-x-full");
+        }, 10);
+    });
+
+    btnCloseSidebar.addEventListener("click", () => {
+        sidebarPredictions.classList.add("translate-x-full");
+        setTimeout(() => {
+            sidebarPredictions.style.display = ""; 
+            sidebarPredictions.classList.add("hidden");
+        }, 300);
+    });
+}
 
 // =======================
 // RENDERERS
