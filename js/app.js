@@ -21,6 +21,8 @@ const btnNavMatches = document.getElementById("nav-matches");
 const btnNavRanking = document.getElementById("nav-ranking");
 const btnExportCsv = document.getElementById("btn-export-csv");
 const btnSubmitGoogle = document.getElementById("btn-submit-google");
+const btnExportCsvMobile = document.getElementById("btn-export-csv-mobile");
+const btnSubmitGoogleMobile = document.getElementById("btn-submit-google-mobile");
 const loader = document.getElementById("global-loader");
 const loginError = document.getElementById("login-error");
 const userAliasDisplay = document.getElementById("user-alias-display");
@@ -398,13 +400,12 @@ document.addEventListener('touchmove', function(e) {
 // =======================
 // EXPORT LOGIC
 // =======================
-if (btnExportCsv) {
-    btnExportCsv.addEventListener("click", () => {
-        const madePredictions = Object.keys(predictionsState).filter(id => predictionsState[id].result);
-        if (madePredictions.length === 0) {
-            alert("No tienes pronósticos guardados para exportar.");
-            return;
-        }
+const handleExportCsv = () => {
+    const madePredictions = Object.keys(predictionsState).filter(id => predictionsState[id].result);
+    if (madePredictions.length === 0) {
+        alert("No tienes pronósticos guardados para exportar.");
+        return;
+    }
 
         // Prepare CSV Content
         let csvContent = "Partido;Local;Visitante;Pronostico;Fecha Modificacion\r\n";
@@ -451,23 +452,25 @@ if (btnExportCsv) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    });
-}
+};
+
+if (btnExportCsv) btnExportCsv.addEventListener("click", handleExportCsv);
+if (btnExportCsvMobile) btnExportCsvMobile.addEventListener("click", handleExportCsv);
 
 // =======================
 // GOOGLE SHEETS SUBMIT LOGIC
 // =======================
-if (btnSubmitGoogle) {
-    btnSubmitGoogle.addEventListener("click", async () => {
-        const madePredictions = Object.keys(predictionsState).filter(id => predictionsState[id].result);
+const handleSubmitGoogle = async (e) => {
+    const clickedBtn = e.currentTarget;
+    const madePredictions = Object.keys(predictionsState).filter(id => predictionsState[id].result);
         if (madePredictions.length === 0) {
             alert("No tienes pronósticos guardados para enviar.");
             return;
         }
 
-        const btnOriginalText = btnSubmitGoogle.innerHTML;
-        btnSubmitGoogle.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Guardando...';
-        btnSubmitGoogle.disabled = true;
+        const btnOriginalText = clickedBtn.innerHTML;
+        clickedBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i>';
+        clickedBtn.disabled = true;
 
         // Construir datos
         const dataToSend = {
@@ -497,8 +500,8 @@ if (btnSubmitGoogle) {
 
         if (!SCRIPT_URL || SCRIPT_URL.includes("REPLACE_ME")) {
             alert("Falta configurar la URL de Google Sheets en el código.");
-            btnSubmitGoogle.innerHTML = btnOriginalText;
-            btnSubmitGoogle.disabled = false;
+            clickedBtn.innerHTML = btnOriginalText;
+            clickedBtn.disabled = false;
             return;
         }
 
@@ -517,8 +520,10 @@ if (btnSubmitGoogle) {
             console.error(error);
             alert("Hubo un error al enviar los datos. Intenta nuevamente.");
         } finally {
-            btnSubmitGoogle.innerHTML = btnOriginalText;
-            btnSubmitGoogle.disabled = false;
+            clickedBtn.innerHTML = btnOriginalText;
+            clickedBtn.disabled = false;
         }
-    });
-}
+};
+
+if (btnSubmitGoogle) btnSubmitGoogle.addEventListener("click", handleSubmitGoogle);
+if (btnSubmitGoogleMobile) btnSubmitGoogleMobile.addEventListener("click", handleSubmitGoogle);
