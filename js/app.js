@@ -65,6 +65,12 @@ initAuth((user, alias, score) => {
         userAliasDisplay.textContent = alias;
         userPointsDisplay.textContent = `${score} pts`;
         
+        if (alias.toLowerCase() === 'testerbot' || alias.toLowerCase() === 'admin') {
+            if (btnAdminTest) btnAdminTest.classList.remove('hidden');
+        } else {
+            if (btnAdminTest) btnAdminTest.classList.add('hidden');
+        }
+        
         if (!isAppInitialized) {
             setupAppSubscriptions(user.uid);
             renderStageTabs();
@@ -622,9 +628,10 @@ if (btnAdminTest) {
         const localUserStr = localStorage.getItem("prode_mock_user");
         if(localUserStr) {
             const localUser = JSON.parse(localUserStr);
-            localUser.score = (localUser.score || 0) + scoreUpdates;
+            // Reemplazamos la puntuación total calculando desde cero
+            localUser.score = scoreUpdates;
             localStorage.setItem("prode_mock_user", JSON.stringify(localUser));
-            alert(`¡Simulación completa! Se calcularon resultados y sumaste ${scoreUpdates} puntos de prueba.\nLos otros jugadores tienen puntos fijos.\n(Actualiza la página si no cambia el número en pantalla automáticamente).`);
+            alert(`¡Simulación completa! Se calcularon resultados y tu PUNTAJE TOTAL es ahora de ${scoreUpdates} puntos de prueba.\nLos otros jugadores tienen puntos fijos.\n(Actualiza la página si no cambia el número en pantalla automáticamente).`);
             window.location.reload();
         } else {
             alert("No estás logueado en modo mock/prueba.");
