@@ -27,6 +27,7 @@ const loader = document.getElementById("global-loader");
 const loginError = document.getElementById("login-error");
 const userAliasDisplay = document.getElementById("user-alias-display");
 const userPointsDisplay = document.getElementById("user-points-display");
+const btnAdminTest = document.getElementById("btn-admin-test");
 
 const btnMobileGrid = document.getElementById("btn-mobile-grid");
 const btnCloseSidebar = document.getElementById("btn-close-sidebar");
@@ -577,3 +578,56 @@ const handleSubmitGoogle = async (e) => {
 
 if (btnSubmitGoogle) btnSubmitGoogle.addEventListener("click", handleSubmitGoogle);
 if (btnSubmitGoogleMobile) btnSubmitGoogleMobile.addEventListener("click", handleSubmitGoogle);
+
+// =======================
+// ADMIN TEST LOGIC
+// =======================
+if (btnAdminTest) {
+    btnAdminTest.addEventListener("click", () => {
+        if (!confirm("Esto evaluará todos tus pronósticos actuales como si los partidos hubiesen terminado con esos mismos resultados para sumar puntos y probar el ranking. ¿Continuar?")) return;
+        
+        let scoreUpdates = 0;
+        const madePredictions = Object.keys(predictionsState).filter(id => predictionsState[id].result);
+        
+        madePredictions.forEach(matchId => {
+             const pred = predictionsState[matchId];
+             
+             // En modo prueba, simulamos que el partido real terminó exactamente 
+             // como predijo el primer jugador (o inventado). 
+             // Vamos a sumarle los 3 puntos (1 por resultado, 2 extra por marcador exacto)
+             // Asumiendo que sus propios goles fueron los reales.
+             
+             // Si el partido tuviera resultados reales (desde Firebase), la fórmula sería:
+             // const offHG = match.realHomeGoals; ...
+             // Pero aquí haremos que ganó *su* predicción.
+             
+             const offHG = parseInt(pred.homeGoals, 10) || 0;
+             const offAG = parseInt(pred.awayGoals, 10) || 0;
+             let offResult = 'E';
+             if (offHG > offAG) offResult = 'L';
+             else if (offAG > offHG) offResult = 'V';
+             
+             let pts = 0;
+             if (pred.result === offResult) {
+                  pts += 1;
+                  // Como estamos usando sus propios numeros como reales, siempre acertará
+                  // y ganará el extra.
+                  if (!isNaN(pred.homeGoals) && !isNaN(pred.awayGoals)) {
+                      pts += 2; // +2 puntos exactos
+                  }
+             }
+             scoreUpdates += pts;
+        });
+        
+        const localUserStr = localStorage.getItem("prode_mock_user");
+        if(localUserStr) {
+            const localUser = JSON.parse(localUserStr);
+            localUser.score = (localUser.score || 0) + scoreUpdates;
+            localStorage.setItem("prode_mock_user", JSON.stringify(localUser));
+            alert(`¡Simulación completa! Se calcularon resultados y sumaste ${scoreUpdates} puntos de prueba.\nLos otros jugadores tienen puntos fijos.\n(Actualiza la página si no cambia el número en pantalla automáticamente).`);
+            window.location.reload();
+        } else {
+            alert("No estás logueado en modo mock/prueba.");
+        }
+    });
+}
