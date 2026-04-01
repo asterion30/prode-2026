@@ -128,22 +128,22 @@ btnNavMatches.addEventListener("click", () => {
     matchesView.classList.remove("hidden");
     rankingView.classList.add("hidden");
     
-    btnNavMatches.classList.replace("text-slate-500", "text-brand-500");
-    btnNavMatches.classList.remove("hover:text-slate-300");
+    btnNavMatches.classList.add("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
+    btnNavMatches.classList.remove("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
     
-    btnNavRanking.classList.replace("text-brand-500", "text-slate-500");
-    btnNavRanking.classList.add("hover:text-slate-300");
+    btnNavRanking.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
+    btnNavRanking.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
 });
 
 btnNavRanking.addEventListener("click", () => {
     rankingView.classList.remove("hidden");
     matchesView.classList.add("hidden");
     
-    btnNavRanking.classList.replace("text-slate-500", "text-brand-500");
-    btnNavRanking.classList.remove("hover:text-slate-300");
+    btnNavRanking.classList.add("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
+    btnNavRanking.classList.remove("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
     
-    btnNavMatches.classList.replace("text-brand-500", "text-slate-500");
-    btnNavMatches.classList.add("hover:text-slate-300");
+    btnNavMatches.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
+    btnNavMatches.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
 });
 
 if (btnMobileGrid && sidebarPredictions && btnCloseSidebar) {
@@ -237,26 +237,35 @@ function renderMatches() {
             
             <div class="text-center text-xs text-slate-400 mb-4 font-medium">${dateStr}</div>
             
-            <div class="flex items-center justify-between gap-2">
-                <!-- Local -->
-                <div class="flex flex-col items-center flex-[2]">
-                    <span class="text-xs font-bold font-sans text-center leading-tight mb-2 max-w-full overflow-hidden text-ellipsis text-slate-200">${match.homeTeam}</span>
-                    ${renderFlag(match.homeFlag, match.homeTeam)}
-                </div>
-                
-                <!-- Center Input 1X2 -->
-                <div class="flex flex-col items-center gap-1 flex-[3] max-w-[140px]">
-                    <div class="flex items-center justify-between bg-slate-900 rounded-lg p-1 border border-slate-700 w-full shadow-inner ${match.tbd ? 'opacity-50 pointer-events-none' : ''}">
-                        <button id="btn-L-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'L' ? 'bg-brand-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all" ${isLocked ? 'disabled' : ''}>L</button>
-                        <button id="btn-E-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'E' ? 'bg-slate-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all mx-1" ${isLocked ? 'disabled' : ''}>E</button>
-                        <button id="btn-V-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'V' ? 'bg-brand-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all" ${isLocked ? 'disabled' : ''}>V</button>
+            <div class="flex flex-col gap-3">
+                <div class="flex items-center justify-between gap-2">
+                    <!-- Local -->
+                    <div class="flex flex-col items-center flex-[2]">
+                        <span class="text-xs font-bold font-sans text-center leading-tight mb-2 max-w-full overflow-hidden text-ellipsis text-slate-200">${match.homeTeam}</span>
+                        ${renderFlag(match.homeFlag, match.homeTeam)}
                     </div>
-                </div>
+                    
+                    <!-- Center Input 1X2 & Goals -->
+                    <div class="flex flex-col items-center gap-2 flex-[3] max-w-[140px]">
+                        <div class="flex items-center justify-between bg-slate-900 rounded-lg p-1 border border-slate-700 w-full shadow-inner ${match.tbd ? 'opacity-50 pointer-events-none' : ''}">
+                            <button id="btn-L-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'L' ? 'bg-brand-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all" ${isLocked ? 'disabled' : ''}>L</button>
+                            <button id="btn-E-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'E' ? 'bg-slate-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all mx-1" ${isLocked ? 'disabled' : ''}>E</button>
+                            <button id="btn-V-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'V' ? 'bg-brand-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all" ${isLocked ? 'disabled' : ''}>V</button>
+                        </div>
+                        
+                        <!-- Goals Input -->
+                        <div class="flex items-center justify-center gap-2 w-full ${match.tbd ? 'opacity-50 pointer-events-none' : ''}">
+                            <input type="number" id="home-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" placeholder="-" value="${pred.homeGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
+                            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Goles</span>
+                            <input type="number" id="away-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" placeholder="-" value="${pred.awayGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
+                        </div>
+                    </div>
 
-                <!-- Visita -->
-                <div class="flex flex-col items-center flex-[2]">
-                    <span class="text-xs font-bold font-sans text-center leading-tight mb-2 max-w-full overflow-hidden text-ellipsis text-slate-200">${match.awayTeam}</span>
-                    ${renderFlag(match.awayFlag, match.awayTeam)}
+                    <!-- Visita -->
+                    <div class="flex flex-col items-center flex-[2]">
+                        <span class="text-xs font-bold font-sans text-center leading-tight mb-2 max-w-full overflow-hidden text-ellipsis text-slate-200">${match.awayTeam}</span>
+                        ${renderFlag(match.awayFlag, match.awayTeam)}
+                    </div>
                 </div>
             </div>
             
@@ -271,21 +280,30 @@ function renderMatches() {
         if (!isLocked) {
             const handleBet = async (res) => {
                 const statusEl = document.getElementById(`status-${match.id}`);
+                
+                const hGInput = document.getElementById(`home-goals-${match.id}`);
+                const aGInput = document.getElementById(`away-goals-${match.id}`);
+                let hG = hGInput.value;
+                let aG = aGInput.value;
+                
                 // reset colors
                 ['L','E','V'].forEach(k => {
                     const b = document.getElementById(`btn-${k}-${match.id}`);
                     b.className = `prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm transition-all ${k === 'E' ? 'mx-1' : ''} text-slate-400 hover:bg-slate-700`;
                 });
-                // set active color
-                const activeBtn = document.getElementById(`btn-${res}-${match.id}`);
-                activeBtn.className = `prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm transition-all shadow-md ${res === 'E' ? 'mx-1 bg-slate-500 text-white' : 'bg-brand-500 text-white'}`;
+                
+                // set active color if res is known
+                if (res) {
+                    const activeBtn = document.getElementById(`btn-${res}-${match.id}`);
+                    activeBtn.className = `prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm transition-all shadow-md ${res === 'E' ? 'mx-1 bg-slate-500 text-white' : 'bg-brand-500 text-white'}`;
+                }
                 
                 statusEl.textContent = "Guardando...";
                 statusEl.classList.remove("opacity-0", "text-red-400", "text-brand-500");
                 statusEl.classList.add("text-slate-400");
                 
                 try {
-                    await savePrediction(match.id, res);
+                    await savePrediction(match.id, res, hG, aG);
                     statusEl.textContent = "¡Guardado ✓!";
                     statusEl.classList.remove("text-slate-400");
                     statusEl.classList.add("text-brand-500");
@@ -297,10 +315,35 @@ function renderMatches() {
                     console.error("No se pudo guardar", error);
                 }
             };
+            
+            const handleGoalChange = () => {
+                const hG = document.getElementById(`home-goals-${match.id}`).value;
+                const aG = document.getElementById(`away-goals-${match.id}`).value;
+                
+                if (hG !== '' && aG !== '') {
+                    const h = parseInt(hG, 10);
+                    const a = parseInt(aG, 10);
+                    let detectedRes = 'E';
+                    if (h > a) detectedRes = 'L';
+                    else if (a > h) detectedRes = 'V';
+                    handleBet(detectedRes);
+                } else {
+                    // find current res
+                    const isL = document.getElementById(`btn-L-${match.id}`).classList.contains('bg-brand-500');
+                    const isV = document.getElementById(`btn-V-${match.id}`).classList.contains('bg-brand-500');
+                    const isE = document.getElementById(`btn-E-${match.id}`).classList.contains('bg-slate-500');
+                    let currRes = '';
+                    if (isL) currRes = 'L'; else if (isV) currRes = 'V'; else if (isE) currRes = 'E';
+                    if (currRes) handleBet(currRes);
+                }
+            };
 
             document.getElementById(`btn-L-${match.id}`).addEventListener("click", () => handleBet('L'));
             document.getElementById(`btn-E-${match.id}`).addEventListener("click", () => handleBet('E'));
             document.getElementById(`btn-V-${match.id}`).addEventListener("click", () => handleBet('V'));
+            
+            document.getElementById(`home-goals-${match.id}`).addEventListener("input", handleGoalChange);
+            document.getElementById(`away-goals-${match.id}`).addEventListener("input", handleGoalChange);
         }
     });
 }
@@ -362,6 +405,10 @@ function renderPredictionsGrid() {
         if (pred.result === 'L') { resText = `Gana ${match.homeTeam}`; resColor = "bg-brand-500 text-white"; }
         if (pred.result === 'V') { resText = `Gana ${match.awayTeam}`; resColor = "bg-brand-500 text-white"; }
 
+        if (pred.homeGoals !== undefined && pred.awayGoals !== undefined && pred.homeGoals !== '' && pred.awayGoals !== '') {
+            resText += ` (${pred.homeGoals}-${pred.awayGoals})`;
+        }
+
         let dateStr = "Sin fecha";
         if (pred.updatedAt) {
             const upDate = new Date(pred.updatedAt);
@@ -408,7 +455,7 @@ const handleExportCsv = () => {
     }
 
         // Prepare CSV Content
-        let csvContent = "Partido;Local;Visitante;Pronostico;Fecha Modificacion\r\n";
+        let csvContent = "Partido;Local;Visitante;Pronostico;Goles Local;Goles Visitante;Fecha Modificacion\r\n";
         
         const sortedIds = madePredictions.sort((a,b) => {
             const tA = predictionsState[a].updatedAt ? new Date(predictionsState[a].updatedAt).getTime() : 0;
@@ -438,7 +485,7 @@ const handleExportCsv = () => {
             const away = match.awayTeam.replace(/;/g, '');
             const matchName = `${local} vs ${away}`;
 
-            csvContent += `"${matchName}";"${local}";"${away}";"${resText}";"${dateStr}"\r\n`;
+            csvContent += `"${matchName}";"${local}";"${away}";"${resText}";"${pred.homeGoals || ''}";"${pred.awayGoals || ''}";"${dateStr}"\r\n`;
         });
 
         // Trigger Download
@@ -488,6 +535,9 @@ const handleSubmitGoogle = async (e) => {
                 let textoResultado = "Empate";
                 if (pred.result === 'L') textoResultado = `Gana ${match.homeTeam}`;
                 if (pred.result === 'V') textoResultado = `Gana ${match.awayTeam}`;
+                if (pred.homeGoals !== undefined && pred.awayGoals !== undefined && pred.homeGoals !== '' && pred.awayGoals !== '') {
+                    textoResultado += ` (${pred.homeGoals}-${pred.awayGoals})`;
+                }
                 
                 dataToSend.predicciones[matchName] = textoResultado;
             }

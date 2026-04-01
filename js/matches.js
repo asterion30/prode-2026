@@ -11,7 +11,7 @@ export const MOCK_MATCHES = [];
 MOCK_MATCHES.push({ id: "m1", stage: "groups", homeTeam: "México", awayTeam: "Croacia", matchDate: "2026-06-11T12:00:00-06:00", homeFlag: "mx", awayFlag: "hr", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m2", stage: "groups", homeTeam: "Canadá", awayTeam: "Suiza", matchDate: "2026-06-12T13:00:00-07:00", homeFlag: "ca", awayFlag: "ch", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m3", stage: "groups", homeTeam: "EE.UU.", awayTeam: "Japón", matchDate: "2026-06-12T15:00:00-07:00", homeFlag: "us", awayFlag: "jp", status: "pending", tbd: false });
-MOCK_MATCHES.push({ id: "m4", stage: "groups", homeTeam: "Argentina", awayTeam: "Nigeria", matchDate: "2026-06-13T16:00:00-04:00", homeFlag: "ar", awayFlag: "ng", status: "pending", tbd: false });
+MOCK_MATCHES.push({ id: "m4", stage: "groups", homeTeam: "Argentina", awayTeam: "Polonia", matchDate: "2026-06-13T16:00:00-04:00", homeFlag: "ar", awayFlag: "pl", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m5", stage: "groups", homeTeam: "España", awayTeam: "Corea", matchDate: "2026-06-14T12:00:00-04:00", homeFlag: "es", awayFlag: "kr", status: "pending", tbd: false });
 
 // Generar el resto de la Fase de Grupos (72 en total, faltan 67)
@@ -89,7 +89,7 @@ export function subscribeToUserPredictions(userId, callback) {
     });
 }
 
-export async function savePrediction(matchId, result) {
+export async function savePrediction(matchId, result, homeGoals = '', awayGoals = '') {
     const { user } = getCurrentUser();
     if (!user) throw new Error("Debes estar logueado.");
     
@@ -98,7 +98,7 @@ export async function savePrediction(matchId, result) {
     if (isMock) {
         const k = `prode_preds_${user.uid}`;
         const preds = JSON.parse(localStorage.getItem(k) || "{}");
-        preds[matchId] = { result };
+        preds[matchId] = { result, homeGoals, awayGoals, updatedAt: new Date().toISOString() };
         localStorage.setItem(k, JSON.stringify(preds));
         return;
     }
@@ -106,6 +106,8 @@ export async function savePrediction(matchId, result) {
     const ref = doc(db, "users", user.uid, "predictions", matchId);
     await setDoc(ref, {
         result: result,
+        homeGoals: homeGoals,
+        awayGoals: awayGoals,
         updatedAt: new Date().toISOString()
     }, { merge: true });
 }

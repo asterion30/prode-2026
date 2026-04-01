@@ -80,6 +80,18 @@
                     <div class="flex items-center gap-2">
                         <img src="./assets/cup.webp" alt="Copa" class="w-6 h-6 object-contain drop-shadow" />
                         <h1 class="font-bold text-lg">Prode 2026</h1>
+                        
+                        <!-- Navigation Buttons -->
+                        <div class="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
+                            <button id="nav-matches" class="nav-btn flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-brand-500 bg-brand-500/10 font-medium text-sm transition-colors border border-brand-500/20">
+                                <i class="ph-fill ph-calendar-blank text-lg"></i>
+                                <span class="hidden sm:inline">Partidos</span>
+                            </button>
+                            <button id="nav-ranking" class="nav-btn flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 font-medium text-sm transition-colors border border-transparent">
+                                <i class="ph-fill ph-chart-bar text-lg"></i>
+                                <span class="hidden sm:inline">Ranking</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="flex items-center gap-2 sm:gap-3">
                         <button id="btn-mobile-grid" class="md:hidden flex items-center justify-center p-1.5 sm:p-2 bg-slate-800 border border-brand-500/30 text-brand-500 rounded-lg hover:bg-slate-700 transition-colors shadow-sm relative">
@@ -96,7 +108,7 @@
                 </header>
 
                 <!-- Scrollable Content Area -->
-                <main id="content-area" class="flex-1 overflow-y-auto p-4 space-y-6 pb-24 hide-scrollbar">
+                <main id="content-area" class="flex-1 overflow-y-auto p-4 space-y-6 pb-6 hide-scrollbar">
                     
                     <!-- Matches View -->
                     <div id="matches-view" class="space-y-4">
@@ -155,23 +167,7 @@
                     
                 </main>
 
-                <!-- Bottom Navigation (Left Col) -->
-                <nav class="bg-brand-card/90 backdrop-blur-md border-t border-slate-800 absolute bottom-0 w-full z-50">
-                    <ul class="flex justify-around items-center p-2">
-                        <li class="flex-1">
-                            <button id="nav-matches" class="nav-btn w-full flex flex-col items-center gap-1 p-2 text-brand-500 transition-colors">
-                                <i class="ph-fill ph-calendar-blank text-2xl"></i>
-                                <span class="text-[10px] font-medium uppercase tracking-wider">Partidos</span>
-                            </button>
-                        </li>
-                        <li class="flex-1">
-                            <button id="nav-ranking" class="nav-btn w-full flex flex-col items-center gap-1 p-2 text-slate-500 hover:text-slate-300 transition-colors">
-                                <i class="ph-fill ph-chart-bar text-2xl"></i>
-                                <span class="text-[10px] font-medium uppercase tracking-wider">Ranking</span>
-                            </button>
-                        </li>
-                    </ul>
-                </nav>
+
             </div>
             
             <!-- Right Column: My Predictions Summary -->
