@@ -621,8 +621,8 @@ if (btnAdminTest) {
              if (pred.result === offResult) {
                   pts += 1;
                   // Como estamos usando sus propios numeros como reales, siempre acertará
-                  // y ganará el extra.
-                  if (!isNaN(pred.homeGoals) && !isNaN(pred.awayGoals)) {
+                  // y ganará el extra SOLO si realmente escribió números (no vacío).
+                  if (pred.homeGoals !== '' && pred.homeGoals !== undefined && pred.awayGoals !== '' && pred.awayGoals !== undefined) {
                       pts += 2; // +2 puntos exactos
                   }
              }
