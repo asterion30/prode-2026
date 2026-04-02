@@ -614,21 +614,17 @@ if (btnAdminTest) {
              // const offHG = match.realHomeGoals; ...
              // Pero aquí haremos que ganó *su* predicción.
              
-             const offHG = parseInt(pred.homeGoals, 10) || 0;
-             const offAG = parseInt(pred.awayGoals, 10) || 0;
-             let offResult = 'E';
-             if (offHG > offAG) offResult = 'L';
-             else if (offAG > offHG) offResult = 'V';
+             // En modo prueba, queremos que el simulador asuma que el resultado 
+             // oficial fue EXACTAMENTE el que el usuario predijo.
+             // Así que SIEMPRE sumará mínimo 1 punto por acertar el ganador.
              
-             let pts = 0;
-             if (pred.result === offResult) {
-                  pts += 1;
-                  // Como estamos usando sus propios numeros como reales, siempre acertará
-                  // y ganará el extra SOLO si realmente escribió números (no vacío).
-                  if (pred.homeGoals !== '' && pred.homeGoals !== undefined && pred.awayGoals !== '' && pred.awayGoals !== undefined) {
-                      pts += 2; // +2 puntos exactos
-                  }
+             let pts = 1;
+
+             // Si el usuario también escribió goles exactos, le damos 2 extra.
+             if (pred.homeGoals !== '' && pred.homeGoals !== undefined && pred.awayGoals !== '' && pred.awayGoals !== undefined) {
+                 pts += 2; // +2 puntos exactos sumando 3 en total
              }
+             
              scoreUpdates += pts;
         });
         
