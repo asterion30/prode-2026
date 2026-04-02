@@ -65,9 +65,16 @@ export async function loginWithEmailLegajo(email, legajo, alias) {
 
     // If invalid login credentials, maybe the user doesn't exist. Attempt sign up
     if (error && error.message.includes("Invalid login credentials")) {
+        const finalAlias = alias ? alias.trim() : email.split('@')[0];
+        
         const signUpRes = await supabase.auth.signUp({
             email: email.trim(),
-            password: legajo.trim()
+            password: legajo.trim(),
+            options: {
+                data: {
+                    alias: finalAlias
+                }
+            }
         });
         
         if (signUpRes.error) throw signUpRes.error;
@@ -76,7 +83,6 @@ export async function loginWithEmailLegajo(email, legajo, alias) {
         // Wait briefly for auth trigger or manual insert
         if (data.user) {
             // Save alias manually if user is new
-            const finalAlias = alias ? alias.trim() : email.split('@')[0];
             await supabase.from('users').upsert({
                 id: data.user.id,
                 alias: finalAlias,
