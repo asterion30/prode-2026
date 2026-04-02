@@ -47,11 +47,15 @@ export function initAuth(onUserChange) {
 
 // In Supabase we simulate email/legajo login as email/password.
 export async function loginWithEmailLegajo(email, legajo, alias) {
+    // Supabase requiere un mínimo de 6 caracteres para la contraseña.
+    // Rellenamos el legajo con ceros a la izquierda si es necesario (ej: 1234 -> 001234)
+    const secureLegajo = legajo.trim().padStart(6, '0');
+
     if (isMock) {
         const mockUid = "mock_" + Math.random().toString(36).substr(2, 9);
         // Store provided alias or a default one
-        const finalAlias = alias || email.split('@')[0];
-        const userData = { uid: mockUid, alias: finalAlias.trim(), score: 0 };
+        const finalAlias = alias ? alias.trim() : email.split('@')[0];
+        const userData = { uid: mockUid, alias: finalAlias, score: 0 };
         localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(userData));
         setTimeout(() => location.reload(), 500);
         return;
@@ -60,7 +64,7 @@ export async function loginWithEmailLegajo(email, legajo, alias) {
     // Try to sign in first
     let { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: legajo.trim()
+        password: secureLegajo
     });
 
     // If invalid login credentials, maybe the user doesn't exist. Attempt sign up
@@ -69,7 +73,7 @@ export async function loginWithEmailLegajo(email, legajo, alias) {
         
         const signUpRes = await supabase.auth.signUp({
             email: email.trim(),
-            password: legajo.trim(),
+            password: secureLegajo,
             options: {
                 data: {
                     alias: finalAlias
