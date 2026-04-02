@@ -92,10 +92,16 @@ export async function loginWithEmailLegajo(email, legajo, alias) {
                 alias: finalAlias,
                 score: 0
             });
+            
+            if (!data.session) {
+                return { needsConfirmation: true };
+            }
         }
     } else if (error) {
         throw error;
     }
+    
+    return { needsConfirmation: false };
 }
 
 export function getCurrentUser() {
