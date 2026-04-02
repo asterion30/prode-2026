@@ -28,6 +28,7 @@ const loginError = document.getElementById("login-error");
 const userAliasDisplay = document.getElementById("user-alias-display");
 const userPointsDisplay = document.getElementById("user-points-display");
 const btnAdminTest = document.getElementById("btn-admin-test");
+const btnAdminReset = document.getElementById("btn-admin-reset");
 
 const btnMobileGrid = document.getElementById("btn-mobile-grid");
 const btnCloseSidebar = document.getElementById("btn-close-sidebar");
@@ -67,8 +68,10 @@ initAuth((user, alias, score) => {
         
         if (alias.toLowerCase() === 'testerbot' || alias.toLowerCase() === 'admin') {
             if (btnAdminTest) btnAdminTest.classList.remove('hidden');
+            if (btnAdminReset) btnAdminReset.classList.remove('hidden');
         } else {
             if (btnAdminTest) btnAdminTest.classList.add('hidden');
+            if (btnAdminReset) btnAdminReset.classList.add('hidden');
         }
         
         if (!isAppInitialized) {
@@ -631,6 +634,19 @@ if (btnAdminTest) {
             window.location.reload();
         } else {
             alert("No estás logueado en modo mock/prueba.");
+        }
+    });
+}
+
+if (btnAdminReset) {
+    btnAdminReset.addEventListener("click", () => {
+        if (!confirm("¿Deseas reiniciar tus puntos de prueba a 0?")) return;
+        const localUserStr = localStorage.getItem("prode_mock_user");
+        if(localUserStr) {
+            const localUser = JSON.parse(localUserStr);
+            localUser.score = 0;
+            localStorage.setItem("prode_mock_user", JSON.stringify(localUser));
+            window.location.reload();
         }
     });
 }
