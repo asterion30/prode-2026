@@ -1,6 +1,5 @@
 // js/matches.js
-import { collection, onSnapshot, doc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-import { db, isMock } from "./firebase-config.js";
+import { supabase, isMock } from "./supabase-config.js";
 import { getCurrentUser } from "./auth.js";
 
 // Mock Data for the 2026 World Cup (Sample)
@@ -118,16 +117,39 @@ export function subscribeToMatches(callback) {
         return () => {};
     }
 
-    const q = query(collection(db, "matches"), orderBy("matchDate", "asc"));
-    return onSnapshot(q, (snapshot) => {
-        const matches = [];
-        snapshot.forEach((doc) => {
-            matches.push({ id: doc.id, ...doc.data() });
-        });
-        callback(matches);
-    }, (error) => {
-        console.error("Error fetching matches:", error);
-    });
+    const fetchMatches = async () => {
+        const { data, error } = await supabase
+            .from('matches')
+            .select('*')
+            .order('match_date', { ascending: true });
+        
+        if (data) {
+            // Map Supabase snake_case columns back to camelCase requested by the frontend
+            const formatted = data.map(m => ({
+                id: m.id,
+                stage: m.stage,
+                homeTeam: m.home_team,
+                awayTeam: m.away_team,
+                matchDate: m.match_date,
+                homeFlag: m.home_flag,
+                awayFlag: m.away_flag,
+                status: m.status,
+                tbd: m.tbd
+            }));
+            callback(formatted);
+        }
+    };
+    
+    fetchMatches();
+    
+    const channel = supabase
+        .channel('public:matches')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, payload => {
+            fetchMatches();
+        })
+        .subscribe();
+        
+    return () => { supabase.removeChannel(channel); };
 }
 
 export function subscribeToUserPredictions(userId, callback) {
@@ -146,14 +168,36 @@ export function subscribeToUserPredictions(userId, callback) {
         return () => clearInterval(interval);
     }
 
-    const predsRef = collection(db, "users", userId, "predictions");
-    return onSnapshot(predsRef, (snapshot) => {
-        const preds = {};
-        snapshot.forEach((doc) => {
-            preds[doc.id] = doc.data();
-        });
-        callback(preds);
-    });
+    const fetchPredictions = async () => {
+        const { data, error } = await supabase
+            .from('predictions')
+            .select('*')
+            .eq('user_id', userId);
+            
+        if (data) {
+            const preds = {};
+            data.forEach(p => {
+                preds[p.match_id] = {
+                    result: p.result,
+                    homeGoals: p.home_goals,
+                    awayGoals: p.away_goals,
+                    updatedAt: p.updated_at
+                };
+            });
+            callback(preds);
+        }
+    };
+    
+    fetchPredictions();
+    
+    const channel = supabase
+        .channel(`public:predictions:user_id=eq.${userId}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'predictions', filter: `user_id=eq.${userId}` }, payload => {
+            fetchPredictions();
+        })
+        .subscribe();
+        
+    return () => { supabase.removeChannel(channel); };
 }
 
 export async function savePrediction(matchId, result, homeGoals = '', awayGoals = '') {
@@ -163,18 +207,26 @@ export async function savePrediction(matchId, result, homeGoals = '', awayGoals 
     // El frontend ya valida la hora, pero lo ideal es que Cloud Rules validen esto en backend.
     
     if (isMock) {
-        const k = `prode_preds_${user.uid}`;
+        const k = `prode_preds_${user.uid || user.id}`;
         const preds = JSON.parse(localStorage.getItem(k) || "{}");
         preds[matchId] = { result, homeGoals, awayGoals, updatedAt: new Date().toISOString() };
         localStorage.setItem(k, JSON.stringify(preds));
         return;
     }
 
-    const ref = doc(db, "users", user.uid, "predictions", matchId);
-    await setDoc(ref, {
-        result: result,
-        homeGoals: homeGoals,
-        awayGoals: awayGoals,
-        updatedAt: new Date().toISOString()
-    }, { merge: true });
+    const { error } = await supabase
+        .from('predictions')
+        .upsert({
+            user_id: user.id,
+            match_id: matchId,
+            result: result,
+            home_goals: homeGoals,
+            away_goals: awayGoals,
+            updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id, match_id' });
+        
+    if (error) {
+        console.error("Supabase upsert error:", error);
+        throw error;
+    }
 }

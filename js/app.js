@@ -1,5 +1,5 @@
 // js/app.js
-import { initAuth, loginWithAlias, getCurrentUser } from "./auth.js";
+import { initAuth, loginWithEmailLegajo, getCurrentUser } from "./auth.js";
 import { subscribeToMatches, subscribeToUserPredictions, savePrediction } from "./matches.js";
 import { subscribeToRanking } from "./ranking.js";
 
@@ -9,6 +9,8 @@ import { subscribeToRanking } from "./ranking.js";
 const loginView = document.getElementById("login-view");
 const mainView = document.getElementById("main-view");
 const loginForm = document.getElementById("login-form");
+const emailInput = document.getElementById("email-input");
+const legajoInput = document.getElementById("legajo-input");
 const aliasInput = document.getElementById("alias-input");
 const matchesView = document.getElementById("matches-view");
 const rankingView = document.getElementById("ranking-view");
@@ -72,7 +74,7 @@ initAuth((user, alias, score) => {
         }
         
         if (!isAppInitialized) {
-            setupAppSubscriptions(user.uid);
+            setupAppSubscriptions(user.uid || user.id);
             renderStageTabs();
             isAppInitialized = true;
         }
@@ -90,17 +92,19 @@ initAuth((user, alias, score) => {
 // =======================
 loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const email = emailInput.value.trim();
+    const legajo = legajoInput.value.trim();
     const alias = aliasInput.value.trim();
-    if (!alias) return;
+    if (!email || !legajo) return;
 
     showLoader();
     loginError.classList.add("hidden");
     
     try {
-        await loginWithAlias(alias);
+        await loginWithEmailLegajo(email, legajo, alias);
         // initAuth observer will hide loader
     } catch (err) {
-        loginError.textContent = "Error iniciando sesión: " + err.message;
+        loginError.textContent = "Error: " + err.message;
         loginError.classList.remove("hidden");
         hideLoader();
     }

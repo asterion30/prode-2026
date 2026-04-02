@@ -1,12 +1,9 @@
 // js/auth.js
-import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-import { auth, db, isMock } from "./firebase-config.js";
+import { supabase, isMock } from "./supabase-config.js";
 
 let currentUser = null;
 let currentAlias = null;
 
-// Mock local storage for auth if firebase is not configured
 const MOCK_STORAGE_KEY = "prode_mock_user";
 
 export function initAuth(onUserChange) {
@@ -14,7 +11,7 @@ export function initAuth(onUserChange) {
         const stored = localStorage.getItem(MOCK_STORAGE_KEY);
         if (stored) {
             const user = JSON.parse(stored);
-            currentUser = { uid: user.uid };
+            currentUser = { id: user.uid };
             currentAlias = user.alias;
             onUserChange(currentUser, currentAlias, user.score);
         } else {
@@ -23,18 +20,23 @@ export function initAuth(onUserChange) {
         return;
     }
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            // Get user alias from DB
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        if (session && session.user) {
+            currentUser = session.user;
+            
+            // Get user alias and score from DB
+            const { data, error } = await supabase
+                .from('users')
+                .select('alias, score')
+                .eq('id', currentUser.id)
+                .single();
+                
             let score = 0;
-            if (userSnap.exists()) {
-                currentAlias = userSnap.data().alias;
-                score = userSnap.data().score || 0;
+            if (data && !error) {
+                currentAlias = data.alias;
+                score = data.score || 0;
             }
-            onUserChange(user, currentAlias, score);
+            onUserChange(currentUser, currentAlias, score);
         } else {
             currentUser = null;
             currentAlias = null;
@@ -43,33 +45,45 @@ export function initAuth(onUserChange) {
     });
 }
 
-export async function loginWithAlias(alias) {
-    if (!alias || alias.trim() === "") throw new Error("Alias inválido");
-    
+// In Supabase we simulate email/legajo login as email/password.
+export async function loginWithEmailLegajo(email, legajo, alias) {
     if (isMock) {
         const mockUid = "mock_" + Math.random().toString(36).substr(2, 9);
-        const userData = { uid: mockUid, alias: alias.trim(), score: 0 };
+        // Store provided alias or a default one
+        const finalAlias = alias || email.split('@')[0];
+        const userData = { uid: mockUid, alias: finalAlias.trim(), score: 0 };
         localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(userData));
         setTimeout(() => location.reload(), 500);
         return;
     }
 
-    try {
-        const { user } = await signInAnonymously(auth);
+    // Try to sign in first
+    let { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: legajo.trim()
+    });
+
+    // If invalid login credentials, maybe the user doesn't exist. Attempt sign up
+    if (error && error.message.includes("Invalid login credentials")) {
+        const signUpRes = await supabase.auth.signUp({
+            email: email.trim(),
+            password: legajo.trim()
+        });
         
-        // Save user alias if new
-        const userRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(userRef);
+        if (signUpRes.error) throw signUpRes.error;
+        data = signUpRes.data;
         
-        if (!docSnap.exists()) {
-            await setDoc(userRef, {
-                alias: alias.trim(),
-                score: 0,
-                createdAt: serverTimestamp()
+        // Wait briefly for auth trigger or manual insert
+        if (data.user) {
+            // Save alias manually if user is new
+            const finalAlias = alias ? alias.trim() : email.split('@')[0];
+            await supabase.from('users').upsert({
+                id: data.user.id,
+                alias: finalAlias,
+                score: 0
             });
         }
-    } catch (error) {
-        console.error("Login Error:", error);
+    } else if (error) {
         throw error;
     }
 }
