@@ -2,7 +2,7 @@
 
 -- Users table (Extends Supabase Auth users)
 create table if not exists public.users (
-  id uuid references auth.users not null primary key,
+  id uuid references auth.users on delete cascade not null primary key,
   alias text not null,
   score integer default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -27,7 +27,7 @@ create table if not exists public.matches (
 -- Predictions table
 create table if not exists public.predictions (
   id uuid default uuid_generate_v4() primary key,
-  user_id uuid references public.users not null,
+  user_id uuid references public.users on delete cascade not null,
   match_id text not null, -- Removed foreign key constraint to matches if we just push mock matches directly. If we want it strictly relational we can add references public.matches(id).
   result text,
   home_goals text,
