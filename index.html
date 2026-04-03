@@ -34,6 +34,9 @@
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="./css/styles.css">
 </head>
@@ -147,11 +150,8 @@
                                     <p class="text-xs text-slate-400">Desliza para cambiar de fase</p>
                                 </div>
                                 <div class="flex gap-2 md:hidden">
-                                    <button id="btn-submit-google-mobile" class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-colors shadow-sm" title="Enviar a la base de datos">
-                                        <i class="ph-bold ph-paper-plane-right"></i>
-                                    </button>
-                                    <button id="btn-export-csv-mobile" class="bg-brand-600 hover:bg-brand-500 text-white w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-colors shadow-sm" title="Descargar como Excel/CSV">
-                                        <i class="ph-bold ph-download-simple"></i>
+                                    <button id="btn-export-csv-mobile" class="bg-brand-600 hover:bg-brand-500 text-white w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-colors shadow-sm" title="Capturar Ranking">
+                                        <i class="ph-bold ph-camera"></i>
                                     </button>
                                 </div>
                             </div>
@@ -209,13 +209,9 @@
                         <p class="text-xs text-slate-400 mt-1">Historial de pronósticos</p>
                     </div>
                     <div class="flex gap-2">
-                        <button id="btn-submit-google" class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg flex items-center gap-1 text-xs font-semibold transition-colors shadow-sm" title="Enviar a la base de datos">
-                            <i class="ph-bold ph-paper-plane-right"></i>
-                            <span class="hidden lg:inline">Enviar</span>
-                        </button>
-                        <button id="btn-export-csv" class="bg-brand-600 hover:bg-brand-500 text-white p-2 rounded-lg flex items-center gap-1 text-xs font-semibold transition-colors shadow-sm" title="Descargar como Excel/CSV">
-                            <i class="ph-bold ph-download-simple"></i>
-                            <span class="hidden lg:inline">Exportar</span>
+                        <button id="btn-export-csv" class="bg-brand-600 hover:bg-brand-500 text-white p-2 rounded-lg flex items-center gap-1 text-xs font-semibold transition-colors shadow-sm" title="Capturar Ranking">
+                            <i class="ph-bold ph-camera"></i>
+                            <span class="hidden lg:inline">Ranking</span>
                         </button>
                     </div>
                 </div>
