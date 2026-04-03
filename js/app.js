@@ -1,5 +1,5 @@
 // js/app.js
-import { initAuth, loginWithEmailLegajo, getCurrentUser } from "./auth.js";
+import { initAuth, loginWithEmail, getCurrentUser } from "./auth.js";
 import { subscribeToMatches, subscribeToUserPredictions, savePrediction } from "./matches.js";
 import { supabase } from "./supabase-config.js";
 import { subscribeToRanking } from "./ranking.js";
@@ -11,7 +11,7 @@ const loginView = document.getElementById("login-view");
 const mainView = document.getElementById("main-view");
 const loginForm = document.getElementById("login-form");
 const emailInput = document.getElementById("email-input");
-const legajoInput = document.getElementById("legajo-input");
+
 const aliasInput = document.getElementById("alias-input");
 const matchesView = document.getElementById("matches-view");
 const rankingView = document.getElementById("ranking-view");
@@ -97,9 +97,8 @@ initAuth((user, alias, score) => {
 loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = emailInput.value.trim();
-    const legajo = legajoInput.value.trim();
     const alias = aliasInput.value.trim();
-    if (!email || !legajo) return;
+    if (!email) return;
 
     showLoader();
     loginError.classList.add("hidden");
@@ -107,11 +106,11 @@ loginForm.addEventListener("submit", async (e) => {
     if (loginSuccess) loginSuccess.classList.add("hidden");
     
     try {
-        const res = await loginWithEmailLegajo(email, legajo, alias);
+        const res = await loginWithEmail(email, alias);
         if (res && res.needsConfirmation) {
             hideLoader();
             if (loginSuccess) {
-                loginSuccess.textContent = "¡Te registraste con éxito! Hemos enviado un enlace a tu correo. Revisa tu bandeja de entrada o SPAM, haz clic en el enlace para validar tu correo, y luego vuelve aquí para jugar.";
+                loginSuccess.textContent = "Hemos enviado un enlace a tu correo. Revisa tu bandeja de entrada o SPAM, haz clic en el enlace para entrar.";
                 loginSuccess.classList.remove("hidden");
             }
         } else {
