@@ -81,12 +81,8 @@ export function initAuth(onUserChange) {
     });
 }
 
-// In Supabase we simulate email/legajo login as email/password.
-export async function loginWithEmailLegajo(email, legajo, alias) {
-    // Supabase requiere un mínimo de 6 caracteres para la contraseña.
-    // Rellenamos el legajo con ceros a la izquierda si es necesario (ej: 1234 -> 001234)
-    const secureLegajo = legajo.trim().padStart(6, '0');
-
+// In Supabase we use Magic Links for passwordless login
+export async function loginWithEmail(email, alias) {
     if (isMock) {
         const mockUid = "mock_" + Math.random().toString(36).substr(2, 9);
         // Store provided alias or a default one
@@ -97,40 +93,23 @@ export async function loginWithEmailLegajo(email, legajo, alias) {
         return;
     }
 
-    // Try to sign in first
-    let { data, error } = await supabase.auth.signInWithPassword({
+    const finalAlias = alias ? alias.trim() : email.split('@')[0];
+
+    const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
-        password: secureLegajo
+        options: {
+            data: {
+                alias: finalAlias
+            }
+            // By default, Supabase sends the magic link and user is redirected back
+        }
     });
 
-    // If invalid login credentials, maybe the user doesn't exist. Attempt sign up
-    if (error && error.message.includes("Invalid login credentials")) {
-        const finalAlias = alias ? alias.trim() : email.split('@')[0];
-        
-        const signUpRes = await supabase.auth.signUp({
-            email: email.trim(),
-            password: secureLegajo,
-            options: {
-                data: {
-                    alias: finalAlias
-                }
-            }
-        });
-        
-        if (signUpRes.error) throw signUpRes.error;
-        data = signUpRes.data;
-        
-        // Wait briefly for auth trigger or manual insert
-        if (data.user) {
-            if (!data.session) {
-                return { needsConfirmation: true };
-            }
-        }
-    } else if (error) {
+    if (error) {
         throw error;
     }
     
-    return { needsConfirmation: false };
+    return { needsConfirmation: true };
 }
 
 export function getCurrentUser() {
