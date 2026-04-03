@@ -113,8 +113,11 @@ loginForm.addEventListener("submit", async (e) => {
                 loginSuccess.textContent = "¡Te registraste con éxito! Hemos enviado un enlace a tu correo. Revisa tu bandeja de entrada o SPAM, haz clic en el enlace para validar tu correo, y luego vuelve aquí para jugar.";
                 loginSuccess.classList.remove("hidden");
             }
+        } else {
+            // Fue exitoso y no necesita confirmación. 
+            // Forzamos la recarga para que el observer inicialice todo perfectamente.
+            window.location.reload();
         }
-        // Si no necesita confirmación y fue exitoso, `initAuth` observer ocultará el loader automáticamente.
     } catch (err) {
         loginError.textContent = "Error: " + err.message;
         loginError.classList.remove("hidden");
