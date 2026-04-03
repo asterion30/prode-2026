@@ -112,6 +112,7 @@ loginForm.addEventListener("submit", async (e) => {
             if (loginSuccess) {
                 loginSuccess.textContent = "Hemos enviado un enlace a tu correo. Revisa tu bandeja de entrada o SPAM, haz clic en el enlace para entrar.";
                 loginSuccess.classList.remove("hidden");
+                loginForm.classList.add("hidden");
             }
         } else {
             // Fue exitoso y no necesita confirmación. 
