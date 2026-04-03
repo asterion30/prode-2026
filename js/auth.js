@@ -25,14 +25,25 @@ export function initAuth(onUserChange) {
             currentUser = session.user;
             
             // Get user alias and score from DB
-            const { data, error } = await supabase
+            let { data, error } = await supabase
                 .from('users')
                 .select('alias, score')
                 .eq('id', currentUser.id)
                 .single();
                 
             let score = 0;
-            if (data && !error) {
+            
+            // Si la fila no existe (RLS bloqueó la creación durante el signup sin sesión), la creamos ahora
+            if (error && error.code === 'PGRST116') {
+                const fallbackAlias = currentUser.user_metadata?.alias || currentUser.email.split('@')[0];
+                await supabase.from('users').upsert({
+                    id: currentUser.id,
+                    alias: fallbackAlias,
+                    score: 0
+                });
+                currentAlias = fallbackAlias;
+                score = 0;
+            } else if (data && !error) {
                 currentAlias = data.alias;
                 score = data.score || 0;
             }
@@ -86,13 +97,6 @@ export async function loginWithEmailLegajo(email, legajo, alias) {
         
         // Wait briefly for auth trigger or manual insert
         if (data.user) {
-            // Save alias manually if user is new
-            await supabase.from('users').upsert({
-                id: data.user.id,
-                alias: finalAlias,
-                score: 0
-            });
-            
             if (!data.session) {
                 return { needsConfirmation: true };
             }
