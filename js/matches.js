@@ -124,6 +124,21 @@ export function subscribeToMatches(callback) {
             .order('match_date', { ascending: true });
         
         if (data) {
+            // Auto-sembrado si la DB está vacía por primera vez
+            if (data.length === 0) {
+                console.log("Empty DB detected. Auto-seeding matches...");
+                const seedData = MOCK_MATCHES.map(m => ({
+                    id: m.id, stage: m.stage, home_team: m.homeTeam, away_team: m.awayTeam,
+                    match_date: m.matchDate, home_flag: m.homeFlag, away_flag: m.awayFlag,
+                    status: m.status, tbd: m.tbd
+                }));
+                const { error: seedErr } = await supabase.from('matches').insert(seedData);
+                if (!seedErr) {
+                    fetchMatches(); // Recursivo tras sembrar
+                    return;
+                }
+            }
+
             // Map Supabase snake_case columns back to camelCase requested by the frontend
             const formatted = data.map(m => ({
                 id: m.id,
