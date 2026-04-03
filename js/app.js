@@ -12,7 +12,6 @@ const mainView = document.getElementById("main-view");
 const loginForm = document.getElementById("login-form");
 const emailInput = document.getElementById("email-input");
 
-const aliasInput = document.getElementById("alias-input");
 const matchesView = document.getElementById("matches-view");
 const rankingView = document.getElementById("ranking-view");
 const matchesListEl = document.getElementById("matches-list");
@@ -30,6 +29,7 @@ const userAliasDisplay = document.getElementById("user-alias-display");
 const userPointsDisplay = document.getElementById("user-points-display");
 const btnAdminTest = document.getElementById("btn-admin-test");
 const btnAdminReset = document.getElementById("btn-admin-reset");
+const btnAdminExport = document.getElementById("btn-admin-export");
 
 const btnMobileGrid = document.getElementById("btn-mobile-grid");
 const btnCloseSidebar = document.getElementById("btn-close-sidebar");
@@ -67,12 +67,14 @@ initAuth((user, alias, score) => {
         userAliasDisplay.textContent = alias;
         userPointsDisplay.textContent = `${score} pts`;
         
-        if (alias.toLowerCase() === 'testerbot' || alias.toLowerCase() === 'admin') {
+        if (alias.toLowerCase() === 'testerbot' || alias.toLowerCase() === 'admin' || alias.toLowerCase() === 'rrhh') {
             if (btnAdminTest) btnAdminTest.classList.remove('hidden');
             if (btnAdminReset) btnAdminReset.classList.remove('hidden');
+            if (btnAdminExport) btnAdminExport.classList.remove('hidden');
         } else {
             if (btnAdminTest) btnAdminTest.classList.add('hidden');
             if (btnAdminReset) btnAdminReset.classList.add('hidden');
+            if (btnAdminExport) btnAdminExport.classList.add('hidden');
         }
         
         if (!isAppInitialized) {
@@ -95,7 +97,7 @@ initAuth((user, alias, score) => {
 loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = emailInput.value.trim();
-    const alias = aliasInput.value.trim();
+    const alias = email.split('@')[0];
     if (!email) return;
 
     showLoader();
@@ -375,7 +377,31 @@ function renderMatches() {
 
 function renderRanking(ranking) {
     rankingListEl.innerHTML = "";
-    ranking.forEach((user, index) => {
+    const { user: currentUser } = getCurrentUser();
+    
+    // Find current user rank index
+    const myRankIndex = currentUser ? ranking.findIndex(u => u.id === currentUser.id) : -1;
+    
+    // Determine which users to show
+    const usersToShow = [];
+    
+    ranking.forEach((u, idx) => {
+        if (idx < 5) {
+            usersToShow.push({ user: u, index: idx });
+        } else if (idx === myRankIndex) {
+            // Also include me if I am not in top 5
+            usersToShow.push({ user: u, index: idx });
+        }
+    });
+
+    usersToShow.forEach(({ user, index }, i) => {
+        // If there's a gap between top 5 and me, insert a visual separator
+        if (i > 0 && index !== usersToShow[i-1].index + 1) {
+            const separatorTr = document.createElement("tr");
+            separatorTr.innerHTML = `<td colspan="3" class="px-4 py-2 text-center text-slate-500 text-xs tracking-widest bg-slate-800/20">••••••</td>`;
+            rankingListEl.appendChild(separatorTr);
+        }
+
         const isMedal = index < 3;
         let rankContent = `${index + 1}`;
         if (index === 0) rankContent = "🥇";
@@ -383,7 +409,6 @@ function renderRanking(ranking) {
         else if (index === 2) rankContent = "🥉";
         
         const tr = document.createElement("tr");
-        const { user: currentUser } = getCurrentUser();
         const isMe = currentUser && currentUser.id === user.id;
         
         tr.className = `border-slate-700/50 transition-colors ${isMe ? 'bg-brand-500/20 border-brand-500/50' : (index % 2 === 0 ? '' : 'bg-slate-800/20')}`;
@@ -523,6 +548,45 @@ const handleExportRankingImage = async () => {
 
 if (btnExportCsv) btnExportCsv.addEventListener("click", handleExportRankingImage);
 if (btnExportCsvMobile) btnExportCsvMobile.addEventListener("click", handleExportRankingImage);
+
+// =======================
+// ADMIN EXPORT CSV LOGIC
+// =======================
+if (btnAdminExport) {
+    btnAdminExport.addEventListener("click", async () => {
+        try {
+            // Re-fetch the full ranking to ensure all users are captured for HR
+            const { data: users, error } = await supabase
+                .from('users')
+                .select('alias, score, created_at')
+                .order('score', { ascending: false })
+                .order('alias', { ascending: true });
+                
+            if (error) throw error;
+            if (!users || users.length === 0) return alert("No hay usuarios.");
+
+            let csvContent = "Posicion;Alias;Puntaje Total;Fecha Registro\r\n";
+            users.forEach((u, i) => {
+                const dateStr = new Date(u.created_at).toLocaleDateString();
+                csvContent += `"${i + 1}";"${u.alias}";"${u.score || 0}";"${dateStr}"\r\n`;
+            });
+
+            const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+            const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            const dateSuffix = new Date().toISOString().split('T')[0];
+            link.setAttribute("download", `Ranking_Global_RRHH_${dateSuffix}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (err) {
+            console.error("Error al exportar RRHH", err);
+            alert("Error al exportar los datos de RRHH: " + err.message);
+        }
+    });
+}
 
 // =======================
 // ADMIN TEST LOGIC
