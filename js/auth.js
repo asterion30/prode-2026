@@ -20,39 +20,55 @@ export function initAuth(onUserChange) {
         return;
     }
 
-    supabase.auth.onAuthStateChange(async (event, session) => {
-        if (session && session.user) {
-            currentUser = session.user;
-            
-            // Get user alias and score from DB
-            let { data, error } = await supabase
-                .from('users')
-                .select('alias, score')
-                .eq('id', currentUser.id)
-                .single();
+    const handleSession = async (session) => {
+        try {
+            if (session && session.user) {
+                currentUser = session.user;
                 
-            let score = 0;
-            
-            // Si la fila no existe (RLS bloqueó la creación durante el signup sin sesión), la creamos ahora
-            if (error && error.code === 'PGRST116') {
-                const fallbackAlias = currentUser.user_metadata?.alias || currentUser.email.split('@')[0];
-                await supabase.from('users').upsert({
-                    id: currentUser.id,
-                    alias: fallbackAlias,
-                    score: 0
-                });
-                currentAlias = fallbackAlias;
-                score = 0;
-            } else if (data && !error) {
-                currentAlias = data.alias;
-                score = data.score || 0;
+                // Get user alias and score from DB
+                let { data, error } = await supabase
+                    .from('users')
+                    .select('alias, score')
+                    .eq('id', currentUser.id)
+                    .single();
+                    
+                let score = 0;
+                
+                // Si la fila no existe (RLS bloqueó la creación durante el signup sin sesión), la creamos ahora
+                if (error && error.code === 'PGRST116') {
+                    const fallbackAlias = currentUser.user_metadata?.alias || currentUser.email?.split('@')[0] || "Usuario";
+                    await supabase.from('users').upsert({
+                        id: currentUser.id,
+                        alias: fallbackAlias,
+                        score: 0
+                    });
+                    currentAlias = fallbackAlias;
+                    score = 0;
+                } else if (data && !error) {
+                    currentAlias = data.alias;
+                    score = data.score || 0;
+                }
+                onUserChange(currentUser, currentAlias, score);
+            } else {
+                currentUser = null;
+                currentAlias = null;
+                onUserChange(null, null, 0);
             }
-            onUserChange(currentUser, currentAlias, score);
-        } else {
-            currentUser = null;
-            currentAlias = null;
-            onUserChange(null, null, 0);
+        } catch (e) {
+            console.error("Critical Auth Error:", e);
+            onUserChange(null, null, 0); // Falla suavemente a la pantalla de login
         }
+    };
+
+    // 1. Forzar una lectura manual rápida de la sesión en caso de que el listener no dispare
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+        if (!error) handleSession(session);
+    }).catch(err => console.error("getSession error:", err));
+
+    // 2. Escuchar cambios
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        // En v2, INITIAL_SESSION a veces dispara después, handleSession es idempotente
+        handleSession(session);
     });
 }
 
