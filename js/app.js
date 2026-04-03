@@ -23,9 +23,7 @@ const stageTabsContainer = document.getElementById("stage-tabs");
 const btnNavMatches = document.getElementById("nav-matches");
 const btnNavRanking = document.getElementById("nav-ranking");
 const btnExportCsv = document.getElementById("btn-export-csv");
-const btnSubmitGoogle = document.getElementById("btn-submit-google");
 const btnExportCsvMobile = document.getElementById("btn-export-csv-mobile");
-const btnSubmitGoogleMobile = document.getElementById("btn-submit-google-mobile");
 const loader = document.getElementById("global-loader");
 const loginError = document.getElementById("login-error");
 const userAliasDisplay = document.getElementById("user-alias-display");
@@ -385,7 +383,10 @@ function renderRanking(ranking) {
         else if (index === 2) rankContent = "🥉";
         
         const tr = document.createElement("tr");
-        tr.className = `border-slate-700/50 hover:bg-slate-800/50 transition-colors ${index % 2 === 0 ? '' : 'bg-slate-800/20'}`;
+        const { user: currentUser } = getCurrentUser();
+        const isMe = currentUser && currentUser.id === user.id;
+        
+        tr.className = `border-slate-700/50 transition-colors ${isMe ? 'bg-brand-500/20 border-brand-500/50' : (index % 2 === 0 ? '' : 'bg-slate-800/20')}`;
         tr.innerHTML = `
             <td class="px-4 py-3 text-center ${isMedal ? 'text-lg' : 'text-slate-400 font-medium'}">
                 ${rankContent}
@@ -472,138 +473,56 @@ document.addEventListener('touchmove', function(e) {
 }, { passive: false });
 
 // =======================
-// EXPORT LOGIC
+// EXPORT LOGIC (Image)
 // =======================
-const handleExportCsv = () => {
-    const madePredictions = Object.keys(predictionsState).filter(id => predictionsState[id].result);
-    if (madePredictions.length === 0) {
-        alert("No tienes pronósticos guardados para exportar.");
-        return;
+const handleExportRankingImage = async () => {
+    if (!rankingView) return;
+    
+    // Check if the ranking is hidden, we need to show it temporarily
+    const wasHidden = rankingView.classList.contains("hidden");
+    
+    if (wasHidden) {
+        rankingView.classList.remove("hidden");
+        matchesView.classList.add("hidden");
     }
-
-        // Prepare CSV Content
-        let csvContent = "Partido;Local;Visitante;Pronostico;Goles Local;Goles Visitante;Fecha Modificacion\r\n";
+    
+    try {
+        const btnOriginalText = btnExportCsv ? btnExportCsv.innerHTML : '';
+        if (btnExportCsv) {
+            btnExportCsv.innerHTML = '<i class="ph ph-spinner animate-spin"></i>';
+            btnExportCsv.disabled = true;
+        }
         
-        const sortedIds = madePredictions.sort((a,b) => {
-            const tA = predictionsState[a].updatedAt ? new Date(predictionsState[a].updatedAt).getTime() : 0;
-            const tB = predictionsState[b].updatedAt ? new Date(predictionsState[b].updatedAt).getTime() : 0;
-            return tB - tA;
+        // Wait for DOM layout
+        await new Promise(r => setTimeout(r, 200));
+        
+        const canvas = await html2canvas(rankingView, {
+            backgroundColor: '#0f172a', // brand-dark
+            scale: 2 // High quality
         });
-
-        sortedIds.forEach(id => {
-            const pred = predictionsState[id];
-            const match = matchesState.find(m => m.id === id);
-            if (!match) return;
-
-            let resText = "E";
-            if (pred.result === 'L') resText = "L";
-            if (pred.result === 'V') resText = "V";
-
-            let dateStr = "";
-            if (pred.updatedAt) {
-                const upDate = new Date(pred.updatedAt);
-                if (!isNaN(upDate.getTime())) {
-                    dateStr = upDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-                }
-            }
-            
-            // Clean up team names just in case they have commas
-            const local = match.homeTeam.replace(/;/g, '');
-            const away = match.awayTeam.replace(/;/g, '');
-            const matchName = `${local} vs ${away}`;
-
-            csvContent += `"${matchName}";"${local}";"${away}";"${resText}";"${pred.homeGoals || ''}";"${pred.awayGoals || ''}";"${dateStr}"\r\n`;
-        });
-
-        // Trigger Download
-        // Add BOM so Excel opens UTF-8 correctly
-        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-        const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
+        
         const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", `Prode2026_Pronosticos_${userAliasDisplay.textContent}.csv`);
-        document.body.appendChild(link);
+        link.download = `Ranking_Prode_${userAliasDisplay.textContent}.png`;
+        link.href = canvas.toDataURL("image/png");
         link.click();
-        document.body.removeChild(link);
+        
+        if (btnExportCsv) {
+            btnExportCsv.innerHTML = btnOriginalText;
+            btnExportCsv.disabled = false;
+        }
+    } catch (err) {
+        console.error("Error al exportar imagen", err);
+        alert("Hubo un error al crear la imagen del ranking.");
+    } finally {
+        if (wasHidden) {
+            rankingView.classList.add("hidden");
+            matchesView.classList.remove("hidden");
+        }
+    }
 };
 
-if (btnExportCsv) btnExportCsv.addEventListener("click", handleExportCsv);
-if (btnExportCsvMobile) btnExportCsvMobile.addEventListener("click", handleExportCsv);
-
-// =======================
-// GOOGLE SHEETS SUBMIT LOGIC
-// =======================
-const handleSubmitGoogle = async (e) => {
-    const clickedBtn = e.currentTarget;
-    const madePredictions = Object.keys(predictionsState).filter(id => predictionsState[id].result);
-        if (madePredictions.length === 0) {
-            alert("No tienes pronósticos guardados para enviar.");
-            return;
-        }
-
-        const btnOriginalText = clickedBtn.innerHTML;
-        clickedBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i>';
-        clickedBtn.disabled = true;
-
-        // Construir datos
-        const dataToSend = {
-            alias: userAliasDisplay.textContent,
-            timestamp: new Date().toISOString(),
-            predicciones: {}
-        };
-
-        madePredictions.forEach(id => {
-            const pred = predictionsState[id];
-            const match = matchesState.find(m => m.id === id);
-            if(match) {
-                const matchName = `${match.homeTeam} vs ${match.awayTeam}`;
-                
-                let textoResultado = "Empate";
-                if (pred.result === 'L') textoResultado = `Gana ${match.homeTeam}`;
-                if (pred.result === 'V') textoResultado = `Gana ${match.awayTeam}`;
-                if (pred.homeGoals !== undefined && pred.awayGoals !== undefined && pred.homeGoals !== '' && pred.awayGoals !== '') {
-                    textoResultado += ` (${pred.homeGoals}-${pred.awayGoals})`;
-                }
-                
-                dataToSend.predicciones[matchName] = textoResultado;
-            }
-        });
-
-        // ==========================================
-        // URL DEL SCRIPT DE GOOGLE
-        // ==========================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwM66-04lRwkCpDeR7teHlPP8LCkegLB12TTV837zXemUxly3FEyyC0tuqLqSCc_E6y/exec";
-
-        if (!SCRIPT_URL || SCRIPT_URL.includes("REPLACE_ME")) {
-            alert("Falta configurar la URL de Google Sheets en el código.");
-            clickedBtn.innerHTML = btnOriginalText;
-            clickedBtn.disabled = false;
-            return;
-        }
-
-        try {
-            await fetch(SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors", // Evita problemas de seguridad CORS desde GitHub Pages
-                headers: {
-                    "Content-Type": "text/plain"
-                },
-                body: JSON.stringify(dataToSend)
-            });
-            
-            alert("¡Tus pronósticos han sido enviados a la base central con éxito!");
-        } catch (error) {
-            console.error(error);
-            alert("Hubo un error al enviar los datos. Intenta nuevamente.");
-        } finally {
-            clickedBtn.innerHTML = btnOriginalText;
-            clickedBtn.disabled = false;
-        }
-};
-
-if (btnSubmitGoogle) btnSubmitGoogle.addEventListener("click", handleSubmitGoogle);
-if (btnSubmitGoogleMobile) btnSubmitGoogleMobile.addEventListener("click", handleSubmitGoogle);
+if (btnExportCsv) btnExportCsv.addEventListener("click", handleExportRankingImage);
+if (btnExportCsvMobile) btnExportCsvMobile.addEventListener("click", handleExportRankingImage);
 
 // =======================
 // ADMIN TEST LOGIC
