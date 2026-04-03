@@ -1,6 +1,5 @@
 // js/ranking.js
-import { collection, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-import { db, isMock } from "./firebase-config.js";
+import { supabase, isMock } from "./supabase-config.js";
 
 // Mock Data for testing
 export const MOCK_RANKING = [
@@ -12,7 +11,7 @@ export const MOCK_RANKING = [
 
 export function subscribeToRanking(callback) {
     if (isMock) {
-        // En mock mode, leemos la data local primero y la sumamos al mock global (simulando usuarios)
+        // En mock mode, leemos la data local primero y la sumamos al mock global
         let currentMock = [...MOCK_RANKING];
         const localUserStr = localStorage.getItem("prode_mock_user");
         if(localUserStr) {
@@ -36,14 +35,24 @@ export function subscribeToRanking(callback) {
         return () => clearInterval(interval);
     }
 
-    const q = query(collection(db, "users"), orderBy("score", "desc"), limit(50));
-    return onSnapshot(q, (snapshot) => {
-        const ranking = [];
-        snapshot.forEach((doc) => {
-            ranking.push({ id: doc.id, ...doc.data() });
-        });
-        callback(ranking);
-    }, (error) => {
-        console.error("Error fetching ranking:", error);
-    });
+    const fetchRanking = async () => {
+        const { data, error } = await supabase
+            .from('users')
+            .select('id, alias, score')
+            .order('score', { ascending: false })
+            .limit(50);
+        
+        if (data) callback(data);
+    };
+
+    fetchRanking();
+
+    const channel = supabase
+        .channel('public:users')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, payload => {
+            fetchRanking();
+        })
+        .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
 }

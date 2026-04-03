@@ -54,18 +54,43 @@
                 <p class="text-slate-400">Pronostica los resultados del Mundial</p>
             </div>
 
-            <form id="login-form" class="w-full space-y-5">
+            <form id="login-form" class="w-full max-w-sm space-y-4">
                 <div>
-                    <label for="alias-input" class="block text-sm font-medium text-slate-300 mb-1">Ingresa tu Alias</label>
-                    <input type="text" id="alias-input" required placeholder="Ej: JuanPerez99" class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white text-lg">
+                    <label for="email-input" class="block text-sm font-medium text-slate-300 mb-1">Correo Electrónico</label>
+                    <input type="email" id="email-input" required placeholder="ejemplo@vittal.com.ar" class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white">
                 </div>
-                <button type="submit" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl shadow-lg transition-all active:scale-[0.98] flex justify-center items-center gap-2">
-                    <span>Entrar a Jugar</span>
+                <div>
+                    <label for="legajo-input" class="block text-sm font-medium text-slate-300 mb-1">Legajo Vittal</label>
+                    <input type="password" id="legajo-input" required placeholder="Ingresa tu legajo" class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white">
+                </div>
+                <div>
+                    <label for="alias-input" class="block text-sm font-medium text-slate-300 mb-1">Alias (Para el Ranking)</label>
+                    <input type="text" id="alias-input" placeholder="Ej: JuanPerez99 (Solo para tu primera vez)" class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white">
+                </div>
+                <button type="submit" class="w-full mt-2 py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl shadow-lg transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+                    <span>Entrar / Registrarme</span>
                     <i class="ph-bold ph-arrow-right"></i>
                 </button>
+                
+                <div class="relative flex items-center justify-center my-4 hidden" id="social-auth-div">
+                    <div class="border-t border-slate-700 w-full"></div>
+                    <span class="bg-brand-dark px-3 text-xs text-slate-400 absolute">O también puedes</span>
+                </div>
+                
+                <div class="flex gap-3 hidden" id="social-auth-buttons">
+                    <button type="button" id="btn-login-google" class="flex-1 py-2.5 px-4 bg-white hover:bg-slate-100 text-slate-800 font-semibold rounded-xl shadow transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                        <span class="text-sm">Google</span>
+                    </button>
+                    <!-- <button type="button" id="btn-login-facebook" class="flex-1 py-2.5 px-4 bg-[#1877F2] hover:bg-[#166fe5] text-white font-semibold rounded-xl shadow transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+                        <i class="ph-fill ph-facebook-logo text-xl"></i>
+                        <span class="text-sm">Facebook</span>
+                    </button> -->
+                </div>
             </form>
             
-            <div id="login-error" class="mt-4 text-red-400 text-sm hidden"></div>
+            <div id="login-error" class="mt-4 text-red-400 text-sm hidden text-center max-w-sm"></div>
+            <div id="login-success" class="mt-4 text-brand-500 text-sm hidden text-center max-w-sm"></div>
         </section>
 
         <!-- ======================= -->
@@ -211,6 +236,9 @@
         </div>
     </div>
 
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <!-- Main Module -->
     <script type="module" src="./js/app.js"></script>
 </body>

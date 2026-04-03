@@ -1,6 +1,7 @@
 // js/app.js
-import { initAuth, loginWithAlias, getCurrentUser } from "./auth.js";
+import { initAuth, loginWithEmailLegajo, getCurrentUser } from "./auth.js";
 import { subscribeToMatches, subscribeToUserPredictions, savePrediction } from "./matches.js";
+import { supabase } from "./supabase-config.js";
 import { subscribeToRanking } from "./ranking.js";
 
 // =======================
@@ -9,6 +10,8 @@ import { subscribeToRanking } from "./ranking.js";
 const loginView = document.getElementById("login-view");
 const mainView = document.getElementById("main-view");
 const loginForm = document.getElementById("login-form");
+const emailInput = document.getElementById("email-input");
+const legajoInput = document.getElementById("legajo-input");
 const aliasInput = document.getElementById("alias-input");
 const matchesView = document.getElementById("matches-view");
 const rankingView = document.getElementById("ranking-view");
@@ -75,7 +78,7 @@ initAuth((user, alias, score) => {
         }
         
         if (!isAppInitialized) {
-            setupAppSubscriptions(user.uid);
+            setupAppSubscriptions(user.uid || user.id);
             renderStageTabs();
             isAppInitialized = true;
         }
@@ -93,17 +96,31 @@ initAuth((user, alias, score) => {
 // =======================
 loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const email = emailInput.value.trim();
+    const legajo = legajoInput.value.trim();
     const alias = aliasInput.value.trim();
-    if (!alias) return;
+    if (!email || !legajo) return;
 
     showLoader();
     loginError.classList.add("hidden");
+    const loginSuccess = document.getElementById("login-success");
+    if (loginSuccess) loginSuccess.classList.add("hidden");
     
     try {
-        await loginWithAlias(alias);
-        // initAuth observer will hide loader
+        const res = await loginWithEmailLegajo(email, legajo, alias);
+        if (res && res.needsConfirmation) {
+            hideLoader();
+            if (loginSuccess) {
+                loginSuccess.textContent = "¡Te registraste con éxito! Hemos enviado un enlace a tu correo. Revisa tu bandeja de entrada o SPAM, haz clic en el enlace para validar tu correo, y luego vuelve aquí para jugar.";
+                loginSuccess.classList.remove("hidden");
+            }
+        } else {
+            // Fue exitoso y no necesita confirmación. 
+            // Forzamos la recarga para que el observer inicialice todo perfectamente.
+            window.location.reload();
+        }
     } catch (err) {
-        loginError.textContent = "Error iniciando sesión: " + err.message;
+        loginError.textContent = "Error: " + err.message;
         loginError.classList.remove("hidden");
         hideLoader();
     }
@@ -624,16 +641,30 @@ if (btnAdminTest) {
              scoreUpdates += pts;
         });
         
-        const localUserStr = localStorage.getItem("prode_mock_user");
-        if(localUserStr) {
-            const localUser = JSON.parse(localUserStr);
-            // Reemplazamos la puntuación total calculando desde cero
-            localUser.score = scoreUpdates;
-            localStorage.setItem("prode_mock_user", JSON.stringify(localUser));
-            alert(`¡Simulación completa! Se calcularon resultados y tu PUNTAJE TOTAL es ahora de ${scoreUpdates} puntos de prueba.\nLos otros jugadores tienen puntos fijos.\n(Actualiza la página si no cambia el número en pantalla automáticamente).`);
-            window.location.reload();
+        const { user } = getCurrentUser();
+        if(user) {
+            supabase.from('users').update({ score: scoreUpdates }).eq('id', user.id).then(({ error }) => {
+                if (error) {
+                    alert("Error guardando el puntaje en Supabase: " + error.message);
+                } else {
+                    alert(`¡Simulación completa! Se calcularon resultados y tu PUNTAJE TOTAL en la base de datos es ahora de ${scoreUpdates} puntos de prueba.\nLos otros jugadores tienen puntos fijos.\n(Actualiza la página si no cambia el número en pantalla automáticamente).`);
+                    window.location.reload();
+                }
+            });
         } else {
-            alert("No estás logueado en modo mock/prueba.");
+            alert("No estás logueado.");
+        }
+    });
+}
+
+if (btnAdminReset) {
+    btnAdminReset.addEventListener("click", () => {
+        if (!confirm("¿Deseas reiniciar tus puntos de prueba a 0 en la base de datos?")) return;
+        const { user } = getCurrentUser();
+        if(user) {
+            supabase.from('users').update({ score: 0 }).eq('id', user.id).then(() => {
+                window.location.reload();
+            });
         }
     });
 }
