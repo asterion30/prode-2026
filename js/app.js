@@ -1,6 +1,7 @@
 // js/app.js
 import { initAuth, loginWithEmailLegajo, getCurrentUser } from "./auth.js";
 import { subscribeToMatches, subscribeToUserPredictions, savePrediction } from "./matches.js";
+import { supabase } from "./supabase-config.js";
 import { subscribeToRanking } from "./ranking.js";
 
 // =======================
@@ -640,29 +641,30 @@ if (btnAdminTest) {
              scoreUpdates += pts;
         });
         
-        const localUserStr = localStorage.getItem("prode_mock_user");
-        if(localUserStr) {
-            const localUser = JSON.parse(localUserStr);
-            // Reemplazamos la puntuación total calculando desde cero
-            localUser.score = scoreUpdates;
-            localStorage.setItem("prode_mock_user", JSON.stringify(localUser));
-            alert(`¡Simulación completa! Se calcularon resultados y tu PUNTAJE TOTAL es ahora de ${scoreUpdates} puntos de prueba.\nLos otros jugadores tienen puntos fijos.\n(Actualiza la página si no cambia el número en pantalla automáticamente).`);
-            window.location.reload();
+        const { user } = getCurrentUser();
+        if(user) {
+            supabase.from('users').update({ score: scoreUpdates }).eq('id', user.id).then(({ error }) => {
+                if (error) {
+                    alert("Error guardando el puntaje en Supabase: " + error.message);
+                } else {
+                    alert(`¡Simulación completa! Se calcularon resultados y tu PUNTAJE TOTAL en la base de datos es ahora de ${scoreUpdates} puntos de prueba.\nLos otros jugadores tienen puntos fijos.\n(Actualiza la página si no cambia el número en pantalla automáticamente).`);
+                    window.location.reload();
+                }
+            });
         } else {
-            alert("No estás logueado en modo mock/prueba.");
+            alert("No estás logueado.");
         }
     });
 }
 
 if (btnAdminReset) {
     btnAdminReset.addEventListener("click", () => {
-        if (!confirm("¿Deseas reiniciar tus puntos de prueba a 0?")) return;
-        const localUserStr = localStorage.getItem("prode_mock_user");
-        if(localUserStr) {
-            const localUser = JSON.parse(localUserStr);
-            localUser.score = 0;
-            localStorage.setItem("prode_mock_user", JSON.stringify(localUser));
-            window.location.reload();
+        if (!confirm("¿Deseas reiniciar tus puntos de prueba a 0 en la base de datos?")) return;
+        const { user } = getCurrentUser();
+        if(user) {
+            supabase.from('users').update({ score: 0 }).eq('id', user.id).then(() => {
+                window.location.reload();
+            });
         }
     });
 }
