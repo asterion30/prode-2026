@@ -37,11 +37,20 @@ export function initAuth(onUserChange) {
                 // Si la fila no existe (RLS bloqueó la creación durante el signup sin sesión), la creamos ahora
                 if (error && error.code === 'PGRST116') {
                     const fallbackAlias = currentUser.user_metadata?.alias || currentUser.email?.split('@')[0] || "Usuario";
-                    await supabase.from('users').upsert({
+                    const { error: upsertErr } = await supabase.from('users').upsert({
                         id: currentUser.id,
                         alias: fallbackAlias,
                         score: 0
                     });
+                    
+                    if (upsertErr) {
+                        // Si falla el upsert (ej: el usuario fue borrado en auth.users pero su LocalStorage guarda un token local fantasma)
+                        console.error("Fallo al reconciliar perfil. El usuario probablemente fue borrado. Forzando cierre de sesión.");
+                        await supabase.auth.signOut();
+                        onUserChange(null, null, 0);
+                        return;
+                    }
+                    
                     currentAlias = fallbackAlias;
                     score = 0;
                 } else if (data && !error) {
