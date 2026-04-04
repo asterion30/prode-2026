@@ -1,0 +1,25 @@
+name: Sincronizador Automático del Mundial
+on:
+  schedule:
+    - cron: '*/30 * * * *' # La máquina arranca cada 30 minutos permanentemente
+  workflow_dispatch: # Permite apretar un botón manual en Github si quieres probarlo en el acto
+
+jobs:
+  sincronizar_partidos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar Código Repositorio
+        uses: actions/checkout@v4
+        
+      - name: Preparar Entorno NodeJS (Motor)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Encender Robot de Sincronización
+        env:
+          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SYNC_SECRET: ${{ secrets.SYNC_SECRET }}
+        run: node scripts/sync-bot.js
