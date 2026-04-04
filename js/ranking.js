@@ -43,14 +43,6 @@ export function subscribeToRanking(callback) {
             .limit(50);
         
         if (data) {
-            data.push(
-                { id: 'fake-1', alias: 'jperez.gerente', score: 28 },
-                { id: 'fake-2', alias: 'mmartinez', score: 21 },
-                { id: 'fake-3', alias: 'carlos.systems', score: 14 },
-                { id: 'fake-4', alias: 'lfernandez', score: 9 },
-                { id: 'fake-5', alias: 'agustina.rrhh', score: 6 }
-            );
-            data.sort((a, b) => b.score - a.score);
             callback(data);
         }
     };
