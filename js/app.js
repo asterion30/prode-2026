@@ -14,6 +14,7 @@ const emailInput = document.getElementById("email-input");
 
 const matchesView = document.getElementById("matches-view");
 const rankingView = document.getElementById("ranking-view");
+const usersView = document.getElementById("users-view");
 const matchesListEl = document.getElementById("matches-list");
 const rankingListEl = document.getElementById("ranking-list");
 const predictionsGridEl = document.getElementById("predictions-grid");
@@ -21,6 +22,7 @@ const stageTabsContainer = document.getElementById("stage-tabs");
 
 const btnNavMatches = document.getElementById("nav-matches");
 const btnNavRanking = document.getElementById("nav-ranking");
+const btnNavUsers = document.getElementById("nav-users");
 const btnExportCsv = document.getElementById("btn-export-csv");
 const btnExportCsvMobile = document.getElementById("btn-export-csv-mobile");
 const loader = document.getElementById("global-loader");
@@ -71,6 +73,10 @@ initAuth((user, alias, score) => {
             if (btnAdminTest) btnAdminTest.classList.remove('hidden');
             if (btnAdminReset) btnAdminReset.classList.remove('hidden');
             if (btnAdminExport) btnAdminExport.classList.remove('hidden');
+            if (btnNavUsers) {
+                btnNavUsers.classList.remove('hidden');
+                btnNavUsers.classList.add('flex');
+            }
         } else {
             if (btnAdminTest) btnAdminTest.classList.add('hidden');
             if (btnAdminReset) btnAdminReset.classList.add('hidden');
@@ -154,24 +160,55 @@ function setupAppSubscriptions(uid) {
 btnNavMatches.addEventListener("click", () => {
     matchesView.classList.remove("hidden");
     rankingView.classList.add("hidden");
+    if (usersView) usersView.classList.add("hidden");
     
     btnNavMatches.classList.add("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
     btnNavMatches.classList.remove("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
     
     btnNavRanking.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
     btnNavRanking.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
+    
+    if (btnNavUsers) {
+        btnNavUsers.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
+        btnNavUsers.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
+    }
 });
 
 btnNavRanking.addEventListener("click", () => {
     rankingView.classList.remove("hidden");
     matchesView.classList.add("hidden");
+    if (usersView) usersView.classList.add("hidden");
     
     btnNavRanking.classList.add("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
     btnNavRanking.classList.remove("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
     
     btnNavMatches.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
     btnNavMatches.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
+    
+    if (btnNavUsers) {
+        btnNavUsers.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
+        btnNavUsers.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
+    }
 });
+
+if (btnNavUsers) {
+    btnNavUsers.addEventListener("click", async () => {
+        if (usersView) usersView.classList.remove("hidden");
+        matchesView.classList.add("hidden");
+        rankingView.classList.add("hidden");
+        
+        btnNavUsers.classList.add("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
+        btnNavUsers.classList.remove("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
+        
+        btnNavMatches.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
+        btnNavMatches.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
+        
+        btnNavRanking.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
+        btnNavRanking.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
+        
+        await loadUsersGrid();
+    });
+}
 
 if (btnMobileGrid && sidebarPredictions && btnCloseSidebar) {
     btnMobileGrid.addEventListener("click", () => {
@@ -650,4 +687,71 @@ if (btnAdminReset) {
             });
         }
     });
+}
+
+const userAvatarImg = document.getElementById("user-avatar-img");
+if (userAvatarImg) {
+    userAvatarImg.addEventListener("click", () => {
+        const currentSrc = userAvatarImg.getAttribute("src");
+        if (currentSrc.includes("avatar_female")) {
+            userAvatarImg.setAttribute("src", "./assets/avatar.webp");
+        } else {
+            userAvatarImg.setAttribute("src", "./assets/avatar_female.png");
+        }
+    });
+}
+
+async function loadUsersGrid() {
+    const listEl = document.getElementById("users-table-list");
+    if (!listEl) return;
+    
+    showLoader();
+    try {
+        const { data: users, error } = await supabase
+            .from('users')
+            .select('alias, created_at')
+            .order('created_at', { ascending: false });
+            
+        if (error) throw error;
+        
+        listEl.innerHTML = "";
+        if (!users || users.length === 0) {
+            listEl.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-500">No hay usuarios</td></tr>`;
+            hideLoader();
+            return;
+        }
+        
+        users.forEach((u, i) => {
+            const dateStr = new Date(u.created_at).toLocaleDateString();
+            const tr = document.createElement("tr");
+            tr.className = "border-slate-700/50 hover:bg-slate-800/30 transition-colors";
+            tr.innerHTML = `
+                <td class="px-4 py-3 text-center text-slate-500">${i + 1}</td>
+                <td class="px-4 py-3 font-semibold text-slate-200">${u.alias}</td>
+                <td class="px-4 py-3 text-slate-400 hidden sm:table-cell">${dateStr}</td>
+            `;
+            listEl.appendChild(tr);
+        });
+        
+        const btnExportUsers = document.getElementById("btn-export-users-csv");
+        if (btnExportUsers) {
+            btnExportUsers.onclick = () => {
+                let csvContent = "Posicion;Alias;Fecha Registro\r\n";
+                users.forEach((u, i) => {
+                    const dateDesc = new Date(u.created_at).toLocaleDateString();
+                    csvContent += `"${i + 1}";"${u.alias}";"${dateDesc}"\r\n`;
+                });
+                const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+                const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = `UsuariosRegistrados_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+            };
+        }
+    } catch(e) {
+        console.error("Error loading users grid", e);
+    } finally {
+        hideLoader();
+    }
 }

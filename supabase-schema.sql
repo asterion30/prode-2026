@@ -133,4 +133,4 @@ begin
     update public.users set score = total_score where id = u.id;
   end loop;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = '';
