@@ -69,7 +69,7 @@ initAuth((user, alias, score) => {
         userAliasDisplay.textContent = alias;
         userPointsDisplay.textContent = `${score} pts`;
         
-        if (alias.toLowerCase() === 'testerbot' || alias.toLowerCase() === 'admin' || alias.toLowerCase() === 'rrhh') {
+        if (alias.toLowerCase() === 'testerbot' || alias.toLowerCase() === 'admin' || alias.toLowerCase() === 'rrhh' || alias.toLowerCase() === 'asterion30') {
             if (btnAdminTest) btnAdminTest.classList.remove('hidden');
             if (btnAdminReset) btnAdminReset.classList.remove('hidden');
             if (btnAdminExport) btnAdminExport.classList.remove('hidden');
