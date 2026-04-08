@@ -696,7 +696,7 @@ if (userAvatarImg) {
         if (currentSrc.includes("avatar_female")) {
             userAvatarImg.setAttribute("src", "./assets/avatar.webp");
         } else {
-            userAvatarImg.setAttribute("src", "./assets/avatar_female.png");
+            userAvatarImg.setAttribute("src", "./assets/avatar_female_v2.png");
         }
     });
 }
