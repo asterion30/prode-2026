@@ -647,15 +647,14 @@ if (btnAdminTest) {
              // const offHG = match.realHomeGoals; ...
              // Pero aquí haremos que ganó *su* predicción.
              
-             // En modo prueba, queremos que el simulador asuma que el resultado 
-             // oficial fue EXACTAMENTE el que el usuario predijo.
-             // Así que SIEMPRE sumará mínimo 1 punto por acertar el ganador.
+             let pts = 0;
+             const hG = pred.homeGoals;
+             const aG = pred.awayGoals;
              
-             let pts = 1;
-
-             // Si el usuario también escribió goles exactos, le damos 2 extra.
-             if (pred.homeGoals !== '' && pred.homeGoals !== undefined && pred.awayGoals !== '' && pred.awayGoals !== undefined) {
-                 pts += 2; // +2 puntos exactos sumando 3 en total
+             if (hG !== '' && aG !== '' && hG !== undefined && aG !== undefined) {
+                 pts = 3;
+             } else if (pred.result) {
+                 pts = 1;
              }
              
              scoreUpdates += pts;
@@ -663,11 +662,13 @@ if (btnAdminTest) {
         
         const { user } = getCurrentUser();
         if(user) {
+            showLoader();
             supabase.from('users').update({ score: scoreUpdates }).eq('id', user.id).then(({ error }) => {
+                hideLoader();
                 if (error) {
                     alert("Error guardando el puntaje en Supabase: " + error.message);
                 } else {
-                    alert(`¡Simulación completa! Se calcularon resultados y tu PUNTAJE TOTAL en la base de datos es ahora de ${scoreUpdates} puntos de prueba.\nLos otros jugadores tienen puntos fijos.\n(Actualiza la página si no cambia el número en pantalla automáticamente).`);
+                    alert(`¡Simulación completa!\nSe calcularon resultados basados en tus predicciones actuales.\nTu PUNTAJE TOTAL en la base de datos es ahora de ${scoreUpdates} puntos de prueba.\n\n(Actualiza la página si no cambia el número en pantalla automáticamente).`);
                     window.location.reload();
                 }
             });
