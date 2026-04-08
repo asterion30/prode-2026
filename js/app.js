@@ -89,6 +89,12 @@ initAuth((user, alias, score) => {
             userAvatarImg.setAttribute("src", savedAvatar);
         }
 
+        if (!isAppInitialized) {
+            setupAppSubscriptions(user.uid || user.id);
+            renderStageTabs();
+            isAppInitialized = true;
+        }
+
         hideLoader();
     } else {
         // Logged Out
