@@ -127,7 +127,6 @@
                             <p id="user-alias-display" class="text-sm font-semibold text-white leading-tight">Alias</p>
                             <div class="flex items-center gap-1 justify-end">
                                 <p id="user-points-display" class="text-xs text-brand-500 font-medium leading-tight">0 pts</p>
-                                <button id="btn-admin-export" class="bg-brand-900/60 hover:bg-brand-800 text-brand-300 text-[9px] px-1.5 py-0.5 rounded border border-brand-700 transition-colors ml-1 hidden" title="Descargar Ranking Global Completo en CSV">CSV RRHH</button>
                                 <button id="btn-admin-reset" class="bg-slate-700/50 hover:bg-slate-600 text-slate-300 text-[9px] px-1.5 py-0.5 rounded border border-slate-600 transition-colors ml-1 hidden" title="Limpiar puntaje">Clean</button>
                                 <button id="btn-admin-test" class="bg-red-900/40 hover:bg-red-800 text-red-300 text-[9px] px-1.5 py-0.5 rounded border border-red-700 transition-colors ml-1 hidden" title="Terminar partidos y calcular puntos">Simular</button>
                             </div>
@@ -174,14 +173,19 @@
 
                     <!-- Ranking View -->
                     <div id="ranking-view" class="hidden space-y-4">
-                        <div class="mb-6">
-                            <h2 class="text-xl font-bold flex items-center gap-2">
-                                <i class="ph-fill ph-ranking text-yellow-500"></i> Ranking General
-                            </h2>
-                            <p class="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                                <i class="ph-fill ph-clock text-slate-500"></i> 
-                                Por revisión oficial y VAR, el ranking se actualiza ~30 mins después de finalizado cada partido.
-                            </p>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
+                            <div>
+                                <h2 class="text-xl font-bold flex items-center gap-2">
+                                    <i class="ph-fill ph-chart-bar text-yellow-500"></i> Ranking General
+                                </h2>
+                                <p class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                                    <i class="ph-fill ph-clock text-slate-500"></i> 
+                                    Por revisión oficial y VAR, el ranking se actualiza ~30 mins después de finalizado cada partido.
+                                </p>
+                            </div>
+                            <button id="btn-admin-export" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-semibold transition-colors shadow-sm hidden">
+                                <i class="ph-bold ph-download-simple"></i> CSV RRHH
+                            </button>
                         </div>
                         <div class="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700/50">
                             <table class="w-full text-left text-sm">
