@@ -69,7 +69,12 @@ initAuth((user, alias, score) => {
         userAliasDisplay.textContent = alias;
         userPointsDisplay.textContent = `${score} pts`;
         
-        if (alias.toLowerCase() === 'testerbot' || alias.toLowerCase() === 'admin' || alias.toLowerCase() === 'rrhh' || alias.toLowerCase() === 'asterion30') {
+        const admins = ['testerbot', 'admin', 'rrhh', 'asterion30', 'lcosta@vittal.com.ar', 'scriado@vittal.com.ar'];
+        // Cargar admings persistentes de localStorage si existen
+        const extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]');
+        const allAdmins = [...admins, ...extraAdmins];
+
+        if (allAdmins.includes(alias.toLowerCase()) || (user.email && allAdmins.includes(user.email.toLowerCase()))) {
             if (btnAdminTest) btnAdminTest.classList.remove('hidden');
             if (btnAdminReset) btnAdminReset.classList.remove('hidden');
             if (btnAdminExport) btnAdminExport.classList.remove('hidden');
@@ -716,6 +721,30 @@ if (userAvatarImg) {
         // Guardar preferencia localmente vinculada a la cuenta de usuario
         if (user) {
             localStorage.setItem(`avatar_${user.uid || user.id}`, newSrc);
+        }
+    });
+}
+
+// =======================
+// ADMIN PROMOTE LOGIC
+// =======================
+const logoCup = document.getElementById("logo-cup");
+if (logoCup) {
+    logoCup.addEventListener("click", () => {
+        const { alias } = getCurrentUser();
+        if (alias !== 'asterion30') return;
+
+        const emailToPromote = prompt("Ingrese el CORREO ELECTRÓNICO para hacerlo ADMIN/RRHH (persiste en este navegador):");
+        if (!emailToPromote || !emailToPromote.includes("@")) return;
+
+        const extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]');
+        if (!extraAdmins.includes(emailToPromote.toLowerCase())) {
+            extraAdmins.push(emailToPromote.toLowerCase());
+            localStorage.setItem('extra_admins', JSON.stringify(extraAdmins));
+            alert(`¡Listo! ${emailToPromote} ahora tiene permisos de administrador.\nActualiza la página para ver los cambios.`);
+            location.reload();
+        } else {
+            alert("Este correo ya está en la lista de administradores.");
         }
     });
 }
