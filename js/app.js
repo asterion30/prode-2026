@@ -69,7 +69,7 @@ initAuth((user, alias, score) => {
         userAliasDisplay.textContent = alias;
         userPointsDisplay.textContent = `${score} pts`;
         
-        const admins = ['testerbot', 'admin', 'rrhh', 'asterion30', 'lcosta@vittal.com.ar', 'scriado@vittal.com.ar'];
+        const admins = ['testerbot', 'admin', 'rrhh', 'asterion30', 'rortega', 'lcosta@vittal.com.ar', 'scriado@vittal.com.ar'];
         // Cargar admings persistentes de localStorage si existen
         const extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]');
         const allAdmins = [...admins, ...extraAdmins];
@@ -734,17 +734,17 @@ if (logoCup) {
         const { alias } = getCurrentUser();
         if (alias !== 'asterion30') return;
 
-        const emailToPromote = prompt("Ingrese el CORREO ELECTRÓNICO para hacerlo ADMIN/RRHH (persiste en este navegador):");
-        if (!emailToPromote || !emailToPromote.includes("@")) return;
+        const targetToPromote = prompt("Ingrese el ALIAS o CORREO ELECTRÓNICO del usuario deseado:");
+        if (!targetToPromote) return;
 
         const extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]');
-        if (!extraAdmins.includes(emailToPromote.toLowerCase())) {
-            extraAdmins.push(emailToPromote.toLowerCase());
+        if (!extraAdmins.includes(targetToPromote.toLowerCase())) {
+            extraAdmins.push(targetToPromote.toLowerCase());
             localStorage.setItem('extra_admins', JSON.stringify(extraAdmins));
-            alert(`¡Listo! ${emailToPromote} ahora tiene permisos de administrador.\nActualiza la página para ver los cambios.`);
+            alert(`¡Listo! ${targetToPromote} ahora tiene permisos de administrador en este navegador.`);
             location.reload();
         } else {
-            alert("Este correo ya está en la lista de administradores.");
+            alert("Este usuario ya está en la lista de administradores.");
         }
     });
 }
