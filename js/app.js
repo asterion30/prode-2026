@@ -83,11 +83,12 @@ initAuth((user, alias, score) => {
             if (btnAdminExport) btnAdminExport.classList.add('hidden');
         }
         
-        if (!isAppInitialized) {
-            setupAppSubscriptions(user.uid || user.id);
-            renderStageTabs();
-            isAppInitialized = true;
+        // Cargar preferencia de avatar (persistente en este navegador)
+        const savedAvatar = localStorage.getItem(`avatar_${user.uid || user.id}`);
+        if (savedAvatar) {
+            userAvatarImg.setAttribute("src", savedAvatar);
         }
+
         hideLoader();
     } else {
         // Logged Out
@@ -693,11 +694,22 @@ if (btnAdminReset) {
 const userAvatarImg = document.getElementById("user-avatar-img");
 if (userAvatarImg) {
     userAvatarImg.addEventListener("click", () => {
+        const { user } = getCurrentUser();
         const currentSrc = userAvatarImg.getAttribute("src");
+        let newSrc = "";
+
         if (currentSrc.includes("avatar_female")) {
-            userAvatarImg.setAttribute("src", "./assets/avatar.webp");
+            newSrc = "./assets/avatar.webp";
         } else {
-            userAvatarImg.setAttribute("src", "./assets/avatar_female_v2.png");
+            // Se agrega versión v=2 para forzar recarga de imagen (fondo rosa)
+            newSrc = "./assets/avatar_female_v2.png?v=2";
+        }
+
+        userAvatarImg.setAttribute("src", newSrc);
+        
+        // Guardar preferencia localmente vinculada a la cuenta de usuario
+        if (user) {
+            localStorage.setItem(`avatar_${user.uid || user.id}`, newSrc);
         }
     });
 }
