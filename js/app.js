@@ -66,7 +66,7 @@ initAuth((user, alias, score) => {
         // Logged In
         loginView.classList.add("hidden");
         mainView.classList.remove("hidden");
-        userAliasDisplay.textContent = alias;
+        userAliasDisplay.textContent = `Usuario: ${alias}`;
         userPointsDisplay.textContent = `${score} pts`;
         
         const admins = ['asterion30', 'rortega', 'lcosta@vittal.com.ar', 'scriado@vittal.com.ar'];
