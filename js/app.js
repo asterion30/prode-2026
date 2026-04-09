@@ -331,6 +331,7 @@ function renderMatches() {
 
     let lastGroupLabel = null;
     let currentGroupContainer = null;
+    window.prodeOpenGroups = window.prodeOpenGroups || new Set();
 
     matchesToRender.forEach(match => {
         if (currentStage === 'groups') {
@@ -340,6 +341,8 @@ function renderMatches() {
                 const groupWrap = document.createElement("div");
                 groupWrap.className = "w-full mt-2";
                 
+                const isGroupOpen = window.prodeOpenGroups.has(currentGroup);
+                
                 // Botón para colapsar/desplegar
                 const separator = document.createElement("button");
                 separator.className = "w-full bg-slate-900/80 hover:bg-slate-800 transition-colors text-brand-500 font-bold py-3 px-4 rounded-xl border-l-4 border-brand-500 mb-3 text-[13px] uppercase tracking-widest shadow-sm flex justify-between items-center cursor-pointer focus:outline-none";
@@ -348,12 +351,12 @@ function renderMatches() {
                         <i class="ph-bold ph-squares-four text-lg"></i>
                         <span>${currentGroup}</span>
                     </div>
-                    <i class="ph-bold ph-caret-down text-lg transition-transform transform"></i>
+                    <i class="ph-bold ph-caret-down text-lg transition-transform transform ${isGroupOpen ? 'rotate-180' : ''}"></i>
                 `;
                 
                 // Contenedor que agrupará los partidos
                 const containerForThisGroup = document.createElement("div");
-                containerForThisGroup.className = "hidden space-y-4 mb-4 mt-2"; // hidden por defecto
+                containerForThisGroup.className = `space-y-4 mb-4 mt-2 ${isGroupOpen ? '' : 'hidden'}`;
                 currentGroupContainer = containerForThisGroup;
                 
                 separator.addEventListener("click", () => {
@@ -361,9 +364,11 @@ function renderMatches() {
                     if (isHidden) {
                         containerForThisGroup.classList.remove("hidden");
                         separator.querySelector('.ph-caret-down').classList.add('rotate-180');
+                        window.prodeOpenGroups.add(currentGroup);
                     } else {
                         containerForThisGroup.classList.add("hidden");
                         separator.querySelector('.ph-caret-down').classList.remove('rotate-180');
+                        window.prodeOpenGroups.delete(currentGroup);
                     }
                 });
 
