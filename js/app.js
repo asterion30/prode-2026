@@ -360,7 +360,7 @@ function renderMatches() {
                 let hG = hGInput.value;
                 let aG = aGInput.value;
                 
-                if (hG !== '' && aG !== '' && res) {
+                if (hG !== '' && aG !== '') {
                     const h = parseInt(hG, 10);
                     const a = parseInt(aG, 10);
                     let impliedRes = 'E';
@@ -368,11 +368,10 @@ function renderMatches() {
                     else if (a > h) impliedRes = 'V';
                     
                     if (impliedRes !== res) {
-                        alert("El resultado seleccionado no coincide con los goles ingresados. Por favor, modifica los goles si deseas cambiar el resultado.");
-                        return;
+                        res = impliedRes; // Fuerza el resultado a lo que dicen los goles y no permite al usuario pisarlo con clics engañosos ni trampas.
                     }
                 }
-
+                
                 const statusEl = document.getElementById(`status-${match.id}`);
                 
                 // reset colors
