@@ -352,22 +352,23 @@ function renderMatches() {
                 `;
                 
                 // Contenedor que agrupará los partidos
-                currentGroupContainer = document.createElement("div");
-                currentGroupContainer.className = "hidden space-y-4 mb-4"; // hidden por defecto
+                const containerForThisGroup = document.createElement("div");
+                containerForThisGroup.className = "hidden space-y-4 mb-4 mt-2"; // hidden por defecto
+                currentGroupContainer = containerForThisGroup;
                 
                 separator.addEventListener("click", () => {
-                    const isHidden = currentGroupContainer.classList.contains("hidden");
+                    const isHidden = containerForThisGroup.classList.contains("hidden");
                     if (isHidden) {
-                        currentGroupContainer.classList.remove("hidden");
+                        containerForThisGroup.classList.remove("hidden");
                         separator.querySelector('.ph-caret-down').classList.add('rotate-180');
                     } else {
-                        currentGroupContainer.classList.add("hidden");
+                        containerForThisGroup.classList.add("hidden");
                         separator.querySelector('.ph-caret-down').classList.remove('rotate-180');
                     }
                 });
 
                 groupWrap.appendChild(separator);
-                groupWrap.appendChild(currentGroupContainer);
+                groupWrap.appendChild(containerForThisGroup);
                 matchesListEl.appendChild(groupWrap);
                 
                 lastGroupLabel = currentGroup;
