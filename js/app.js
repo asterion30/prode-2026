@@ -274,7 +274,75 @@ function renderMatches() {
         return;
     }
 
-    filteredMatches.forEach(match => {
+    let matchesToRender = [...filteredMatches];
+    let groupLabels = {};
+
+    if (currentStage === 'groups') {
+        let parent = {};
+        const getRoot = (i) => {
+            if (parent[i] === undefined) parent[i] = i;
+            if (parent[i] === i) return i;
+            return parent[i] = getRoot(parent[i]);
+        };
+        const union = (i, j) => {
+            let rootI = getRoot(i);
+            let rootJ = getRoot(j);
+            if (rootI !== rootJ) parent[rootI] = rootJ;
+        };
+        
+        // Inferimos clústers de equipos jugando entre sí
+        filteredMatches.forEach(m => union(m.homeTeam, m.awayTeam));
+        
+        let clusters = {};
+        Object.keys(parent).forEach(team => {
+            let root = getRoot(team);
+            if (!clusters[root]) clusters[root] = [];
+            clusters[root].push(team);
+        });
+
+        // Ordenamos los grupos basados en el orden original de la agenda (Jornada 1)
+        const rootsSorted = Object.keys(clusters).sort((a,b) => {
+             const mA = filteredMatches.findIndex(m => m.homeTeam === a || m.awayTeam === a);
+             const mB = filteredMatches.findIndex(m => m.homeTeam === b || m.awayTeam === b);
+             return mA - mB;
+        });
+
+        const teamToGroupLabel = {};
+        const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        rootsSorted.forEach((root, idx) => {
+            const letter = LETTERS[idx] || (idx+1).toString();
+            clusters[root].forEach(t => teamToGroupLabel[t] = `Grupo ${letter}`);
+        });
+
+        filteredMatches.forEach(m => {
+            groupLabels[m.id] = teamToGroupLabel[m.homeTeam];
+        });
+
+        // Ordenamos por Grupo y luego por Fecha
+        matchesToRender.sort((a, b) => {
+            const gA = groupLabels[a.id];
+            const gB = groupLabels[b.id];
+            if (gA !== gB) return gA.localeCompare(gB);
+            return new Date(a.matchDate) - new Date(b.matchDate);
+        });
+    } else {
+        matchesToRender.sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
+    }
+
+    let lastGroupLabel = null;
+
+    matchesToRender.forEach(match => {
+        if (currentStage === 'groups') {
+            const currentGroup = groupLabels[match.id];
+            if (currentGroup !== lastGroupLabel) {
+                const separator = document.createElement("div");
+                separator.className = "w-full bg-slate-900/80 text-brand-500 font-bold py-2.5 px-4 rounded-xl border-l-4 border-brand-500 mt-6 mb-3 text-[13px] uppercase tracking-widest shadow-sm flex items-center gap-2";
+                separator.innerHTML = `<i class="ph-bold ph-squares-four text-lg"></i> ${currentGroup}`;
+                matchesListEl.appendChild(separator);
+                lastGroupLabel = currentGroup;
+            }
+        }
+        
         const matchDate = new Date(match.matchDate);
         // Validar si falta menos de 1 hora
         const diffMs = matchDate - now;
