@@ -355,12 +355,25 @@ function renderMatches() {
         // Bind Save Button Event
         if (!isLocked) {
             const handleBet = async (res) => {
-                const statusEl = document.getElementById(`status-${match.id}`);
-                
                 const hGInput = document.getElementById(`home-goals-${match.id}`);
                 const aGInput = document.getElementById(`away-goals-${match.id}`);
                 let hG = hGInput.value;
                 let aG = aGInput.value;
+                
+                if (hG !== '' && aG !== '' && res) {
+                    const h = parseInt(hG, 10);
+                    const a = parseInt(aG, 10);
+                    let impliedRes = 'E';
+                    if (h > a) impliedRes = 'L';
+                    else if (a > h) impliedRes = 'V';
+                    
+                    if (impliedRes !== res) {
+                        alert("El resultado seleccionado no coincide con los goles ingresados. Por favor, modifica los goles si deseas cambiar el resultado.");
+                        return;
+                    }
+                }
+
+                const statusEl = document.getElementById(`status-${match.id}`);
                 
                 // reset colors
                 ['L','E','V'].forEach(k => {
