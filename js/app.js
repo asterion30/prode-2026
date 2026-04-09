@@ -330,15 +330,46 @@ function renderMatches() {
     }
 
     let lastGroupLabel = null;
+    let currentGroupContainer = null;
 
     matchesToRender.forEach(match => {
         if (currentStage === 'groups') {
             const currentGroup = groupLabels[match.id];
             if (currentGroup !== lastGroupLabel) {
-                const separator = document.createElement("div");
-                separator.className = "w-full bg-slate-900/80 text-brand-500 font-bold py-2.5 px-4 rounded-xl border-l-4 border-brand-500 mt-6 mb-3 text-[13px] uppercase tracking-widest shadow-sm flex items-center gap-2";
-                separator.innerHTML = `<i class="ph-bold ph-squares-four text-lg"></i> ${currentGroup}`;
-                matchesListEl.appendChild(separator);
+                // Wrapper del grupo
+                const groupWrap = document.createElement("div");
+                groupWrap.className = "w-full mt-2";
+                
+                // Botón para colapsar/desplegar
+                const separator = document.createElement("button");
+                separator.className = "w-full bg-slate-900/80 hover:bg-slate-800 transition-colors text-brand-500 font-bold py-3 px-4 rounded-xl border-l-4 border-brand-500 mb-3 text-[13px] uppercase tracking-widest shadow-sm flex justify-between items-center cursor-pointer focus:outline-none";
+                separator.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <i class="ph-bold ph-squares-four text-lg"></i>
+                        <span>${currentGroup}</span>
+                    </div>
+                    <i class="ph-bold ph-caret-down text-lg transition-transform transform"></i>
+                `;
+                
+                // Contenedor que agrupará los partidos
+                currentGroupContainer = document.createElement("div");
+                currentGroupContainer.className = "hidden space-y-4 mb-4"; // hidden por defecto
+                
+                separator.addEventListener("click", () => {
+                    const isHidden = currentGroupContainer.classList.contains("hidden");
+                    if (isHidden) {
+                        currentGroupContainer.classList.remove("hidden");
+                        separator.querySelector('.ph-caret-down').classList.add('rotate-180');
+                    } else {
+                        currentGroupContainer.classList.add("hidden");
+                        separator.querySelector('.ph-caret-down').classList.remove('rotate-180');
+                    }
+                });
+
+                groupWrap.appendChild(separator);
+                groupWrap.appendChild(currentGroupContainer);
+                matchesListEl.appendChild(groupWrap);
+                
                 lastGroupLabel = currentGroup;
             }
         }
@@ -418,7 +449,11 @@ function renderMatches() {
             </div>
         `;
         
-        matchesListEl.appendChild(card);
+        if (currentStage === 'groups' && currentGroupContainer) {
+            currentGroupContainer.appendChild(card);
+        } else {
+            matchesListEl.appendChild(card);
+        }
         
         // Bind Save Button Event
         if (!isLocked) {
