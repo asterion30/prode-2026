@@ -118,6 +118,10 @@ initAuth((user, alias, score) => {
             if (btnAdminTest) btnAdminTest.classList.add('hidden');
             if (btnAdminReset) btnAdminReset.classList.add('hidden');
             if (btnAdminExport) btnAdminExport.classList.add('hidden');
+            if (btnNavUsers) {
+                btnNavUsers.classList.add('hidden');
+                btnNavUsers.classList.remove('flex');
+            }
         }
         
         // Cargar preferencia de avatar (persistente en este navegador)
@@ -895,7 +899,9 @@ if (logoCup) {
         if (!targetToPromote) return;
 
         let extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]');
-        const targetLower = targetToPromote.toLowerCase();
+        // Limpiamos los sucios preexistentes (viejos) para que el toggle logre igualar el String:
+        extraAdmins = extraAdmins.map(u => u.trim());
+        const targetLower = targetToPromote.toLowerCase().trim();
         
         if (!extraAdmins.includes(targetLower)) {
             extraAdmins.push(targetLower);
