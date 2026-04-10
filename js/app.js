@@ -59,7 +59,39 @@ let currentStage = 'groups';
 function showLoader() { loader.classList.remove("hidden"); }
 function hideLoader() { loader.classList.add("hidden"); }
 
+function initCountdown() {
+    const countdownTimer = document.getElementById("countdown-timer");
+    const countdownText = document.getElementById("countdown-text");
+    if (!countdownTimer || !countdownText) return;
+    
+    // Mundial de la FIFA 2026 arranca el 11 de Junio de 2026
+    const worldCupStart = new Date("2026-06-11T16:00:00-05:00").getTime(); 
+    
+    const tick = () => {
+        const now = new Date().getTime();
+        const distance = worldCupStart - now;
+        
+        if (distance < 0) {
+            countdownTimer.classList.add("hidden");
+            countdownTimer.classList.remove("flex");
+            return;
+        }
+        
+        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        countdownText.innerHTML = `${d}d ${h}h ${m}m ${s}s`;
+        countdownTimer.classList.remove("hidden");
+        countdownTimer.classList.add("flex");
+        setTimeout(tick, 1000);
+    };
+    tick();
+}
+
 showLoader();
+initCountdown();
 
 initAuth((user, alias, score) => {
     if (user && alias) {

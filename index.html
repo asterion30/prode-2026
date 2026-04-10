@@ -145,8 +145,12 @@
                         <div class="flex flex-col mb-4 gap-4">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <h2 class="text-xl font-bold flex items-center gap-2">
+                                    <h2 class="text-xl font-bold flex items-center gap-2 relative">
                                         <i class="ph-fill ph-calendar text-brand-500"></i> Fixture
+                                        <div id="countdown-timer" class="hidden absolute left-full ml-4 whitespace-nowrap bg-slate-900 border border-slate-700/50 text-brand-500 px-2 py-1 rounded-md text-[10px] font-mono shadow-inner items-center gap-1">
+                                            <i class="ph-bold ph-hourglass-high animate-pulse text-xs"></i>
+                                            <span id="countdown-text"></span>
+                                        </div>
                                     </h2>
                                     <p class="text-xs text-slate-400">Desliza para cambiar de fase</p>
                                 </div>
@@ -276,6 +280,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- Main Module -->
-    <script type="module" src="./js/app.js?v=8"></script>
+    <script type="module" src="./js/app.js?v=9"></script>
 </body>
 </html>
