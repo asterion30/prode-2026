@@ -436,9 +436,9 @@ function renderMatches() {
                         
                         <!-- Goals Input -->
                         <div class="flex items-center justify-center gap-2 w-full ${match.tbd ? 'opacity-50 pointer-events-none' : ''}">
-                            <input type="number" id="home-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" placeholder="-" value="${pred.homeGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
+                            <input type="number" id="home-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" max="25" oninput="if(this.value && parseInt(this.value) > 25) this.value='25';" placeholder="-" value="${pred.homeGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
                             <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Goles</span>
-                            <input type="number" id="away-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" placeholder="-" value="${pred.awayGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
+                            <input type="number" id="away-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" max="25" oninput="if(this.value && parseInt(this.value) > 25) this.value='25';" placeholder="-" value="${pred.awayGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
                         </div>
                     </div>
 
@@ -468,6 +468,10 @@ function renderMatches() {
                 const aGInput = document.getElementById(`away-goals-${match.id}`);
                 let hG = hGInput.value;
                 let aG = aGInput.value;
+                
+                // Truncamiento estricto de seguridad visual
+                if (hG !== '' && parseInt(hG, 10) > 25) { hG = '25'; hGInput.value = '25'; }
+                if (aG !== '' && parseInt(aG, 10) > 25) { aG = '25'; aGInput.value = '25'; }
                 
                 if (hG !== '' && aG !== '') {
                     const h = parseInt(hG, 10);
