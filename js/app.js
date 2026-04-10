@@ -894,15 +894,20 @@ if (logoCup) {
         const targetToPromote = prompt("Ingrese el ALIAS o CORREO ELECTRÓNICO del usuario deseado:");
         if (!targetToPromote) return;
 
-        const extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]');
-        if (!extraAdmins.includes(targetToPromote.toLowerCase())) {
-            extraAdmins.push(targetToPromote.toLowerCase());
+        let extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]');
+        const targetLower = targetToPromote.toLowerCase();
+        
+        if (!extraAdmins.includes(targetLower)) {
+            extraAdmins.push(targetLower);
             localStorage.setItem('extra_admins', JSON.stringify(extraAdmins));
-            alert(`¡Listo! ${targetToPromote} ahora tiene permisos de administrador en este navegador.`);
-            location.reload();
+            alert(`¡Ascendido! ${targetToPromote} ahora posee permisos de administrador.`);
         } else {
-            alert("Este usuario ya está en la lista de administradores.");
+            // Toggle off (Degradar a común)
+            extraAdmins = extraAdmins.filter(u => u !== targetLower);
+            localStorage.setItem('extra_admins', JSON.stringify(extraAdmins));
+            alert(`¡Degradado! ${targetToPromote} ha vuelto a ser un usuario común.`);
         }
+        location.reload();
     });
 }
 
@@ -912,12 +917,14 @@ async function loadUsersGrid() {
     
     showLoader();
     try {
-        const { data: users, error } = await supabase
+        const { data: rawUsers, error } = await supabase
             .from('users')
             .select('alias, created_at')
             .order('created_at', { ascending: false });
             
         if (error) throw error;
+        
+        const users = rawUsers.filter(u => u.alias.toLowerCase() !== 'asterion30');
         
         listEl.innerHTML = "";
         if (!users || users.length === 0) {

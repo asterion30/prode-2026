@@ -45,7 +45,7 @@ export function subscribeToRanking(callback) {
             .limit(50);
         
         if (data) {
-            callback(data);
+            callback(data.filter(u => u.alias.toLowerCase() !== 'asterion30'));
         }
     };
 
