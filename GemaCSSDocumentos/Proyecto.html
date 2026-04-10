@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informe Técnico Prode 2026</title>
+    <title>Informe Técnico: Prode Mundial 2026</title>
     <style>
+        /* ESTILOS BASE - MINIMALISMO DIGITAL 
+           Inspiración: Neo-clásica, Bauhaus Digital, Dark Mode Premium
+        */
         :root {
-            --bg: #0a0a0a;
-            --surface: #141414;
-            --border: #2a2a2a;
-            --accent: #00ff41; /* Cyber Green */
-            --text-main: #e0e0e0;
-            --text-dim: #888;
-            --font-mono: 'Courier New', Courier, monospace;
-            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --bg-color: #0a0a0b;
+            --surface-color: #161618;
+            --accent-color: #1bc27c; /* Verde Supabase */
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --border-color: #27272a;
+            --glass-bg: rgba(22, 22, 24, 0.8);
         }
 
         * {
@@ -23,11 +25,11 @@
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             line-height: 1.6;
-            padding: 2rem;
+            padding: 2rem 1rem;
             display: flex;
             justify-content: center;
         }
@@ -35,265 +37,257 @@
         .container {
             max-width: 900px;
             width: 100%;
-            animation: scanIn 0.8s ease-out;
         }
 
-        @keyframes scanIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Cabecera Neo-Clásica */
+        /* CABECERA */
         header {
-            border-bottom: 1px solid var(--accent);
-            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2rem;
             margin-bottom: 3rem;
+        }
+
+        .badge-status {
+            display: inline-block;
+            background: rgba(27, 194, 124, 0.1);
+            color: var(--accent-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid var(--accent-color);
+            margin-bottom: 1rem;
+            box-shadow: 0 0 15px rgba(27, 194, 124, 0.2);
         }
 
         h1 {
             font-size: 2.5rem;
-            text-transform: uppercase;
-            letter-spacing: -1px;
-            color: var(--accent);
+            font-weight: 800;
+            letter-spacing: -0.05em;
             margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #fff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .meta-data {
-            font-family: var(--font-mono);
-            font-size: 0.85rem;
-            color: var(--text-dim);
+        .meta-info {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
             display: flex;
             gap: 20px;
+            flex-wrap: wrap;
         }
 
-        /* Secciones */
+        .meta-info span b { color: var(--text-primary); }
+
+        /* SECCIONES CARD */
         section {
-            margin-bottom: 3.5rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        section:hover {
+            border-color: #3f3f46;
         }
 
         h2 {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-dim);
+            font-size: 1.25rem;
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             gap: 10px;
+            color: var(--text-primary);
+            border-left: 3px solid var(--accent-color);
+            padding-left: 15px;
         }
 
-        h2::after {
-            content: "";
-            height: 1px;
-            background: var(--border);
-            flex-grow: 1;
-        }
-
-        /* Estilo de Stack Tecnológico (Grid) */
-        .grid {
+        /* MÉTRICAS GRID */
+        .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
         }
 
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
+        .metric-card {
+            background: rgba(255,255,255,0.03);
             padding: 1.5rem;
-            border-radius: 4px;
-            transition: border-color 0.3s ease;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
         }
 
-        .card:hover {
-            border-color: var(--accent);
-        }
-
-        .card h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.75rem;
-            color: var(--accent);
-        }
-
-        .card ul {
-            list-style: none;
-            font-size: 0.9rem;
-        }
-
-        .card li {
-            margin-bottom: 0.4rem;
-            color: var(--text-main);
-        }
-
-        .card li b { color: #fff; }
-
-        /* Auditoría y Bloques de Alerta */
-        .audit-list {
-            background: #0f140f;
-            border-left: 3px solid var(--accent);
-            padding: 1.5rem;
-            border-radius: 0 4px 4px 0;
-        }
-
-        .audit-item {
-            margin-bottom: 1.2rem;
-        }
-
-        .audit-item strong {
+        .metric-value {
             display: block;
-            color: var(--accent);
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
         }
 
-        /* Roadmap / Future Tasks */
-        .roadmap-grid {
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* LISTAS Y SEGURIDAD */
+        ul {
+            list-style: none;
+        }
+
+        li {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+        }
+
+        .admin-tag {
+            background: #27272a;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #e4e4e7;
+        }
+
+        /* DIAGRAMA CONCEPTUAL */
+        .architecture-flow {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 10px;
         }
 
-        .status-box {
-            padding: 1.2rem;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            border: 1px solid transparent;
+        .flow-step {
+            background: #1c1c1f;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.85rem;
+            border: 1px dashed #3f3f46;
         }
 
-        .tip { background: rgba(0, 255, 65, 0.05); border-color: rgba(0, 255, 65, 0.2); }
-        .note { background: rgba(0, 150, 255, 0.05); border-color: rgba(0, 150, 255, 0.2); }
-        .caution { background: rgba(255, 50, 50, 0.05); border-color: rgba(255, 50, 50, 0.2); }
-
-        .tag {
-            font-family: var(--font-mono);
+        .flow-arrow {
+            text-align: center;
+            color: var(--accent-color);
             font-weight: bold;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 3px;
-            margin-right: 8px;
-            vertical-align: middle;
         }
 
-        .tag-tip { background: var(--accent); color: #000; }
-        .tag-note { background: #0096ff; color: #fff; }
-        .tag-caution { background: #ff3232; color: #fff; }
+        /* FOOTER / CALLOUT */
+        .important-note {
+            background: linear-gradient(45deg, #1bc27c11, #0a0a0b);
+            border: 1px solid var(--accent-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 3rem;
+            text-align: center;
+        }
 
         footer {
-            margin-top: 5rem;
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            color: var(--text-dim);
             text-align: center;
-            border-top: 1px solid var(--border);
-            padding-top: 2rem;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
         }
 
-        /* Responsive */
         @media (max-width: 600px) {
-            body { padding: 1rem; }
             h1 { font-size: 1.8rem; }
+            section { padding: 1.2rem; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>Prode Mundial 2026</h1>
-        <div class="meta-data">
-            <span>STATUS: FINALIZADO</span>
-            <span>DATE: 03-04-2026</span>
-            <span>ID: TECH-INF-001</span>
-        </div>
-    </header>
+    <div class="container">
+        <header>
+            <div class="badge-status">Estado: Producción Final</div>
+            <h1>Prode Mundial 2026</h1>
+            <div class="meta-info">
+                <span><b>Finalización / Última Actualización:</b> 9 de abril, 2026</span>
+                <span><b>Edición:</b> Vittal Edition</span>
+                <span><b>URL:</b> sapate.net.ar</span>
+            </div>
+        </header>
 
-    <section>
-        <h2>⏱️ Tiempo Real de Desarrollo</h2>
-        <p style="font-size: 1.1rem; color: var(--text-main);">
-            Proyecto construido bajo un esquema de **iteración de alta velocidad** (5 días calendario).
-        </p>
-        <div class="meta-data" style="margin-top: 10px; font-size: 1rem;">
-            > Total Horas Efectivas: <span style="color: var(--accent);">~12 a 15h</span>
-        </div>
-    </section>
+        <section id="metrics">
+            <h2>⏱️ Métricas de Desarrollo</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-value">32h</span>
+                    <span class="metric-label">Esfuerzo Total</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">50%</span>
+                    <span class="metric-label">UI/UX Focus</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">25%</span>
+                    <span class="metric-label">Backend Logic</span>
+                </div>
+            </div>
+        </section>
 
-    <section>
-        <h2>🛠️ Stack Tecnológico</h2>
-        <div class="grid">
-            <div class="card">
-                <h3>Frontend</h3>
-                <ul>
-                    <li><b>UI:</b> HTML5 / CSS3 Semántico</li>
-                    <li><b>Logic:</b> Vanilla JS (ES6+)</li>
-                    <li><b>Styles:</b> TailwindCSS / Glassmorphism</li>
-                    <li><b>Assets:</b> Phosphor Icons / html2canvas</li>
-                </ul>
-            </div>
-            <div class="card">
-                <h3>Backend & DB</h3>
-                <ul>
-                    <li><b>Engine:</b> Supabase / PostgreSQL</li>
-                    <li><b>Auth:</b> Enterprise Magic Links</li>
-                    <li><b>Compute:</b> PL/pgSQL Stored Procedures</li>
-                </ul>
-            </div>
-            <div class="card">
-                <h3>Automation</h3>
-                <ul>
-                    <li><b>CI/CD:</b> GitHub Actions</li>
-                    <li><b>Runtime:</b> NodeJS (v24)</li>
-                    <li><b>Data Source:</b> API-Football</li>
-                </ul>
-            </div>
-        </div>
-    </section>
+        <section id="ui-updates">
+            <h2>✨ Actualizaciones Críticas (9 de Abril)</h2>
+            <ul>
+                <li><strong>Algoritmo de Inferencia Recreativa:</strong> Cálculo heurístico (Componentes Conexas) para deducir y envolver on-the-fly los 72 partidos de fase de grupos en agrupaciones de la A a la L.</li>
+                <li><strong>Acordeón Persistente:</strong> Agrupación visual en módulos colapsables con memoria de estado (Set Objects) para mantener la UX sincronizada al repintarse con Sockets.</li>
+                <li><strong>Bloqueo Lógico Pasivo:</strong> Defensa hermética anti-inconsistencias. Sobreescritura inmediata del botón Ganador, obligando validación estricta dependiente del marcador introducido.</li>
+            </ul>
+        </section>
 
-    <section>
-        <h2>🔒 Post-Mortem: Auditoría de Seguridad</h2>
-        <div class="audit-list">
-            <div class="audit-item">
-                <strong>01. PROTECCIÓN DE PII</strong>
-                <p>Restricción total a `auth.users`. Uso de alias auto-generados para evitar fugas de datos sensibles.</p>
-            </div>
-            <div class="audit-item">
-                <strong>02. BLINDAJE ANTI-TRAMPAS</strong>
-                <p>Políticas RLS (Row Level Security) que impiden la manipulación de puntajes por parte de clientes.</p>
-            </div>
-            <div class="audit-item">
-                <strong>03. CIERRE DE VENTANA</strong>
-                <p>Reglas nativas `WITH CHECK` para bloquear cambios una vez iniciado el encuentro.</p>
-            </div>
-        </div>
-    </section>
+        <section id="security">
+            <h2>🔒 Auditoría de Seguridad</h2>
+            <ul>
+                <li><strong>Gestión de Identidad:</strong> Whitelist activa. Usuarios verificados: 
+                    <span class="admin-tag">asterion30</span> <span class="admin-tag">rortega</span> <span class="admin-tag">lcosta</span>
+                </li>
+                <li><strong>Backdoor Administrativo:</strong> Panel de promoción oculto en branding institucional para escalada de privilegios.</li>
+                <li><strong>Persistencia de Sesión:</strong> Inyección de estados vía <code>LocalStorage</code> para preferencias de avatar.</li>
+            </ul>
+        </section>
 
-    <section>
-        <h2>🚀 Automatización Total</h2>
-        <div class="card" style="width: 100%;">
-            <p><strong>Sincronizador Automático Cloud:</strong> Ejecución cada 30 min. Ahorro estimado de <strong>60 horas</strong> de Data-Entry manual. Precisión inteligente en el matching de nomenclatura de países.</p>
-        </div>
-    </section>
+        <section id="architecture">
+            <h2>🛠️ Arquitectura de Servicios</h2>
+            <div class="architecture-flow">
+                <div class="flow-step">Capa 1: Acceso (Vercel Edge & SSL)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">Capa 2: Aplicación (Vercel & Resend SMTP)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">Capa 3: Datos (Supabase PostgreSQL + RLS)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">Capa 4: Sync (GitHub Actions + API-Football)</div>
+            </div>
+        </section>
 
-    <section>
-        <h2>🔮 Roadmap & Recomendaciones</h2>
-        <div class="roadmap-grid">
-            <div class="status-box tip">
-                <span class="tag tag-tip">TIP</span>
-                <strong>Regla de Desempate:</strong> Implementar lógica de "Resultados Exactos" para jerarquizar el ranking en la cima de la tabla.
-            </div>
-            <div class="status-box note">
-                <span class="tag tag-note">NOTE</span>
-                <strong>Alertas Cron:</strong> Integración con Sendgrid para recordatorios automáticos < 24hs del partido.
-            </div>
-            <div class="status-box caution">
-                <span class="tag tag-caution">CAUTION</span>
-                <strong>Monitor de Cuotas:</strong> Vigilar el límite de 50,000 MAU en la capa gratuita de Supabase Auth.
-            </div>
-        </div>
-    </section>
+        <section id="admin">
+            <h2>📊 Capacidades RRHH</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Herramientas diseñadas para la gestión de talento y compromiso corporativo:</p>
+            <ul>
+                <li>Dashboard analítico en tiempo real.</li>
+                <li>Motor de exportación CSV optimizado para nóminas de premios.</li>
+                <li>Algoritmo de desempate por antigüedad y precisión métrica.</li>
+            </ul>
+        </section>
 
-    <footer>
-        <p>TERMINAL v3.0 // END OF LINE</p>
-    </footer>
-</div>
+        <div class="important-note">
+            <p><strong>ENTREGA FINAL:</strong> Sistema en estado óptimo. Automatización de fase de grupos activada. No se requiere intervención técnica adicional.</p>
+        </div>
+
+        <footer>
+            Design System v2.6.4 | Generado por la IA de Diseño Neo-Clásica
+        </footer>
+    </div>
 
 </body>
 </html>
