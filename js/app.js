@@ -101,7 +101,7 @@ initAuth((user, alias, score) => {
         userAliasDisplay.textContent = `Usuario: ${alias}`;
         userPointsDisplay.textContent = `${score} pts`;
         
-        const admins = ['asterion30', 'rortega', 'lcosta@vittal.com.ar', 'scriado@vittal.com.ar'];
+        const admins = ['asterion30'];
         // Cargar admings persistentes de localStorage si existen
         const extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]');
         const allAdmins = [...admins, ...extraAdmins];
