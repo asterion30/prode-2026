@@ -145,13 +145,19 @@
                         <div class="flex flex-col mb-4 gap-4">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <h2 class="text-xl font-bold flex items-center gap-2 relative">
-                                        <i class="ph-fill ph-calendar text-brand-500"></i> Fixture
-                                        <div id="countdown-timer" class="hidden absolute left-full ml-4 whitespace-nowrap bg-slate-900 border border-slate-700/50 text-brand-500 px-2 py-1 rounded-md text-[10px] font-mono shadow-inner items-center gap-1">
-                                            <i class="ph-bold ph-hourglass-high animate-pulse text-xs"></i>
-                                            <span id="countdown-text"></span>
-                                        </div>
-                                    </h2>
+                                        <h2 class="text-xl font-bold flex items-center gap-2 relative w-max">
+                                            <i class="ph-fill ph-calendar text-brand-500"></i> Fixture
+                                            <div class="absolute left-full ml-4 flex items-center gap-2">
+                                                <div id="countdown-timer" class="hidden whitespace-nowrap bg-slate-900 border border-slate-700/50 text-brand-500 px-2 py-1 rounded-md text-[10px] font-mono shadow-inner items-center gap-1">
+                                                    <i class="ph-bold ph-hourglass-high animate-pulse text-xs"></i>
+                                                    <span id="countdown-text"></span>
+                                                </div>
+                                                <a href="./salud/index.html" class="whitespace-nowrap bg-red-600 hover:bg-red-500 text-white px-2 py-1 rounded-md text-[10px] font-bold shadow-md shadow-red-900/50 flex items-center gap-1 transition-all border border-red-500/50 hover:scale-105 active:scale-95">
+                                                    <i class="ph-bold ph-first-aid text-xs"></i>
+                                                    Primeros Auxilios
+                                                </a>
+                                            </div>
+                                        </h2>
                                     <p class="text-xs text-slate-400">Desliza para cambiar de fase</p>
                                 </div>
                                 <div class="flex gap-2 md:hidden">
