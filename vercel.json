@@ -3,7 +3,7 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://unpkg.com; img-src 'self' data: https://flagcdn.com https://www.svgrepo.com https://api.mapbox.com; connect-src 'self' https://*.supabase.co https://get.geojs.io https://*.overpass-api.de https://overpass.kumi.systems; frame-ancestors 'none';" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://unpkg.com; img-src 'self' data: https://flagcdn.com https://www.svgrepo.com https://api.mapbox.com; connect-src 'self' https://*.supabase.co https://get.geojs.io https://*.overpass-api.de https://overpass.kumi.systems; frame-ancestors 'none';" },
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
