@@ -1,4 +1,15 @@
 // js/app.js
+
+// Helper to prevent XSS
+function escapeHTML(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 import { initAuth, loginWithEmail, getCurrentUser } from "./auth.js";
 import { subscribeToMatches, subscribeToUserPredictions, savePrediction } from "./matches.js";
 import { supabase } from "./supabase-config.js";
@@ -627,7 +638,7 @@ function renderRanking(ranking) {
                 ${rankContent}
             </td>
             <td class="px-4 py-3 font-semibold ${index === 0 ? 'text-brand-500' : 'text-slate-200'} flex items-center gap-2">
-                ${user.alias}
+                ${escapeHTML(user.alias)}
             </td>
             <td class="px-4 py-3 text-right">
                 <span class="bg-brand-900/50 text-brand-500 font-bold px-2 py-1 rounded">
@@ -685,7 +696,7 @@ function renderPredictionsGrid() {
         div.innerHTML = `
             <div class="flex justify-between items-center w-full">
                 <span class="text-xs font-bold font-sans text-slate-300">
-                    ${match.homeTeam} vs ${match.awayTeam}
+                    ${escapeHTML(match.homeTeam)} vs ${escapeHTML(match.awayTeam)}
                 </span>
                 <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded shadow-sm ${resColor}">
                     ${resText}
@@ -945,7 +956,7 @@ async function loadUsersGrid() {
             tr.className = "border-slate-700/50 hover:bg-slate-800/30 transition-colors";
             tr.innerHTML = `
                 <td class="px-4 py-3 text-center text-slate-500">${i + 1}</td>
-                <td class="px-4 py-3 font-semibold text-slate-200">${u.alias}</td>
+                <td class="px-4 py-3 font-semibold text-slate-200">${escapeHTML(u.alias)}</td>
                 <td class="px-4 py-3 text-slate-400 hidden sm:table-cell">${dateStr}</td>
             `;
             listEl.appendChild(tr);
