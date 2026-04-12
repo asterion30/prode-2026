@@ -485,9 +485,9 @@ function renderMatches() {
                         
                         <!-- Goals Input -->
                         <div class="flex items-center justify-center gap-2 w-full ${match.tbd ? 'opacity-50 pointer-events-none' : ''}">
-                            <input type="number" id="home-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" max="25" oninput="if(this.value && parseInt(this.value) > 25) this.value='25';" placeholder="-" value="${pred.homeGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
+                            <input type="number" id="home-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" max="25" placeholder="-" value="${pred.homeGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
                             <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Goles</span>
-                            <input type="number" id="away-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" max="25" oninput="if(this.value && parseInt(this.value) > 25) this.value='25';" placeholder="-" value="${pred.awayGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
+                            <input type="number" id="away-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" max="25" placeholder="-" value="${pred.awayGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
                         </div>
                     </div>
 
@@ -592,6 +592,12 @@ function renderMatches() {
             document.getElementById(`btn-E-${match.id}`).addEventListener("click", () => handleBet('E'));
             document.getElementById(`btn-V-${match.id}`).addEventListener("click", () => handleBet('V'));
             
+            const enforceMaxGoals = (e) => {
+                if(e.target.value && parseInt(e.target.value, 10) > 25) e.target.value = '25';
+            };
+            document.getElementById(`home-goals-${match.id}`).addEventListener("input", enforceMaxGoals);
+            document.getElementById(`away-goals-${match.id}`).addEventListener("input", enforceMaxGoals);
+
             document.getElementById(`home-goals-${match.id}`).addEventListener("input", handleGoalChange);
             document.getElementById(`away-goals-${match.id}`).addEventListener("input", handleGoalChange);
         }
