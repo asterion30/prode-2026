@@ -1,4 +1,4 @@
-// js/app.js
+import html2canvas from 'html2canvas';
 
 // Helper to prevent XSS
 function escapeHTML(str) {
@@ -10,6 +10,7 @@ function escapeHTML(str) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
 import { initAuth, loginWithEmail, getCurrentUser } from "./auth.js";
 import { subscribeToMatches, subscribeToUserPredictions, savePrediction } from "./matches.js";
 import { supabase } from "./supabase-config.js";
@@ -18,6 +19,7 @@ import { subscribeToRanking } from "./ranking.js";
 // =======================
 // DOM ELEMENTS
 // =======================
+const userAvatarImg = document.getElementById("user-avatar-img");
 const loginView = document.getElementById("login-view");
 const mainView = document.getElementById("main-view");
 const loginForm = document.getElementById("login-form");
@@ -874,7 +876,6 @@ if (btnAdminReset) {
     });
 }
 
-const userAvatarImg = document.getElementById("user-avatar-img");
 if (userAvatarImg) {
     userAvatarImg.addEventListener("click", () => {
         const { user } = getCurrentUser();

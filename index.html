@@ -1,4 +1,3 @@
-<!-- v1.0.1 - Security Rollback -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,58 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prode Mundial 2026</title>
     
-    <!-- Security Headers -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://unpkg.com; img-src 'self' data: https://flagcdn.com https://www.svgrepo.com https://api.mapbox.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://get.geojs.io https://*.overpass-api.de https://overpass.kumi.systems; frame-ancestors 'none';">
+    <!-- Security Headers (Grade A) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://flagcdn.com https://www.svgrepo.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://get.geojs.io; frame-ancestors 'none';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            900: '#14532d',
-                            dark: '#0f172a',
-                            card: '#1e293b'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+
+    <!-- CSS (Processed by Vite/Tailwind) -->
+    <link rel="stylesheet" href="./src/css/styles.css">
+
     <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1" crossorigin="anonymous"></script>
-    
-    <!-- html2canvas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body class="bg-brand-dark text-white font-sans antialiased min-h-screen flex items-center justify-center">
 
     <!-- App Container -->
     <div id="app-container" class="w-full max-w-5xl md:h-[800px] flex flex-col md:flex-row relative shadow-2xl bg-brand-dark overflow-hidden sm:border sm:border-slate-800 sm:rounded-3xl sm:my-8 hide-scrollbar mx-auto">
         
-        <!-- ======================= -->
-        <!--  LOGIN VIEW             -->
-        <!-- ======================= -->
+        <!-- LOGIN VIEW -->
         <section id="login-view" class="flex-1 w-full flex flex-col justify-center items-center p-6 sm:p-10 z-10 transition-all duration-500 min-h-screen md:min-h-0">
             <div class="mb-8 text-center">
                 <div class="w-24 h-24 bg-brand-500/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)] overflow-hidden p-1">
-                    <img src="./assets/cup.webp" alt="Prode 2026" class="w-full h-full object-contain rounded-full drop-shadow-lg" />
+                    <img src="/assets/cup.webp" alt="Prode 2026" class="w-full h-full object-contain rounded-full drop-shadow-lg" />
                 </div>
                 <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">Prode 2026</h1>
                 <p class="text-slate-400">Pronostica los resultados del Mundial</p>
@@ -69,229 +39,85 @@
                     <input type="email" id="email-input" required placeholder="ejemplo@vittal.com.ar" class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white">
                 </div>
 
-
                 <button type="submit" class="w-full mt-2 py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl shadow-lg transition-all active:scale-[0.98] flex justify-center items-center gap-2">
                     <span>Entrar / Registrarme</span>
-                    <i class="ph-bold ph-arrow-right"></i>
+                    <span>&rarr;</span>
                 </button>
-                
-                <div class="relative flex items-center justify-center my-4 hidden" id="social-auth-div">
-                    <div class="border-t border-slate-700 w-full"></div>
-                    <span class="bg-brand-dark px-3 text-xs text-slate-400 absolute">O también puedes</span>
-                </div>
-                
-                <div class="flex gap-3 hidden" id="social-auth-buttons">
-                    <button type="button" id="btn-login-google" class="flex-1 py-2.5 px-4 bg-white hover:bg-slate-100 text-slate-800 font-semibold rounded-xl shadow transition-all active:scale-[0.98] flex justify-center items-center gap-2">
-                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
-                        <span class="text-sm">Google</span>
-                    </button>
-                    <!-- <button type="button" id="btn-login-facebook" class="flex-1 py-2.5 px-4 bg-[#1877F2] hover:bg-[#166fe5] text-white font-semibold rounded-xl shadow transition-all active:scale-[0.98] flex justify-center items-center gap-2">
-                        <i class="ph-fill ph-facebook-logo text-xl"></i>
-                        <span class="text-sm">Facebook</span>
-                    </button> -->
-                </div>
             </form>
             
             <div id="login-error" class="mt-4 text-red-400 text-sm hidden text-center max-w-sm"></div>
             <div id="login-success" class="mt-4 text-brand-500 text-sm hidden text-center max-w-sm"></div>
         </section>
 
-        <!-- ======================= -->
-        <!--  MAIN APP VIEW          -->
-        <!-- ======================= -->
+        <!-- MAIN APP VIEW -->
         <section id="main-view" class="flex-1 flex flex-col md:flex-row hidden h-full w-full">
             
             <!-- Left Column: Matches & Ranking -->
             <div class="flex-1 flex flex-col relative h-full md:border-r border-slate-800">
-                <!-- App Header -->
                 <header class="bg-brand-card/80 backdrop-blur-md border-b border-slate-800 p-4 flex justify-between items-center sticky top-0 z-50">
                     <div class="flex items-center gap-2">
-                        <img id="logo-cup" src="./assets/cup.webp" alt="Copa" class="w-6 h-6 object-contain drop-shadow cursor-pointer" title="Admin Panel" />
+                        <img id="logo-cup" src="/assets/cup.webp" alt="Copa" class="w-6 h-6 object-contain drop-shadow cursor-pointer" />
                         <h1 class="font-bold text-lg">Prode 2026</h1>
                         
-                        <!-- Navigation Buttons -->
                         <div class="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
-                            <button id="nav-matches" class="nav-btn flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-brand-500 bg-brand-500/10 font-medium text-sm transition-colors border border-brand-500/20">
-                                <i class="ph-fill ph-calendar-blank text-lg"></i>
-                                <span class="hidden sm:inline">Partidos</span>
-                            </button>
-                            <button id="nav-ranking" class="nav-btn flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 font-medium text-sm transition-colors border border-transparent">
-                                <i class="ph-fill ph-chart-bar text-lg"></i>
-                                <span class="hidden sm:inline">Ranking</span>
-                            </button>
-                            <button id="nav-users" class="nav-btn hidden items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 font-medium text-sm transition-colors border border-transparent">
-                                <i class="ph-fill ph-users text-lg"></i>
-                                <span class="hidden sm:inline">Usuarios</span>
-                            </button>
+                            <button id="nav-matches" class="nav-btn px-2 sm:px-3 py-1.5 rounded-lg text-brand-500 bg-brand-500/10 font-medium text-sm transition-colors border border-brand-500/20">Partidos</button>
+                            <button id="nav-ranking" class="nav-btn px-2 sm:px-3 py-1.5 rounded-lg text-slate-400 font-medium text-sm transition-colors border border-transparent">Ranking</button>
+                            <button id="nav-users" class="nav-btn hidden px-2 sm:px-3 py-1.5 rounded-lg text-slate-400 font-medium text-sm transition-colors border border-transparent">Usuarios</button>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 sm:gap-3">
-                        <button id="btn-mobile-grid" class="md:hidden flex items-center justify-center p-1.5 sm:p-2 bg-slate-800 border border-brand-500/30 text-brand-500 rounded-lg hover:bg-slate-700 transition-colors shadow-sm relative">
-                            <i class="ph-bold ph-list-checks text-xl"></i>
-                        </button>
-                        <div class="text-right flex flex-col justify-center">
-                            <p id="user-alias-display" class="text-sm font-semibold text-white leading-tight">Alias</p>
-                            <div class="flex items-center gap-1 justify-end">
-                                <p id="user-points-display" class="text-xs text-brand-500 font-medium leading-tight">0 pts</p>
-                                <button id="btn-admin-reset" class="bg-slate-700/50 hover:bg-slate-600 text-slate-300 text-[9px] px-1.5 py-0.5 rounded border border-slate-600 transition-colors ml-1 hidden" title="Limpiar puntaje">Clean</button>
-                                <button id="btn-admin-test" class="bg-red-900/40 hover:bg-red-800 text-red-300 text-[9px] px-1.5 py-0.5 rounded border border-red-700 transition-colors ml-1 hidden" title="Terminar partidos y calcular puntos">Simular</button>
-                            </div>
+                        <div class="text-right">
+                            <p id="user-alias-display" class="text-sm font-semibold text-white">Alias</p>
+                            <p id="user-points-display" class="text-xs text-brand-500 font-medium">0 pts</p>
                         </div>
-                        <div class="hidden sm:flex w-10 h-10 rounded-full bg-slate-700 border-2 border-brand-500 items-center justify-center text-lg shadow-sm overflow-hidden">
-                            <img id="user-avatar-img" src="./assets/avatar.webp" alt="Avatar Usuario" class="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" title="Haz clic para cambiar avatar" />
+                        <div class="hidden sm:flex w-10 h-10 rounded-full bg-slate-700 border-2 border-brand-500 overflow-hidden">
+                            <img id="user-avatar-img" src="/assets/avatar.webp" alt="Avatar" class="w-full h-full object-cover" />
                         </div>
                     </div>
                 </header>
 
-                <!-- Scrollable Content Area -->
                 <main id="content-area" class="flex-1 overflow-y-auto p-4 space-y-6 pb-6 hide-scrollbar">
-                    
-                    <!-- Matches View -->
+                    <!-- Views will be injected here -->
                     <div id="matches-view" class="space-y-4">
-                        <div class="flex flex-col mb-4 gap-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                        <h2 class="text-xl font-bold flex items-center gap-2 relative w-max">
-                                            <i class="ph-fill ph-calendar text-brand-500"></i> Fixture
-                                            <div class="absolute left-full ml-4 flex items-center gap-2">
-                                                <div id="countdown-timer" class="hidden whitespace-nowrap bg-slate-900 border border-slate-700/50 text-brand-500 px-2 py-1 rounded-md text-[10px] font-mono shadow-inner items-center gap-1">
-                                                    <i class="ph-bold ph-hourglass-high animate-pulse text-xs"></i>
-                                                    <span id="countdown-text"></span>
-                                                </div>
-                                                <a href="./salud/index.html" class="whitespace-nowrap bg-red-600 hover:bg-red-500 text-white px-2 py-1 md:py-1.5 md:px-3 rounded-md text-[10px] md:text-xs font-bold shadow-md shadow-red-900/50 flex items-center gap-1 md:gap-1.5 transition-all border border-red-500/50 hover:scale-105 active:scale-95" title="Primeros Auxilios">
-                                                    <i class="ph-bold ph-first-aid text-sm md:text-base"></i>
-                                                    <span class="hidden sm:inline">Primeros Auxilios</span>
-                                                </a>
-                                            </div>
-                                        </h2>
-                                    <p class="text-xs text-slate-400">Desliza para cambiar de fase</p>
-                                </div>
-                                <div class="flex gap-2 md:hidden">
-                                    <button id="btn-export-csv-mobile" class="bg-brand-600 hover:bg-brand-500 text-white w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-colors shadow-sm" title="Capturar Ranking">
-                                        <i class="ph-bold ph-camera"></i>
-                                    </button>
-                                </div>
+                         <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Fixture</h2>
+                            <div class="flex gap-2">
+                                <div id="countdown-timer" class="hidden bg-slate-900 border border-slate-700 px-2 py-1 rounded text-[10px] text-brand-500"></div>
+                                <a href="/salud/index.html" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold">Primeros Auxilios</a>
                             </div>
-                            
-                            <!-- Stage Tabs -->
-                            <div class="overflow-x-auto hide-scrollbar pb-1 -mx-4 px-4">
-                                <div id="stage-tabs" class="flex gap-2 min-w-max">
-                                    <!-- Tabs injected via JS -->
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Matches List Container -->
-                        <div id="matches-list" class="space-y-4">
-                            <!-- Matches injected here via JS -->
-                        </div>
+                         </div>
+                         <div id="stage-tabs" class="flex gap-2 overflow-x-auto pb-2"></div>
+                         <div id="matches-list" class="space-y-4"></div>
                     </div>
 
-                    <!-- Ranking View -->
                     <div id="ranking-view" class="hidden space-y-4">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
-                            <div>
-                                <h2 class="text-xl font-bold flex items-center gap-2">
-                                    <i class="ph-fill ph-chart-bar text-yellow-500"></i> Ranking General
-                                </h2>
-                                <p class="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                                    <i class="ph-fill ph-clock text-slate-500"></i> 
-                                    Por revisión oficial y VAR, el ranking se actualiza ~30 mins después de finalizado cada partido.
-                                </p>
-                            </div>
-                            <button id="btn-admin-export" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-semibold transition-colors shadow-sm hidden">
-                                <i class="ph-bold ph-download-simple"></i> CSV RRHH
-                            </button>
-                        </div>
-                        <div class="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700/50">
+                         <h2 class="text-xl font-bold">Ranking General</h2>
+                         <div class="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700/50">
                             <table class="w-full text-left text-sm">
-                                <thead class="bg-slate-800">
-                                    <tr>
-                                        <th class="px-4 py-3 font-medium text-slate-300 w-12 text-center">#</th>
-                                        <th class="px-4 py-3 font-medium text-slate-300">Jugador</th>
-                                        <th class="px-4 py-3 font-medium text-brand-500 text-right">Pts</th>
-                                    </tr>
+                                <thead class="bg-slate-800 text-slate-300">
+                                    <tr><th class="px-4 py-3">#</th><th class="px-4 py-3">Jugador</th><th class="px-4 py-3 text-right">Pts</th></tr>
                                 </thead>
-                                <tbody id="ranking-list" class="divide-y divide-slate-700/50">
-                                    <!-- Ranking injected here via JS -->
-                                </tbody>
+                                <tbody id="ranking-list" class="divide-y divide-slate-700/50"></tbody>
                             </table>
-                        </div>
+                         </div>
                     </div>
-                    
-                    <!-- Users View -->
-                    <div id="users-view" class="hidden space-y-4">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
-                            <div>
-                                <h2 class="text-xl font-bold flex items-center gap-2">
-                                    <i class="ph-fill ph-users text-brand-500"></i> Usuarios Registrados
-                                </h2>
-                                <p class="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                                    Lista de participantes
-                                </p>
-                            </div>
-                            <button id="btn-export-users-csv" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm font-semibold transition-colors shadow-sm">
-                                <i class="ph-bold ph-download-simple"></i> Exportar
-                            </button>
-                        </div>
-                        <div class="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700/50">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-slate-800">
-                                    <tr>
-                                        <th class="px-4 py-3 font-medium text-slate-300 w-16 text-center">#</th>
-                                        <th class="px-4 py-3 font-medium text-slate-300">Alias</th>
-                                        <th class="px-4 py-3 font-medium text-slate-300 hidden sm:table-cell">Fecha de Registro</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="users-table-list" class="divide-y divide-slate-700/50">
-                                    <!-- Users injected here via JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
                 </main>
-
-
             </div>
             
-            <!-- Right Column: My Predictions Summary -->
-            <aside id="sidebar-predictions" class="w-full md:w-80 lg:w-96 bg-brand-dark/95 backdrop-blur-md md:bg-slate-900/50 h-full flex-col border-t md:border-t-0 border-slate-800 fixed md:relative inset-0 z-[60] md:z-auto transition-transform duration-300 transform translate-x-full md:translate-x-0 hidden md:flex pb-10 md:pb-0">
-                <div class="p-4 border-b border-slate-800 sticky top-0 bg-brand-dark/90 md:bg-slate-900/90 backdrop-blur-md z-10 flex justify-between items-start">
-                    <div>
-                        <h2 class="font-bold text-white flex items-center gap-2">
-                            <i class="ph-fill ph-list-checks text-brand-500"></i> Mi Grilla
-                            <button id="btn-close-sidebar" class="md:hidden ml-2 flex items-center justify-center p-1 rounded-md text-slate-400 bg-slate-800 hover:text-white transition-colors">
-                                <i class="ph-bold ph-x"></i>
-                            </button>
-                        </h2>
-                        <p class="text-xs text-slate-400 mt-1">Historial de pronósticos</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button id="btn-export-csv" class="bg-brand-600 hover:bg-brand-500 text-white p-2 rounded-lg flex items-center gap-1 text-xs font-semibold transition-colors shadow-sm" title="Capturar Ranking">
-                            <i class="ph-bold ph-camera"></i>
-                            <span class="hidden lg:inline">Ranking</span>
-                        </button>
-                    </div>
-                </div>
-                <div id="predictions-grid" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24 hide-scrollbar">
-                    <!-- Grid injected here via JS -->
-                    <div class="text-center text-slate-500 text-sm mt-10">Aún no hay predicciones</div>
-                </div>
+            <!-- Sidebar Predictions -->
+            <aside id="sidebar-predictions" class="w-full md:w-80 lg:w-96 bg-brand-dark/95 backdrop-blur-md md:bg-slate-900/50 h-full flex flex-col border-t md:border-t-0 border-slate-800 hidden md:flex">
+                <div class="p-4 border-b border-slate-800"><h2 class="font-bold">Mi Grilla</h2></div>
+                <div id="predictions-grid" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24 hide-scrollbar"></div>
             </aside>
         </section>
         
         <!-- Loading Overlay -->
         <div id="global-loader" class="fixed inset-0 bg-brand-dark/90 backdrop-blur-sm z-[100] flex flex-col items-center justify-center hidden">
-            <i class="ph ph-soccer-ball text-4xl text-brand-500 animate-spin mb-4"></i>
-            <p class="text-brand-500 font-medium tracking-wide animate-pulse">Cargando...</p>
+            <p class="text-brand-500 font-medium animate-pulse">Cargando...</p>
         </div>
     </div>
 
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-    
-    <!-- Main Module -->
-    <script type="module" src="./js/app.js?v=12"></script>
+    <!-- Entry Point -->
+    <script type="module" src="./src/js/app.js"></script>
 </body>
 </html>
