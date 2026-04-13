@@ -323,118 +323,62 @@ function renderMatches() {
         return;
     }
 
-    let matchesToRender = [...filteredMatches];
-    let groupLabels = {};
+    let matchesToRender = [...filteredMatches].sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
 
-    if (currentStage === 'groups') {
-        let parent = {};
-        const getRoot = (i) => {
-            if (parent[i] === undefined) parent[i] = i;
-            if (parent[i] === i) return i;
-            return parent[i] = getRoot(parent[i]);
-        };
-        const union = (i, j) => {
-            let rootI = getRoot(i);
-            let rootJ = getRoot(j);
-            if (rootI !== rootJ) parent[rootI] = rootJ;
-        };
-        
-        // Inferimos clústers de equipos jugando entre sí
-        filteredMatches.forEach(m => union(m.homeTeam, m.awayTeam));
-        
-        let clusters = {};
-        Object.keys(parent).forEach(team => {
-            let root = getRoot(team);
-            if (!clusters[root]) clusters[root] = [];
-            clusters[root].push(team);
-        });
-
-        // Ordenamos los grupos basados en el orden original de la agenda (Jornada 1)
-        const rootsSorted = Object.keys(clusters).sort((a,b) => {
-             const mA = filteredMatches.findIndex(m => m.homeTeam === a || m.awayTeam === a);
-             const mB = filteredMatches.findIndex(m => m.homeTeam === b || m.awayTeam === b);
-             return mA - mB;
-        });
-
-        const teamToGroupLabel = {};
-        const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        rootsSorted.forEach((root, idx) => {
-            const letter = LETTERS[idx] || (idx+1).toString();
-            clusters[root].forEach(t => teamToGroupLabel[t] = `Grupo ${letter}`);
-        });
-
-        filteredMatches.forEach(m => {
-            groupLabels[m.id] = teamToGroupLabel[m.homeTeam];
-        });
-
-        // Ordenamos por Grupo y luego por Fecha
-        matchesToRender.sort((a, b) => {
-            const gA = groupLabels[a.id];
-            const gB = groupLabels[b.id];
-            if (gA !== gB) return gA.localeCompare(gB);
-            return new Date(a.matchDate) - new Date(b.matchDate);
-        });
-    } else {
-        matchesToRender.sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
-    }
-
-    let lastGroupLabel = null;
-    let currentGroupContainer = null;
-    window.prodeOpenGroups = window.prodeOpenGroups || new Set();
+    let lastDayLabel = null;
+    let currentDayContainer = null;
+    window.prodeOpenSections = window.prodeOpenSections || new Set();
 
     matchesToRender.forEach(match => {
-        if (currentStage === 'groups') {
-            const currentGroup = groupLabels[match.id];
-            if (currentGroup !== lastGroupLabel) {
-                // Wrapper del grupo
-                const groupWrap = document.createElement("div");
-                groupWrap.className = "w-full mt-2";
-                
-                const isGroupOpen = window.prodeOpenGroups.has(currentGroup);
-                
-                // Botón para colapsar/desplegar
-                const separator = document.createElement("button");
-                separator.className = "w-full bg-slate-900/80 hover:bg-slate-800 transition-colors text-brand-500 font-bold py-3 px-4 rounded-xl border-l-4 border-brand-500 mb-3 text-[13px] uppercase tracking-widest shadow-sm flex justify-between items-center cursor-pointer focus:outline-none";
-                separator.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <i class="ph-bold ph-squares-four text-lg"></i>
-                        <span>${currentGroup}</span>
-                    </div>
-                    <i class="ph-bold ph-caret-down text-lg transition-transform transform ${isGroupOpen ? 'rotate-180' : ''}"></i>
-                `;
-                
-                // Contenedor que agrupará los partidos
-                const containerForThisGroup = document.createElement("div");
-                containerForThisGroup.className = `space-y-4 mb-4 mt-2 ${isGroupOpen ? '' : 'hidden'}`;
-                currentGroupContainer = containerForThisGroup;
-                
-                separator.addEventListener("click", () => {
-                    const isHidden = containerForThisGroup.classList.contains("hidden");
-                    if (isHidden) {
-                        containerForThisGroup.classList.remove("hidden");
-                        separator.querySelector('.ph-caret-down').classList.add('rotate-180');
-                        window.prodeOpenGroups.add(currentGroup);
-                    } else {
-                        containerForThisGroup.classList.add("hidden");
-                        separator.querySelector('.ph-caret-down').classList.remove('rotate-180');
-                        window.prodeOpenGroups.delete(currentGroup);
-                    }
-                });
-
-                groupWrap.appendChild(separator);
-                groupWrap.appendChild(containerForThisGroup);
-                matchesListEl.appendChild(groupWrap);
-                
-                lastGroupLabel = currentGroup;
-            }
-        }
-        
         const matchDate = new Date(match.matchDate);
-        // Validar si falta menos de 1 hora
+        const dayLabel = match.tbd ? "Partidos por Definir" : matchDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+        const dayLabelFormatted = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
+        
+        if (dayLabel !== lastDayLabel) {
+            const sectionWrap = document.createElement("div");
+            sectionWrap.className = "w-full mt-2";
+            
+            const isSectionOpen = window.prodeOpenSections.has(dayLabel);
+            
+            const separator = document.createElement("button");
+            separator.className = "w-full bg-slate-900/80 hover:bg-slate-800 transition-colors text-brand-500 font-bold py-3 px-4 rounded-xl border-l-4 border-brand-500 mb-3 text-[13px] uppercase tracking-widest shadow-sm flex justify-between items-center cursor-pointer focus:outline-none";
+            separator.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="ph-bold ${match.tbd ? 'ph-question' : 'ph-calendar-blank'} text-lg"></i>
+                    <span>${dayLabelFormatted}</span>
+                </div>
+                <i class="ph-bold ph-caret-down text-lg transition-transform transform ${isSectionOpen ? 'rotate-180' : ''}"></i>
+            `;
+            
+            const container = document.createElement("div");
+            container.className = `space-y-4 mb-4 mt-2 ${isSectionOpen ? '' : 'hidden'}`;
+            currentDayContainer = container;
+            
+            separator.addEventListener("click", () => {
+                const isHidden = container.classList.contains("hidden");
+                if (isHidden) {
+                    container.classList.remove("hidden");
+                    separator.querySelector('.ph-caret-down').classList.add('rotate-180');
+                    window.prodeOpenSections.add(dayLabel);
+                } else {
+                    container.classList.add("hidden");
+                    separator.querySelector('.ph-caret-down').classList.remove('rotate-180');
+                    window.prodeOpenSections.delete(dayLabel);
+                }
+            });
+
+            sectionWrap.appendChild(separator);
+            sectionWrap.appendChild(container);
+            matchesListEl.appendChild(sectionWrap);
+            
+            lastDayLabel = dayLabel;
+        }
+
+        // Configurar tiempo actual y bloqueo
+        const now = new Date();
         const diffMs = matchDate - now;
         const hoursLeft = diffMs / (1000 * 60 * 60);
         const isLocked = match.tbd || hoursLeft <= 1 || match.status === 'finished';
-        
         const pred = predictionsState[match.id] || { result: '' };
         
         // Match Card HTML
@@ -445,8 +389,7 @@ function renderMatches() {
             if(match.tbd) card.classList.add("grayscale-[0.5]");
         }
         
-        // Date formatter
-        const dateStr = matchDate.toLocaleDateString('es-AR', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const dateStr = matchDate.toLocaleDateString('es-AR', { hour: '2-digit', minute: '2-digit' });
         
         const renderFlag = (flagName, teamName) => {
             if (flagName === 'un') {
@@ -464,18 +407,15 @@ function renderMatches() {
 
         card.innerHTML = `
             ${statusBadge}
-            
-            <div class="text-center text-xs text-slate-400 mb-4 font-medium">${dateStr}</div>
+            <div class="text-center text-[10px] text-slate-400 mb-4 font-bold uppercase tracking-widest">${match.tbd ? 'TBD' : dateStr}</div>
             
             <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between gap-2">
-                    <!-- Local -->
                     <div class="flex flex-col items-center flex-[2]">
                         <span class="text-xs font-bold font-sans text-center leading-tight mb-2 max-w-full overflow-hidden text-ellipsis text-slate-200">${match.homeTeam}</span>
                         ${renderFlag(match.homeFlag, match.homeTeam)}
                     </div>
                     
-                    <!-- Center Input 1X2 & Goals -->
                     <div class="flex flex-col items-center gap-2 flex-[3] max-w-[140px]">
                         <div class="flex items-center justify-between bg-slate-900 rounded-lg p-1 border border-slate-700 w-full shadow-inner ${match.tbd ? 'opacity-50 pointer-events-none' : ''}">
                             <button id="btn-L-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'L' ? 'bg-brand-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all" ${isLocked ? 'disabled' : ''}>L</button>
@@ -483,7 +423,6 @@ function renderMatches() {
                             <button id="btn-V-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'V' ? 'bg-brand-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all" ${isLocked ? 'disabled' : ''}>V</button>
                         </div>
                         
-                        <!-- Goals Input -->
                         <div class="flex items-center justify-center gap-2 w-full ${match.tbd ? 'opacity-50 pointer-events-none' : ''}">
                             <input type="number" id="home-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" max="25" placeholder="-" value="${pred.homeGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
                             <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Goles</span>
@@ -491,7 +430,6 @@ function renderMatches() {
                         </div>
                     </div>
 
-                    <!-- Visita -->
                     <div class="flex flex-col items-center flex-[2]">
                         <span class="text-xs font-bold font-sans text-center leading-tight mb-2 max-w-full overflow-hidden text-ellipsis text-slate-200">${match.awayTeam}</span>
                         ${renderFlag(match.awayFlag, match.awayTeam)}
@@ -504,13 +442,8 @@ function renderMatches() {
             </div>
         `;
         
-        if (currentStage === 'groups' && currentGroupContainer) {
-            currentGroupContainer.appendChild(card);
-        } else {
-            matchesListEl.appendChild(card);
-        }
+        currentDayContainer.appendChild(card);
         
-        // Bind Save Button Event
         if (!isLocked) {
             const handleBet = async (res) => {
                 const hGInput = document.getElementById(`home-goals-${match.id}`);
@@ -518,7 +451,6 @@ function renderMatches() {
                 let hG = hGInput.value;
                 let aG = aGInput.value;
                 
-                // Truncamiento estricto de seguridad visual
                 if (hG !== '' && parseInt(hG, 10) > 25) { hG = '25'; hGInput.value = '25'; }
                 if (aG !== '' && parseInt(aG, 10) > 25) { aG = '25'; aGInput.value = '25'; }
                 
@@ -528,21 +460,15 @@ function renderMatches() {
                     let impliedRes = 'E';
                     if (h > a) impliedRes = 'L';
                     else if (a > h) impliedRes = 'V';
-                    
-                    if (impliedRes !== res) {
-                        res = impliedRes; // Fuerza el resultado a lo que dicen los goles y no permite al usuario pisarlo con clics engañosos ni trampas.
-                    }
+                    if (impliedRes !== res) res = impliedRes;
                 }
                 
                 const statusEl = document.getElementById(`status-${match.id}`);
-                
-                // reset colors
                 ['L','E','V'].forEach(k => {
                     const b = document.getElementById(`btn-${k}-${match.id}`);
                     b.className = `prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm transition-all ${k === 'E' ? 'mx-1' : ''} text-slate-400 hover:bg-slate-700`;
                 });
                 
-                // set active color if res is known
                 if (res) {
                     const activeBtn = document.getElementById(`btn-${res}-${match.id}`);
                     activeBtn.className = `prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm transition-all shadow-md ${res === 'E' ? 'mx-1 bg-slate-500 text-white' : 'bg-brand-500 text-white'}`;
@@ -562,14 +488,12 @@ function renderMatches() {
                     statusEl.textContent = "Error al guardar";
                     statusEl.classList.remove("text-slate-400");
                     statusEl.classList.add("text-red-400");
-                    console.error("No se pudo guardar", error);
                 }
             };
             
             const handleGoalChange = () => {
                 const hG = document.getElementById(`home-goals-${match.id}`).value;
                 const aG = document.getElementById(`away-goals-${match.id}`).value;
-                
                 if (hG !== '' && aG !== '') {
                     const h = parseInt(hG, 10);
                     const a = parseInt(aG, 10);
@@ -578,7 +502,6 @@ function renderMatches() {
                     else if (a > h) detectedRes = 'V';
                     handleBet(detectedRes);
                 } else {
-                    // find current res
                     const isL = document.getElementById(`btn-L-${match.id}`).classList.contains('bg-brand-500');
                     const isV = document.getElementById(`btn-V-${match.id}`).classList.contains('bg-brand-500');
                     const isE = document.getElementById(`btn-E-${match.id}`).classList.contains('bg-slate-500');
@@ -592,12 +515,9 @@ function renderMatches() {
             document.getElementById(`btn-E-${match.id}`).addEventListener("click", () => handleBet('E'));
             document.getElementById(`btn-V-${match.id}`).addEventListener("click", () => handleBet('V'));
             
-            const enforceMaxGoals = (e) => {
-                if(e.target.value && parseInt(e.target.value, 10) > 25) e.target.value = '25';
-            };
-            document.getElementById(`home-goals-${match.id}`).addEventListener("input", enforceMaxGoals);
-            document.getElementById(`away-goals-${match.id}`).addEventListener("input", enforceMaxGoals);
-
+            const enforceMax = (e) => { if(e.target.value && parseInt(e.target.value, 10) > 25) e.target.value = '25'; };
+            document.getElementById(`home-goals-${match.id}`).addEventListener("input", enforceMax);
+            document.getElementById(`away-goals-${match.id}`).addEventListener("input", enforceMax);
             document.getElementById(`home-goals-${match.id}`).addEventListener("input", handleGoalChange);
             document.getElementById(`away-goals-${match.id}`).addEventListener("input", handleGoalChange);
         }
@@ -670,17 +590,64 @@ function renderPredictionsGrid() {
         return;
     }
 
-    // Ordenamos por updatedAt descendente si existe
-    const sortedIds = madePredictions.sort((a,b) => {
-        const tA = predictionsState[a].updatedAt ? new Date(predictionsState[a].updatedAt).getTime() : 0;
-        const tB = predictionsState[b].updatedAt ? new Date(predictionsState[b].updatedAt).getTime() : 0;
-        return tB - tA;
-    });
+    // Mapeamos para incluir datos del partido para agrupar por fecha
+    const list = madePredictions.map(id => {
+        return {
+            id,
+            pred: predictionsState[id],
+            match: matchesState.find(m => m.id === id)
+        };
+    }).filter(item => item.match);
 
-    sortedIds.forEach(id => {
-        const pred = predictionsState[id];
-        const match = matchesState.find(m => m.id === id);
-        if (!match) return;
+    // Ordenamos por fecha del partido
+    list.sort((a, b) => new Date(a.match.matchDate) - new Date(b.match.matchDate));
+
+    let lastDayLabel = null;
+    let currentDayContainer = null;
+    window.prodeOpenGridSections = window.prodeOpenGridSections || new Set();
+
+    list.forEach(item => {
+        const { match, pred } = item;
+        const matchDate = new Date(match.matchDate);
+        const dayLabel = match.tbd ? "Por Definir" : matchDate.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' });
+        const dayLabelFormatted = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
+
+        if (dayLabel !== lastDayLabel) {
+            const sectionWrap = document.createElement("div");
+            sectionWrap.className = "w-full mb-2";
+            
+            const isOpen = window.prodeOpenGridSections.has(dayLabel);
+            
+            const separator = document.createElement("button");
+            separator.className = "w-full bg-slate-800/80 hover:bg-slate-700 transition-colors text-[10px] text-slate-400 font-bold py-2 px-3 rounded-lg border-l-2 border-brand-500/50 flex justify-between items-center cursor-pointer focus:outline-none uppercase tracking-widest";
+            separator.innerHTML = `
+                <span>${dayLabelFormatted}</span>
+                <i class="ph-bold ph-caret-down transition-transform transform ${isOpen ? 'rotate-180' : ''}"></i>
+            `;
+            
+            const container = document.createElement("div");
+            container.className = `space-y-3 mt-2 ${isOpen ? '' : 'hidden'}`;
+            currentDayContainer = container;
+            
+            separator.addEventListener("click", () => {
+                const isHidden = container.classList.contains("hidden");
+                if (isHidden) {
+                    container.classList.remove("hidden");
+                    separator.querySelector('.ph-caret-down').classList.add('rotate-180');
+                    window.prodeOpenGridSections.add(dayLabel);
+                } else {
+                    container.classList.add("hidden");
+                    separator.querySelector('.ph-caret-down').classList.remove('rotate-180');
+                    window.prodeOpenGridSections.delete(dayLabel);
+                }
+            });
+
+            sectionWrap.appendChild(separator);
+            sectionWrap.appendChild(container);
+            predictionsGridEl.appendChild(sectionWrap);
+            
+            lastDayLabel = dayLabel;
+        }
 
         let resText = "Empate";
         let resColor = "bg-slate-500 text-white";
@@ -691,31 +658,31 @@ function renderPredictionsGrid() {
             resText += ` (${pred.homeGoals}-${pred.awayGoals})`;
         }
 
-        let dateStr = "Sin fecha";
+        let dateUpdateStr = "Sin fecha";
         if (pred.updatedAt) {
             const upDate = new Date(pred.updatedAt);
             if (!isNaN(upDate.getTime())) {
-                dateStr = upDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                dateUpdateStr = upDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
             }
         }
 
         const div = document.createElement("div");
-        div.className = "bg-slate-800 rounded-lg p-3 border border-slate-700/50 flex flex-col gap-1 fade-in";
+        div.className = "bg-slate-800/40 rounded-lg p-3 border border-slate-700/30 flex flex-col gap-1 fade-in";
         div.innerHTML = `
-            <div class="flex justify-between items-center w-full">
-                <span class="text-xs font-bold font-sans text-slate-300">
+            <div class="flex justify-between items-start gap-2 w-full">
+                <span class="text-[11px] font-bold font-sans text-slate-300 leading-tight">
                     ${escapeHTML(match.homeTeam)} vs ${escapeHTML(match.awayTeam)}
                 </span>
-                <span class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded shadow-sm ${resColor}">
+                <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap ${resColor}">
                     ${resText}
                 </span>
             </div>
-            <div class="text-[10px] text-slate-500 italic mt-1 flex items-center justify-between">
+            <div class="text-[9px] text-slate-500 italic mt-1 flex items-center justify-between">
                 <span>Modificado:</span>
-                <span>${dateStr}</span>
+                <span>${dateUpdateStr}</span>
             </div>
         `;
-        predictionsGridEl.appendChild(div);
+        currentDayContainer.appendChild(div);
     });
 }
 
