@@ -1,4 +1,8 @@
 import html2canvas from 'html2canvas';
+import { inject } from '@vercel/analytics';
+
+// Initialize Vercel Analytics
+inject();
 
 // Helper to prevent XSS
 function escapeHTML(str) {
