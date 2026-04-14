@@ -2,7 +2,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.103.0",
     "dompurify": "^3.3.3",
-    "html2canvas": "^1.4.1",
+    "html-to-image": "^1.11.13",
     "lucide-react": "^1.8.0"
   },
   "name": "prode",

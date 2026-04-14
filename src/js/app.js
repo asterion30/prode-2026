@@ -1,4 +1,4 @@
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 
 // Helper to prevent XSS
 function escapeHTML(str) {
@@ -729,14 +729,14 @@ const handleExportRankingImage = async () => {
         // Wait for DOM layout
         await new Promise(r => setTimeout(r, 200));
         
-        const canvas = await html2canvas(rankingView, {
+        const dataUrl = await toPng(rankingView, {
             backgroundColor: '#0f172a', // brand-dark
-            scale: 2 // High quality
+            pixelRatio: 2 // High quality
         });
         
         const link = document.createElement("a");
         link.download = `Ranking_Prode_${userAliasDisplay.textContent}.png`;
-        link.href = canvas.toDataURL("image/png");
+        link.href = dataUrl;
         link.click();
         
         if (btnExportCsv) {
