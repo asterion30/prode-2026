@@ -119,9 +119,21 @@ initAuth((user, alias, score) => {
         const extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]');
         const allAdmins = [...admins, ...extraAdmins];
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const isDebugMode = urlParams.get('debug') === 'true';
+        const isMainAdmin = alias.toLowerCase() === 'asterion30';
+
         if (allAdmins.includes(alias.toLowerCase()) || (user.email && allAdmins.includes(user.email.toLowerCase()))) {
-            if (btnAdminTest) btnAdminTest.classList.remove('hidden');
-            if (btnAdminReset) btnAdminReset.classList.remove('hidden');
+            // El Test de puntos y Reset solo visibles si es asterion30 y está en modo debug (?debug=true)
+            if (isMainAdmin && isDebugMode) {
+                if (btnAdminTest) btnAdminTest.classList.remove('hidden');
+                if (btnAdminReset) btnAdminReset.classList.remove('hidden');
+            } else {
+                if (btnAdminTest) btnAdminTest.classList.add('hidden');
+                if (btnAdminReset) btnAdminReset.classList.add('hidden');
+            }
+            
+            // Exportación RRHH y Pestaña de Usuarios permanecen para todos los admins
             if (btnAdminExport) btnAdminExport.classList.remove('hidden');
             if (btnNavUsers) {
                 btnNavUsers.classList.remove('hidden');
