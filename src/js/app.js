@@ -572,7 +572,7 @@ function renderRanking(ranking) {
         const tr = document.createElement("tr");
         const isMe = currentUser && currentUser.id === user.id;
         
-        tr.className = `border-slate-700/50 transition-colors ${isMe ? 'row-me' : (index % 2 === 0 ? '' : 'row-alt')}`;
+        tr.className = `border-slate-700 transition-colors ${isMe ? 'row-me' : (index % 2 === 0 ? '' : 'row-alt')}`;
         tr.innerHTML = `
             <td class="px-4 py-3 text-center ${isMedal ? 'text-lg' : 'text-slate-400 font-medium'}">
                 ${rankContent}
@@ -581,7 +581,7 @@ function renderRanking(ranking) {
                 ${escapeHTML(user.alias)}
             </td>
             <td class="px-4 py-3 text-right">
-                <span class="bg-brand-900/50 text-brand-500 font-bold px-2 py-1 rounded">
+                <span class="bg-brand-900 text-brand-500 font-bold px-2 py-1 rounded">
                     ${user.score}
                 </span>
             </td>
