@@ -55,10 +55,7 @@ input:-webkit-autofill:active {
     animation: fadeIn 0.4s ease-out forwards;
 }
 
-h1 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-}
+
 
 /* Legacy RGBA classes for html2canvas compatibility (avoids Tailwind 4 oklch/color-mix) */
 .ranking-panel {
