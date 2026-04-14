@@ -9,6 +9,20 @@
   --color-brand-900: #14532d;
   --color-brand-dark: #0f172a;
   --color-brand-card: #1e293b;
+  
+  /* Slate palette in hex to avoid oklch errors in html2canvas */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
   --font-sans: "Inter", sans-serif;
 }
 
@@ -40,3 +54,9 @@ input:-webkit-autofill:active {
 .fade-in {
     animation: fadeIn 0.4s ease-out forwards;
 }
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
