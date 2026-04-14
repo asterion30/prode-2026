@@ -572,7 +572,7 @@ function renderRanking(ranking) {
         const tr = document.createElement("tr");
         const isMe = currentUser && currentUser.id === user.id;
         
-        tr.className = `border-slate-700/50 transition-colors ${isMe ? 'bg-brand-500/20 border-brand-500/50' : (index % 2 === 0 ? '' : 'bg-slate-800/20')}`;
+        tr.className = `border-slate-700/50 transition-colors ${isMe ? 'row-me' : (index % 2 === 0 ? '' : 'row-alt')}`;
         tr.innerHTML = `
             <td class="px-4 py-3 text-center ${isMedal ? 'text-lg' : 'text-slate-400 font-medium'}">
                 ${rankContent}

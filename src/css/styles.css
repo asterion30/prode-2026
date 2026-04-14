@@ -60,3 +60,18 @@ h1 {
     margin-bottom: 1rem;
 }
 
+/* Legacy RGBA classes for html2canvas compatibility (avoids Tailwind 4 oklch/color-mix) */
+.ranking-panel {
+    background-color: rgba(30, 41, 59, 0.5) !important;
+    border-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+.row-me {
+    background-color: rgba(22, 163, 74, 0.2) !important; /* brand-600 with opacity */
+}
+
+.row-alt {
+    background-color: rgba(30, 41, 59, 0.2) !important; /* slate-800 with opacity */
+}
+
+
