@@ -729,10 +729,21 @@ const handleExportRankingImage = async () => {
         // Wait for DOM layout
         await new Promise(r => setTimeout(r, 200));
         
+        // Mute SecurityError logs from html-to-image trying to read Cross-Origin cssRules (Phosphor icons)
+        const originalConsoleError = console.error;
+        console.error = (...args) => {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('Error inlining remote css file')) return;
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('Error while reading CSS rules')) return;
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('Error loading remote stylesheet')) return;
+            originalConsoleError(...args);
+        };
+
         const dataUrl = await toPng(rankingView, {
             backgroundColor: '#0f172a', // brand-dark
             pixelRatio: 2 // High quality
         });
+        
+        console.error = originalConsoleError;
         
         const link = document.createElement("a");
         link.download = `Ranking_Prode_${userAliasDisplay.textContent}.png`;
