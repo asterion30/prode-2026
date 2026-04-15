@@ -58,6 +58,15 @@ let matchesState = [];
 let predictionsState = {};
 let isAppInitialized = false;
 
+// ADMIN STATE — se setea al iniciar la sesión
+let IS_SUPER_ADMIN = false;  // solo asterion30
+let IS_ADMIN = false;        // asterion30 + delegados
+
+// El superadmin se identifica por el alias 'asterion30' en la BD (campo alias).
+// Opcionalmente agregar email para doble verificación.
+const SUPER_ADMIN_ALIAS = 'asterion30';
+const SUPER_ADMIN_EMAIL = '';  // ej: 'tuemail@gmail.com'  (dejar vacío si no se usa)
+
 const STAGES = [
     { id: 'groups', name: 'Fase de Grupos' },
     { id: 'round_32', name: '16vos' },
@@ -116,43 +125,54 @@ initAuth((user, alias, score) => {
         mainView.classList.remove("hidden");
         userAliasDisplay.textContent = alias || 'Usuario';
         userPointsDisplay.textContent = `${score} pts`;
-        
-        const admins = ['asterion30'];
-        // Cargar admings persistentes de localStorage si existen
-        const extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]');
-        const allAdmins = [...admins, ...extraAdmins];
+
+        // ── Cálculo de permisos ──────────────────────────────────────────────
+        // Superadmin: identificado por alias legacy 'asterion30' O por email (si está configurado)
+        IS_SUPER_ADMIN = (
+            alias.toLowerCase() === SUPER_ADMIN_ALIAS ||
+            (SUPER_ADMIN_EMAIL !== '' && user.email && user.email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase())
+        );
+
+        // Admins delegados: guardados en localStorage por el superadmin
+        const extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]')
+            .map(a => a.toLowerCase().trim());
+
+        // Un admin delegado se identifica por alias (nombre apellido) o email
+        const aliasLower = alias.toLowerCase();
+        const emailLower = (user.email || '').toLowerCase();
+        IS_ADMIN = IS_SUPER_ADMIN ||
+            extraAdmins.includes(aliasLower) ||
+            extraAdmins.includes(emailLower);
+        // ────────────────────────────────────────────────────────────────────
 
         const urlParams = new URLSearchParams(window.location.search);
         const isDebugMode = urlParams.get('debug') === 'true';
-        const isMainAdmin = alias.toLowerCase() === 'asterion30';
 
-        if (allAdmins.includes(alias.toLowerCase()) || (user.email && allAdmins.includes(user.email.toLowerCase()))) {
-            // El Test de puntos y Reset solo visibles si es asterion30 y está en modo debug (?debug=true)
-            if (isMainAdmin && isDebugMode) {
-                if (btnAdminTest) btnAdminTest.classList.remove('hidden');
-                if (btnAdminReset) btnAdminReset.classList.remove('hidden');
-            } else {
-                if (btnAdminTest) btnAdminTest.classList.add('hidden');
-                if (btnAdminReset) btnAdminReset.classList.add('hidden');
-            }
-            
-            // Exportación RRHH y Pestaña de Usuarios permanecen para todos los admins
+        // Botones de debug: solo superadmin en modo debug
+        if (IS_SUPER_ADMIN && isDebugMode) {
+            if (btnAdminTest) btnAdminTest.classList.remove('hidden');
+            if (btnAdminReset) btnAdminReset.classList.remove('hidden');
+        } else {
+            if (btnAdminTest) btnAdminTest.classList.add('hidden');
+            if (btnAdminReset) btnAdminReset.classList.add('hidden');
+        }
+
+        // Export RRHH y pestaña Usuarios: admin o superadmin
+        if (IS_ADMIN) {
             if (btnAdminExport) btnAdminExport.classList.remove('hidden');
             if (btnNavUsers) {
                 btnNavUsers.classList.remove('hidden');
                 btnNavUsers.classList.add('flex');
             }
         } else {
-            if (btnAdminTest) btnAdminTest.classList.add('hidden');
-            if (btnAdminReset) btnAdminReset.classList.add('hidden');
             if (btnAdminExport) btnAdminExport.classList.add('hidden');
             if (btnNavUsers) {
                 btnNavUsers.classList.add('hidden');
                 btnNavUsers.classList.remove('flex');
             }
         }
-        
-        // Cargar preferencia de avatar (persistente en este navegador)
+
+        // Cargar preferencia de avatar
         const savedAvatar = localStorage.getItem(`avatar_${user.uid || user.id}`);
         if (savedAvatar) {
             userAvatarImg.setAttribute("src", savedAvatar);
@@ -792,9 +812,13 @@ if (btnAdminExport) {
             if (error) throw error;
             if (!users || users.length === 0) return alert("No hay usuarios.");
 
+            // Excluir al superadmin del export (es un usuario oculto de debug)
+            const filteredUsers = users.filter(u => (u.alias || '').toLowerCase() !== SUPER_ADMIN_ALIAS);
+            if (filteredUsers.length === 0) return alert("No hay usuarios registrados.");
+
             let csvContent = "Posicion;Nombre;Apellido;Legajo;Puntaje Total;Fecha Registro\r\n";
-            users.forEach((u, i) => {
-                const dateStr = new Date(u.created_at).toLocaleDateString();
+            filteredUsers.forEach((u, i) => {
+                const dateStr  = new Date(u.created_at).toLocaleDateString('es-AR');
                 const nombre   = u.nombre   || u.alias || '';
                 const apellido = u.apellido || '';
                 const legajo   = u.legajo   || '';
@@ -911,8 +935,8 @@ if (userAvatarImg) {
 const logoCup = document.getElementById("logo-cup");
 if (logoCup) {
     logoCup.addEventListener("click", () => {
-        const { alias } = getCurrentUser();
-        if (alias !== 'asterion30') return;
+        // Solo el superadmin puede delegar
+        if (!IS_SUPER_ADMIN) return;
 
         const targetToPromote = prompt("Ingrese el ALIAS o CORREO ELECTRÓNICO del usuario deseado:");
         if (!targetToPromote) return;
@@ -1040,12 +1064,13 @@ async function loadUsersGrid() {
                 <td class="px-3 py-3 text-slate-400 text-xs hidden sm:table-cell">${dateStr}</td>
                 <td class="px-3 py-3 text-center">
                     <div class="flex items-center justify-center gap-2">
-                        <button data-uid="${u.id}" class="btn-edit-user bg-slate-700 hover:bg-brand-600 text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1">
+                        <button data-uid="${u.id}" class="btn-edit-user bg-slate-700 hover:bg-brand-600 text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1" title="Editar">
                             <i class="ph-bold ph-pencil-simple"></i>
                         </button>
-                        <button data-uid="${u.id}" data-name="${nombre} ${apellido}" class="btn-delete-user bg-red-900/60 hover:bg-red-600 text-red-300 hover:text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1">
+                        ${IS_SUPER_ADMIN ? `
+                        <button data-uid="${u.id}" data-name="${nombre} ${apellido}" class="btn-delete-user bg-red-900/60 hover:bg-red-600 text-red-300 hover:text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1" title="Eliminar">
                             <i class="ph-bold ph-trash"></i>
-                        </button>
+                        </button>` : ''}
                     </div>
                 </td>
             `;
