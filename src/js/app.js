@@ -56,6 +56,41 @@ const btnMobileGrid = document.getElementById("btn-mobile-grid");
 const btnCloseSidebar = document.getElementById("btn-close-sidebar");
 const sidebarPredictions = document.getElementById("sidebar-predictions");
 
+// =======================
+// THEME LOGIC
+// =======================
+const btnThemeToggle = document.getElementById("btn-theme-toggle");
+const themeToggleIcon = document.getElementById("theme-toggle-icon");
+
+function initTheme() {
+    const savedTheme = localStorage.getItem("prode_theme") || "dark";
+    if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (themeToggleIcon) {
+            themeToggleIcon.classList.remove("ph-sun");
+            themeToggleIcon.classList.add("ph-moon");
+        }
+    }
+}
+
+if (btnThemeToggle) {
+    btnThemeToggle.addEventListener("click", () => {
+        const isLight = document.body.classList.toggle("light-theme");
+        localStorage.setItem("prode_theme", isLight ? "light" : "dark");
+        if (themeToggleIcon) {
+            if (isLight) {
+                themeToggleIcon.classList.remove("ph-sun");
+                themeToggleIcon.classList.add("ph-moon");
+            } else {
+                themeToggleIcon.classList.remove("ph-moon");
+                themeToggleIcon.classList.add("ph-sun");
+            }
+        }
+    });
+}
+
+initTheme();
+
 // STATE
 let matchesState = [];
 let predictionsState = {};

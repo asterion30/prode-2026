@@ -1,30 +1,97 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #f0fdf4;
-  --color-brand-100: #dcfce7;
-  --color-brand-500: #22c55e;
-  --color-brand-600: #16a34a;
-  --color-brand-700: #15803d;
-  --color-brand-900: #14532d;
-  --color-brand-dark: #0f172a;
-  --color-brand-card: #1e293b;
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-900: var(--brand-900);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-card: var(--brand-card);
   
-  /* Slate palette in hex to avoid oklch errors in html2canvas */
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
-  --color-slate-950: #020617;
+  --color-slate-50: var(--slate-50);
+  --color-slate-100: var(--slate-100);
+  --color-slate-200: var(--slate-200);
+  --color-slate-300: var(--slate-300);
+  --color-slate-400: var(--slate-400);
+  --color-slate-500: var(--slate-500);
+  --color-slate-600: var(--slate-600);
+  --color-slate-700: var(--slate-700);
+  --color-slate-800: var(--slate-800);
+  --color-slate-900: var(--slate-900);
+  --color-slate-950: var(--slate-950);
 
   --font-sans: "Inter", sans-serif;
 }
+
+:root {
+  --brand-50: #f0fdf4;
+  --brand-100: #dcfce7;
+  --brand-500: #22c55e;
+  --brand-600: #16a34a;
+  --brand-700: #15803d;
+  --brand-900: #14532d;
+  --brand-dark: #0f172a;
+  --brand-card: #1e293b;
+
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+}
+
+.light-theme {
+  --brand-50: #f0f9ff;
+  --brand-100: #e0f2fe;
+  --brand-500: #006bc4; /* Azure from palette */
+  --brand-600: #0059b3; /* Deep blue from palette */
+  --brand-700: #2b59b5; /* Royal blue from palette */
+  --brand-900: #1e3a8a;
+  --brand-dark: #f1f5f9;  /* Light background */
+  --brand-card: #ffffff;  /* White cards */
+
+  --slate-50: #ffffff;
+  --slate-100: #f8fafc;
+  --slate-200: #f1f5f9;
+  --slate-300: #e2e8f0;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #cbd5e1;
+  --slate-800: #f1f5f9;
+  --slate-900: #e2e8f0;
+  --slate-950: #cbd5e1;
+
+  /* Adjustments for light theme visibility */
+  color-scheme: light;
+}
+
+.light-theme .text-white { color: #0f172a !important; }
+.light-theme .text-slate-400 { color: #64748b !important; }
+.light-theme .bg-brand-dark\/90 { background-color: rgba(255, 255, 255, 0.9) !important; }
+.light-theme .bg-brand-card\/80 { background-color: rgba(255, 255, 255, 0.8) !important; }
+.light-theme .bg-slate-900\/50 { background-color: rgba(241, 245, 249, 0.5) !important; }
+.light-theme .border-slate-800 { border-color: #e2e8f0 !important; }
+.light-theme .border-slate-700 { border-color: #f1f5f9 !important; }
+.light-theme .bg-slate-800 { background-color: #f8fafc !important; }
+.light-theme .bg-slate-800\/50 { background-color: rgba(248, 250, 252, 0.5) !important; }
+
+/* Teal accents from palette */
+.light-theme .bg-brand-500\/10 { background-color: rgba(79, 212, 196, 0.1) !important; }
+.light-theme .text-brand-500 { color: #006bc4 !important; }
+.light-theme .border-brand-500\/20 { border-color: rgba(0, 107, 196, 0.2) !important; }
+
+/* Special override for Teal secondary color in palette */
+.light-theme .accent-teal { color: #4fd4c4 !important; }
+
 
 /* src/css/styles.css */
 .hide-scrollbar::-webkit-scrollbar {
@@ -141,6 +208,35 @@ input:-webkit-autofill:active {
     font-size: 1.25rem;
 }
 
+/* Light Theme refinements */
+.light-theme #app-container {
+    box-shadow: 0 10px 50px rgba(0, 97, 193, 0.1);
+}
+
+.light-theme #prizes-banner {
+    background-color: #ffffff !important;
+    border-color: #006bc4 !important;
+    box-shadow: 0 0 20px rgba(0, 107, 196, 0.15) !important;
+}
+
+.light-theme .glitch-text {
+    color: #1e3a8a !important;
+}
+
+.light-theme ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+}
+
+.light-theme ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+/* Specific UI overrides for light mode visibility */
+.light-theme .bg-brand-dark { background-color: #f1f5f9 !important; }
+.light-theme .text-white { color: #1e293b !important; }
+.light-theme .text-slate-500 { color: #64748b !important; }
+.light-theme .border-white\/5 { border-color: rgba(0, 107, 196, 0.1) !important; }
+.light-theme .text-brand-400 { color: #0059b3 !important; }
 
 @media (max-width: 768px) {
     #logo-cup {
