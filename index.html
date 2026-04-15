@@ -81,6 +81,7 @@
                         
                         <div class="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
                             <button id="nav-matches" class="nav-btn px-2 sm:px-3 py-1.5 rounded-lg text-brand-500 bg-brand-500/10 font-medium text-sm transition-colors border border-brand-500/20">Partidos</button>
+                            <button id="nav-grupos" class="nav-btn px-2 sm:px-3 py-1.5 rounded-lg text-slate-400 font-medium text-sm transition-colors border border-transparent">Grupos</button>
                             <button id="nav-ranking" class="nav-btn px-2 sm:px-3 py-1.5 rounded-lg text-slate-400 font-medium text-sm transition-colors border border-transparent">Ranking</button>
                             <button id="nav-users" class="nav-btn hidden px-2 sm:px-3 py-1.5 rounded-lg text-slate-400 font-medium text-sm transition-colors border border-transparent">Usuarios</button>
                         </div>
@@ -111,6 +112,23 @@
                          </div>
                          <div id="stage-tabs" class="flex gap-2 overflow-x-auto pb-2"></div>
                          <div id="matches-list" class="space-y-4"></div>
+                    </div>
+
+                    <div id="grupos-view" class="hidden space-y-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="text-xl font-bold">Tabla de Posiciones</h2>
+                            <span class="text-xs text-slate-500 italic">Se actualiza con los resultados cargados</span>
+                        </div>
+
+                        <!-- Selector de grupo -->
+                        <div id="group-selector" class="flex gap-2 flex-wrap pb-1">
+                            <!-- Botones de grupo generados por JS -->
+                        </div>
+
+                        <!-- Tabla del grupo seleccionado -->
+                        <div id="group-table-container">
+                            <!-- Contenido generado por JS -->
+                        </div>
                     </div>
 
                     <div id="ranking-view" class="hidden space-y-4">

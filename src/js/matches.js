@@ -148,6 +148,8 @@ export function subscribeToMatches(callback) {
                 matchDate: m.match_date,
                 homeFlag: m.home_flag,
                 awayFlag: m.away_flag,
+                homeGoals: m.home_goals,
+                awayGoals: m.away_goals,
                 status: m.status,
                 tbd: m.tbd
             }));

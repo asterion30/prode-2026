@@ -15,6 +15,7 @@ import { initAuth, loginWithEmail, getCurrentUser } from "./auth.js";
 import { subscribeToMatches, subscribeToUserPredictions, savePrediction } from "./matches.js";
 import { supabase } from "./supabase-config.js";
 import { subscribeToRanking } from "./ranking.js";
+import { calculateStandings, GROUP_MAP } from "./standings.js";
 
 // =======================
 // DOM ELEMENTS
@@ -30,6 +31,7 @@ const legajoInput = document.getElementById("legajo-input");
 
 const matchesView = document.getElementById("matches-view");
 const rankingView = document.getElementById("ranking-view");
+const gruposView  = document.getElementById("grupos-view");
 const usersView = document.getElementById("users-view");
 const matchesListEl = document.getElementById("matches-list");
 const rankingListEl = document.getElementById("ranking-list");
@@ -38,6 +40,7 @@ const stageTabsContainer = document.getElementById("stage-tabs");
 
 const btnNavMatches = document.getElementById("nav-matches");
 const btnNavRanking = document.getElementById("nav-ranking");
+const btnNavGrupos  = document.getElementById("nav-grupos");
 const btnNavUsers = document.getElementById("nav-users");
 const btnExportCsv = document.getElementById("btn-export-csv");
 const btnExportCsvMobile = document.getElementById("btn-export-csv-mobile");
@@ -57,6 +60,7 @@ const sidebarPredictions = document.getElementById("sidebar-predictions");
 let matchesState = [];
 let predictionsState = {};
 let isAppInitialized = false;
+let currentStandingsGroup = 'A'; // grupo activo en la vista de posiciones
 
 // ADMIN STATE — se setea al iniciar la sesión
 let IS_SUPER_ADMIN = false;  // solo asterion30
@@ -273,56 +277,39 @@ function setupAppSubscriptions(uid) {
     });
 }
 
-// NAVIGATION
-btnNavMatches.addEventListener("click", () => {
-    matchesView.classList.remove("hidden");
-    rankingView.classList.add("hidden");
-    if (usersView) usersView.classList.add("hidden");
-    
-    btnNavMatches.classList.add("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
-    btnNavMatches.classList.remove("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
-    
-    btnNavRanking.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
-    btnNavRanking.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
-    
-    if (btnNavUsers) {
-        btnNavUsers.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
-        btnNavUsers.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
-    }
-});
+// =======================
+// NAVIGATION HELPERS
+// =======================
+const ALL_VIEWS = [matchesView, gruposView, rankingView, usersView].filter(Boolean);
+const ALL_NAV_BTNS = [btnNavMatches, btnNavGrupos, btnNavRanking, btnNavUsers].filter(Boolean);
 
-btnNavRanking.addEventListener("click", () => {
-    rankingView.classList.remove("hidden");
-    matchesView.classList.add("hidden");
-    if (usersView) usersView.classList.add("hidden");
-    
-    btnNavRanking.classList.add("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
-    btnNavRanking.classList.remove("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
-    
-    btnNavMatches.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
-    btnNavMatches.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
-    
-    if (btnNavUsers) {
-        btnNavUsers.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
-        btnNavUsers.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
+function setActiveNav(activeBtn, activeView) {
+    ALL_VIEWS.forEach(v => v.classList.add('hidden'));
+    ALL_NAV_BTNS.forEach(b => {
+        b.classList.remove('text-brand-500', 'bg-brand-500/10', 'border-brand-500/20');
+        b.classList.add('text-slate-400', 'border-transparent');
+    });
+    if (activeView) activeView.classList.remove('hidden');
+    if (activeBtn) {
+        activeBtn.classList.add('text-brand-500', 'bg-brand-500/10', 'border-brand-500/20');
+        activeBtn.classList.remove('text-slate-400', 'border-transparent');
     }
-});
+}
+
+btnNavMatches.addEventListener('click', () => setActiveNav(btnNavMatches, matchesView));
+
+btnNavRanking.addEventListener('click', () => setActiveNav(btnNavRanking, rankingView));
+
+if (btnNavGrupos) {
+    btnNavGrupos.addEventListener('click', () => {
+        setActiveNav(btnNavGrupos, gruposView);
+        renderGroupsView();
+    });
+}
 
 if (btnNavUsers) {
-    btnNavUsers.addEventListener("click", async () => {
-        if (usersView) usersView.classList.remove("hidden");
-        matchesView.classList.add("hidden");
-        rankingView.classList.add("hidden");
-        
-        btnNavUsers.classList.add("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
-        btnNavUsers.classList.remove("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
-        
-        btnNavMatches.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
-        btnNavMatches.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
-        
-        btnNavRanking.classList.remove("text-brand-500", "bg-brand-500/10", "border-brand-500/20");
-        btnNavRanking.classList.add("text-slate-400", "hover:text-slate-200", "hover:bg-slate-800", "border-transparent");
-        
+    btnNavUsers.addEventListener('click', async () => {
+        setActiveNav(btnNavUsers, usersView);
         await loadUsersGrid();
     });
 }
@@ -344,6 +331,105 @@ if (btnMobileGrid && sidebarPredictions && btnCloseSidebar) {
         }, 300);
     });
 }
+
+// =======================
+// GRUPOS / STANDINGS VIEW
+// =======================
+function renderGroupsView() {
+    const selectorEl   = document.getElementById('group-selector');
+    const containerEl  = document.getElementById('group-table-container');
+    if (!selectorEl || !containerEl) return;
+
+    const standings = calculateStandings(matchesState);
+    const groupLetters = Object.keys(GROUP_MAP);
+
+    // Renderizar botones de selección de grupo
+    selectorEl.innerHTML = '';
+    groupLetters.forEach(letter => {
+        const btn = document.createElement('button');
+        const isActive = letter === currentStandingsGroup;
+        btn.textContent = `Grupo ${letter}`;
+        btn.className = `px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+            isActive
+                ? 'bg-brand-500 text-white border-brand-500 shadow-md'
+                : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white'
+        }`;
+        btn.onclick = () => {
+            currentStandingsGroup = letter;
+            renderGroupsView();
+        };
+        selectorEl.appendChild(btn);
+    });
+
+    // Renderizar tabla del grupo seleccionado
+    const groupData = standings[currentStandingsGroup] || [];
+    const anyPlayed = groupData.some(t => t.pj > 0);
+
+    containerEl.innerHTML = `
+        <div class="rounded-2xl overflow-hidden border border-slate-700/60 mt-3">
+            <div class="bg-slate-800/80 px-4 py-2 flex items-center gap-3 border-b border-slate-700/60">
+                <span class="text-xs font-bold text-brand-500 uppercase tracking-widest">Grupo ${currentStandingsGroup}</span>
+                ${!anyPlayed ? '<span class="text-xs text-slate-500 italic">— Sin partidos jugados aún</span>' : ''}
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-800 text-slate-400 text-xs uppercase tracking-wider">
+                        <tr>
+                            <th class="px-3 py-2 text-left w-6">#</th>
+                            <th class="px-3 py-2 text-left">Equipo</th>
+                            <th class="px-2 py-2 text-center">PJ</th>
+                            <th class="px-2 py-2 text-center">G</th>
+                            <th class="px-2 py-2 text-center">E</th>
+                            <th class="px-2 py-2 text-center">P</th>
+                            <th class="px-2 py-2 text-center hidden sm:table-cell">GF</th>
+                            <th class="px-2 py-2 text-center hidden sm:table-cell">GC</th>
+                            <th class="px-2 py-2 text-center hidden sm:table-cell">DG</th>
+                            <th class="px-2 py-2 text-center font-bold text-brand-400">Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700/50">
+                        ${groupData.map((team, idx) => {
+                            const isQualifying = idx < 2;
+                            const flagSrc = team.flag !== 'un'
+                                ? `https://flagcdn.com/w40/${team.flag}.png`
+                                : null;
+                            const flagHtml = flagSrc
+                                ? `<img src="${flagSrc}" alt="${escapeHTML(team.team)}" class="w-5 h-auto rounded-sm object-cover border border-slate-600" onerror="this.style.display='none'">`
+                                : `<div class="w-5 h-3.5 bg-slate-700 rounded-sm border border-slate-600"></div>`;
+                            return `
+                                <tr class="hover:bg-slate-800/40 transition-colors ${isQualifying ? 'border-l-2 border-brand-500' : 'border-l-2 border-transparent'}">
+                                    <td class="px-3 py-2.5 text-slate-400 text-xs">${idx + 1}</td>
+                                    <td class="px-3 py-2.5">
+                                        <div class="flex items-center gap-2">
+                                            ${flagHtml}
+                                            <span class="font-semibold text-slate-200 text-xs sm:text-sm leading-tight">${escapeHTML(team.team)}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-2 py-2.5 text-center text-slate-300 text-xs">${team.pj}</td>
+                                    <td class="px-2 py-2.5 text-center text-slate-300 text-xs">${team.g}</td>
+                                    <td class="px-2 py-2.5 text-center text-slate-300 text-xs">${team.e}</td>
+                                    <td class="px-2 py-2.5 text-center text-slate-300 text-xs">${team.p}</td>
+                                    <td class="px-2 py-2.5 text-center text-slate-400 text-xs hidden sm:table-cell">${team.gf}</td>
+                                    <td class="px-2 py-2.5 text-center text-slate-400 text-xs hidden sm:table-cell">${team.gc}</td>
+                                    <td class="px-2 py-2.5 text-center text-xs hidden sm:table-cell ${team.dg > 0 ? 'text-brand-400' : team.dg < 0 ? 'text-red-400' : 'text-slate-400'}">${team.dg > 0 ? '+' : ''}${team.dg}</td>
+                                    <td class="px-2 py-2.5 text-center">
+                                        <span class="font-bold text-sm ${isQualifying && team.pj > 0 ? 'text-brand-400' : 'text-slate-200'}">${team.pts}</span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div class="bg-slate-800/30 px-4 py-2 flex items-center gap-2 border-t border-slate-700/60">
+                <div class="w-0.5 h-3 bg-brand-500 rounded"></div>
+                <span class="text-xs text-slate-500">Clasifican los 2 primeros de cada grupo</span>
+            </div>
+        </div>
+    `;
+}
+
+
 
 // =======================
 // RENDERERS
