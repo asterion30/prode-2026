@@ -145,8 +145,43 @@
                                 <button id="btn-export-csv" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold py-1 px-2 rounded transition-all flex items-center gap-1">
                                     <i class="ph-bold ph-image"></i> Imagen
                                 </button>
+                                <button id="btn-show-prizes" class="bg-brand-600 hover:bg-brand-500 text-white text-[10px] font-bold py-1 px-2 rounded transition-all flex items-center gap-1">
+                                    <i class="ph-bold ph-gift"></i> Premios
+                                </button>
                             </div>
                          </div>
+
+                         <!-- Prizes Banner (Glitch Effect) -->
+                         <div id="prizes-banner" class="hidden relative overflow-hidden rounded-2xl border-2 border-brand-500 bg-slate-900 p-6 shadow-[0_0_20px_rgba(34,197,94,0.3)] animate-pulse">
+                             <div class="absolute inset-0 bg-brand-500/5 pointer-events-none"></div>
+                             <h3 class="text-lg font-black text-white mb-4 uppercase tracking-tighter glitch-text" data-text="PREMIOS DEL MUNDIAL">PREMIOS DEL MUNDIAL</h3>
+                             <ul class="space-y-3 font-mono text-sm">
+                                 <li class="flex justify-between items-center text-brand-400 border-b border-white/5 pb-2">
+                                     <span class="glitch-text" data-text="1° PUESTO">1° PUESTO</span>
+                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
+                                 </li>
+                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
+                                     <span class="glitch-text" data-text="2° PUESTO">2° PUESTO</span>
+                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
+                                 </li>
+                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
+                                     <span class="glitch-text" data-text="3° PUESTO">3° PUESTO</span>
+                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
+                                 </li>
+                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
+                                     <span class="glitch-text" data-text="4° PUESTO">4° PUESTO</span>
+                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
+                                 </li>
+                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
+                                     <span class="glitch-text" data-text="5° PUESTO">5° PUESTO</span>
+                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
+                                 </li>
+                             </ul>
+                             <div class="mt-4 text-[10px] text-slate-500 text-center uppercase tracking-widest italic flex items-center justify-center gap-2">
+                                 <i class="ph-bold ph-warning-circle"></i> Resolviendo interferencias...
+                             </div>
+                         </div>
+
                          <div class="ranking-panel rounded-2xl overflow-hidden border">
                             <table class="w-full text-left text-sm">
                                 <thead class="bg-slate-800 text-slate-300">

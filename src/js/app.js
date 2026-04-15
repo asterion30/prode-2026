@@ -318,6 +318,15 @@ if (btnNavUsers) {
     });
 }
 
+const btnShowPrizes = document.getElementById("btn-show-prizes");
+const prizesBanner  = document.getElementById("prizes-banner");
+
+if (btnShowPrizes && prizesBanner) {
+    btnShowPrizes.addEventListener('click', () => {
+        prizesBanner.classList.toggle('hidden');
+    });
+}
+
 if (btnMobileGrid && sidebarPredictions && btnCloseSidebar) {
     btnMobileGrid.addEventListener("click", () => {
         sidebarPredictions.classList.remove("hidden");
