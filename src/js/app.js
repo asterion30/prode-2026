@@ -63,9 +63,16 @@ let IS_SUPER_ADMIN = false;  // solo asterion30
 let IS_ADMIN = false;        // asterion30 + delegados
 
 // El superadmin se identifica por el alias 'asterion30' en la BD (campo alias).
-// Opcionalmente agregar email para doble verificación.
 const SUPER_ADMIN_ALIAS = 'asterion30';
-const SUPER_ADMIN_EMAIL = '';  // ej: 'tuemail@gmail.com'  (dejar vacío si no se usa)
+const SUPER_ADMIN_EMAIL = '';  // email del superadmin (opcional)
+
+// Admins delegados con acceso permanente (por email).
+// Se activan automaticamente cuando el usuario se registra con ese e-mail.
+// El superadmin también puede delegar otros usuarios via el panel.
+const DELEGATED_ADMIN_EMAILS = [
+    'lcosta@vittal.com.ar',
+    'scriado@vittal.com.ar'
+];
 
 const STAGES = [
     { id: 'groups', name: 'Fase de Grupos' },
@@ -133,16 +140,22 @@ initAuth((user, alias, score) => {
             (SUPER_ADMIN_EMAIL !== '' && user.email && user.email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase())
         );
 
-        // Admins delegados: guardados en localStorage por el superadmin
+        // Admins delegados: hardcodeados permanentes + los que el superadmin promueve via localStorage
         const extraAdmins = JSON.parse(localStorage.getItem('extra_admins') || '[]')
             .map(a => a.toLowerCase().trim());
 
-        // Un admin delegado se identifica por alias (nombre apellido) o email
         const aliasLower = alias.toLowerCase();
         const emailLower = (user.email || '').toLowerCase();
-        IS_ADMIN = IS_SUPER_ADMIN ||
+
+        // Un usuario es admin delegado si:
+        // - Su email está en la lista permanente, O
+        // - Su alias o email fue promovido por el superadmin (localStorage)
+        const isDelegatedAdmin =
+            DELEGATED_ADMIN_EMAILS.map(e => e.toLowerCase()).includes(emailLower) ||
             extraAdmins.includes(aliasLower) ||
             extraAdmins.includes(emailLower);
+
+        IS_ADMIN = IS_SUPER_ADMIN || isDelegatedAdmin;
         // ────────────────────────────────────────────────────────────────────
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -173,7 +186,7 @@ initAuth((user, alias, score) => {
         }
 
         // Cargar preferencia de avatar
-        const savedAvatar = localStorage.getItem(`avatar_${user.uid || user.id}`);
+        const savedAvatar = localStorage.getItem(`avatar_${user.id}`);
         if (savedAvatar) {
             userAvatarImg.setAttribute("src", savedAvatar);
         }
@@ -910,21 +923,22 @@ if (btnAdminReset) {
 if (userAvatarImg) {
     userAvatarImg.addEventListener("click", () => {
         const { user } = getCurrentUser();
-        const currentSrc = userAvatarImg.getAttribute("src");
-        let newSrc = "";
+        if (!user) return;
 
-        if (currentSrc.includes("avatar_female")) {
-            newSrc = "./assets/avatar.webp";
-        } else {
-            // Se agrega versión v=2 para forzar recarga de imagen (fondo rosa)
-            newSrc = "./assets/avatar_female_v2.png?v=2";
-        }
+        const currentSrc = userAvatarImg.getAttribute("src") || '';
+        // Alternar entre avatar masculino y femenino
+        const newSrc = currentSrc.includes("avatar_female")
+            ? "/assets/avatar.webp"
+            : "/assets/avatar_female_v2.png";
 
         userAvatarImg.setAttribute("src", newSrc);
-        
-        // Guardar preferencia localmente vinculada a la cuenta de usuario
-        if (user) {
-            localStorage.setItem(`avatar_${user.uid || user.id}`, newSrc);
+
+        // Persistir preferencia por usuario
+        const key = `avatar_${user.id}`;
+        try {
+            localStorage.setItem(key, newSrc);
+        } catch(e) {
+            console.error("No se pudo guardar avatar en localStorage", e);
         }
     });
 }
@@ -1067,8 +1081,8 @@ async function loadUsersGrid() {
                         <button data-uid="${u.id}" class="btn-edit-user bg-slate-700 hover:bg-brand-600 text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1" title="Editar">
                             <i class="ph-bold ph-pencil-simple"></i>
                         </button>
-                        ${IS_SUPER_ADMIN ? `
-                        <button data-uid="${u.id}" data-name="${nombre} ${apellido}" class="btn-delete-user bg-red-900/60 hover:bg-red-600 text-red-300 hover:text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1" title="Eliminar">
+                        ${IS_ADMIN ? `
+                        <button data-uid="${u.id}" data-name="${nombre} ${apellido}" data-alias="${escapeHTML(u.alias || '')}" class="btn-delete-user bg-red-900/60 hover:bg-red-600 text-red-300 hover:text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1" title="Eliminar">
                             <i class="ph-bold ph-trash"></i>
                         </button>` : ''}
                     </div>
@@ -1086,24 +1100,28 @@ async function loadUsersGrid() {
             });
         });
 
-        // Botones eliminar
+        // Botones eliminar — admin puede borrar a cualquiera excepto al superadmin
         listEl.querySelectorAll('.btn-delete-user').forEach(btn => {
             btn.addEventListener('click', async () => {
-                const uid  = btn.dataset.uid;
-                const name = btn.dataset.name;
+                const uid      = btn.dataset.uid;
+                const name     = btn.dataset.name;
+                const targetAlias = (btn.dataset.alias || '').toLowerCase();
+
+                // Protección: nadie puede eliminar al superadmin
+                if (targetAlias === SUPER_ADMIN_ALIAS) {
+                    alert('No es posible eliminar al superadministrador.');
+                    return;
+                }
+
                 if (!confirm(`¿Eliminar a ${name} de la plataforma?\nEsto borrará sus predicciones y no podrá acceder más con ese email.`)) return;
 
                 showLoader();
-                // Eliminar de public.users (las predicciones se borran en cascada)
                 const { error } = await supabase.from('users').delete().eq('id', uid);
                 if (error) {
                     hideLoader();
                     alert('Error al eliminar: ' + error.message);
                     return;
                 }
-                // Nota: auth.users solo se puede borrar con service_role desde el server.
-                // El usuario queda sin fila en public.users y si vuelve a hacer login
-                // deberá registrarse nuevamente (se creará perfil vacío).
                 await loadUsersGrid();
             });
         });
