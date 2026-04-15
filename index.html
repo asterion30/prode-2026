@@ -20,14 +20,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous">
 </head>
-<body class="bg-brand-dark text-white font-sans antialiased min-h-screen flex items-center justify-center">
+<body class="bg-brand-dark text-white font-sans antialiased min-h-screen flex items-start sm:items-center justify-center">
 
     <!-- App Container -->
     <div id="app-container" class="w-full max-w-5xl md:h-[800px] flex flex-col md:flex-row relative shadow-2xl bg-brand-dark overflow-hidden sm:border sm:border-slate-800 sm:rounded-3xl sm:my-8 hide-scrollbar mx-auto">
         
         <!-- LOGIN VIEW -->
-        <section id="login-view" class="flex-1 w-full flex flex-col justify-center items-center p-6 sm:p-10 z-10 transition-all duration-500 min-h-screen md:min-h-0">
-            <div class="mb-8 text-center">
+        <section id="login-view" class="flex-1 w-full flex flex-col justify-start sm:justify-center items-center p-6 sm:p-10 z-10 transition-all duration-500 min-h-screen md:min-h-0">
+            <div class="mt-12 sm:mt-0 mb-8 text-center">
                 <div class="w-24 h-24 bg-brand-500/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)] overflow-hidden p-1">
                     <img src="/assets/cup.webp" alt="Prode 2026" class="w-full h-full object-contain rounded-full drop-shadow-lg" />
                 </div>
@@ -77,13 +77,25 @@
                 <header class="bg-brand-card/80 backdrop-blur-md border-b border-slate-800 p-4 flex justify-between items-center sticky top-0 z-50">
                     <div class="flex items-center gap-2">
                         <img id="logo-cup" src="/assets/cup.webp" alt="Copa" class="w-6 h-6 object-contain drop-shadow cursor-pointer" />
-                        <h1 class="font-bold text-lg">Prode 2026</h1>
+                        <h1 class="hidden sm:block font-bold text-lg">Prode 2026</h1>
                         
-                        <div class="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
-                            <button id="nav-matches" class="nav-btn px-2 sm:px-3 py-1.5 rounded-lg text-brand-500 bg-brand-500/10 font-medium text-sm transition-colors border border-brand-500/20">Partidos</button>
-                            <button id="nav-grupos" class="nav-btn px-2 sm:px-3 py-1.5 rounded-lg text-slate-400 font-medium text-sm transition-colors border border-transparent">Grupos</button>
-                            <button id="nav-ranking" class="nav-btn px-2 sm:px-3 py-1.5 rounded-lg text-slate-400 font-medium text-sm transition-colors border border-transparent">Ranking</button>
-                            <button id="nav-users" class="nav-btn hidden px-2 sm:px-3 py-1.5 rounded-lg text-slate-400 font-medium text-sm transition-colors border border-transparent">Usuarios</button>
+                        <div class="flex items-center gap-1 sm:gap-2 ml-1 sm:ml-4">
+                            <button id="nav-matches" title="Partidos" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-brand-500 bg-brand-500/10 font-bold text-sm transition-all border border-brand-500/20 flex items-center justify-center">
+                                <i class="ph-bold ph-soccer-ball md:hidden text-lg"></i>
+                                <span class="hidden md:inline">Partidos</span>
+                            </button>
+                            <button id="nav-grupos" title="Grupos" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
+                                <img src="/assets/groups-icon.png" alt="Grupos" class="md:hidden">
+                                <span class="hidden md:inline">Grupos</span>
+                            </button>
+                            <button id="nav-ranking" title="Ranking" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
+                                <i class="ph-bold ph-trophy md:hidden text-lg"></i>
+                                <span class="hidden md:inline">Ranking</span>
+                            </button>
+                            <button id="nav-users" title="Usuarios" class="nav-btn hidden px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent items-center justify-center">
+                                <i class="ph-bold ph-users md:hidden text-lg"></i>
+                                <span class="hidden md:inline">Usuarios</span>
+                            </button>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 sm:gap-3">

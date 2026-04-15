@@ -293,7 +293,14 @@ function setActiveNav(activeBtn, activeView) {
         b.classList.remove('text-brand-500', 'bg-brand-500/10', 'border-brand-500/20');
         b.classList.add('text-slate-400', 'border-transparent');
     });
-    if (activeView) activeView.classList.remove('hidden');
+    if (activeView) {
+        activeView.classList.remove('hidden');
+        // Asegurar que vuelve al tope al cambiar de vista (especialmente en móvil)
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        // Si el contenedor interno tiene scroll propio, resetearlo también
+        const contentArea = document.getElementById("content-area");
+        if (contentArea) contentArea.scrollTop = 0;
+    }
     if (activeBtn) {
         activeBtn.classList.add('text-brand-500', 'bg-brand-500/10', 'border-brand-500/20');
         activeBtn.classList.remove('text-slate-400', 'border-transparent');

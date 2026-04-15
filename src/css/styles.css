@@ -135,3 +135,27 @@ input:-webkit-autofill:active {
     80% { clip: rect(41px, 9999px, 98px, 0); transform: skew(0.2deg); }
     100% { clip: rect(28px, 9999px, 63px, 0); transform: skew(0.25deg); }
 }
+
+/* Nav Buttons Mobile Styling */
+.nav-btn i {
+    font-size: 1.25rem;
+}
+
+[id="nav-grupos"] img {
+    width: 24px;
+    height: auto;
+    transition: all 0.3s ease;
+    /* Slate-400 filter approx */
+    filter: brightness(0) saturate(100%) invert(69%) sepia(21%) saturate(307%) hue-rotate(174deg) brightness(91%) contrast(85%);
+}
+
+[id="nav-grupos"].text-brand-500 img {
+    /* Brand-500 filter approx */
+    filter: brightness(0) saturate(100%) invert(58%) sepia(82%) saturate(468%) hue-rotate(92deg) brightness(98%) contrast(92%);
+}
+
+@media (max-width: 768px) {
+    #logo-cup {
+        display: none;
+    }
+}
