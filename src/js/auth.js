@@ -24,40 +24,63 @@ export function initAuth(onUserChange) {
         try {
             if (session && session.user) {
                 currentUser = session.user;
-                
-                // Get user alias and score from DB
+
+                // Obtener perfil del usuario desde la tabla users
                 let { data, error } = await supabase
                     .from('users')
-                    .select('alias, score')
+                    .select('alias, nombre, apellido, legajo, score')
                     .eq('id', currentUser.id)
                     .single();
-                    
+
                 let score = 0;
-                
-                // Si la fila no existe (RLS bloqueó la creación durante el signup sin sesión), la creamos ahora
+
                 if (error && error.code === 'PGRST116') {
-                    const fallbackAlias = currentUser.user_metadata?.alias || currentUser.email?.split('@')[0] || "Usuario";
+                    // El perfil no existe aún — lo creamos con los datos del registro
+                    const meta = currentUser.user_metadata || {};
+                    const nombre   = meta.nombre   || '';
+                    const apellido = meta.apellido  || '';
+                    const legajo   = meta.legajo    || '';
+                    const alias    = (nombre + ' ' + apellido).trim() || currentUser.email?.split('@')[0] || 'Usuario';
+
                     const { error: upsertErr } = await supabase.from('users').upsert({
                         id: currentUser.id,
-                        alias: fallbackAlias,
+                        alias,
+                        nombre,
+                        apellido,
+                        legajo,
                         score: 0
                     });
-                    
+
                     if (upsertErr) {
-                        // Si falla el upsert (ej: el usuario fue borrado en auth.users pero su LocalStorage guarda un token local fantasma)
-                        console.error("Fallo al reconciliar perfil. El usuario probablemente fue borrado. Forzando cierre de sesión.");
+                        console.error("Fallo al crear perfil. Forzando cierre de sesión.", upsertErr);
                         await supabase.auth.signOut();
                         onUserChange(null, null, 0);
                         return;
                     }
-                    
-                    currentAlias = fallbackAlias;
+
+                    currentAlias = alias;
                     score = 0;
+
                 } else if (data && !error) {
-                    currentAlias = data.alias;
+                    // Perfil existente — verificar si necesita completar nombre/apellido/legajo
+                    currentAlias = data.alias || (data.nombre + ' ' + data.apellido).trim() || 'Usuario';
                     score = data.score || 0;
+
+                    // Si el perfil no tiene nombre (usuario antiguo), actualizamos desde metadata si está disponible
+                    if (!data.nombre && currentUser.user_metadata?.nombre) {
+                        const meta = currentUser.user_metadata;
+                        const nombre   = meta.nombre   || '';
+                        const apellido = meta.apellido  || '';
+                        const legajo   = meta.legajo    || data.legajo || '';
+                        const alias    = (nombre + ' ' + apellido).trim() || data.alias;
+
+                        await supabase.from('users').update({ nombre, apellido, legajo, alias }).eq('id', currentUser.id);
+                        currentAlias = alias;
+                    }
                 }
+
                 onUserChange(currentUser, currentAlias, score);
+
             } else {
                 currentUser = null;
                 currentAlias = null;
@@ -65,50 +88,52 @@ export function initAuth(onUserChange) {
             }
         } catch (e) {
             console.error("Critical Auth Error:", e);
-            onUserChange(null, null, 0); // Falla suavemente a la pantalla de login
+            onUserChange(null, null, 0);
         }
     };
 
-    // 1. Forzar una lectura manual rápida de la sesión en caso de que el listener no dispare
+    // Lectura inicial de sesión
     supabase.auth.getSession().then(({ data: { session }, error }) => {
         if (!error) handleSession(session);
     }).catch(err => console.error("getSession error:", err));
 
-    // 2. Escuchar cambios
+    // Escuchar cambios de estado de auth
     supabase.auth.onAuthStateChange(async (event, session) => {
-        // En v2, INITIAL_SESSION a veces dispara después, handleSession es idempotente
         handleSession(session);
     });
 }
 
-// In Supabase we use Magic Links for passwordless login
-export async function loginWithEmail(email, alias) {
+/**
+ * Envía un magic link al email dado.
+ * Guarda nombre, apellido y legajo en user_metadata para recuperarlos al confirmar.
+ */
+export async function loginWithEmail(email, nombre, apellido, legajo) {
     if (isMock) {
         const mockUid = "mock_" + Math.random().toString(36).substr(2, 9);
-        // Store provided alias or a default one
-        const finalAlias = alias ? alias.trim() : email.split('@')[0];
-        const userData = { uid: mockUid, alias: finalAlias, score: 0 };
+        const alias = (nombre + ' ' + apellido).trim() || email.split('@')[0];
+        const userData = { uid: mockUid, alias, score: 0 };
         localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(userData));
         setTimeout(() => location.reload(), 500);
         return;
     }
 
-    const finalAlias = alias ? alias.trim() : email.split('@')[0];
+    const nombreClean   = (nombre   || '').trim();
+    const apellidoClean = (apellido || '').trim();
+    const legajoClean   = (legajo   || '').trim();
 
     const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
             data: {
-                alias: finalAlias
+                nombre:   nombreClean,
+                apellido: apellidoClean,
+                legajo:   legajoClean
             }
-            // By default, Supabase sends the magic link and user is redirected back
         }
     });
 
-    if (error) {
-        throw error;
-    }
-    
+    if (error) throw error;
+
     return { needsConfirmation: true };
 }
 

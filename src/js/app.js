@@ -24,6 +24,9 @@ const loginView = document.getElementById("login-view");
 const mainView = document.getElementById("main-view");
 const loginForm = document.getElementById("login-form");
 const emailInput = document.getElementById("email-input");
+const nombreInput = document.getElementById("nombre-input");
+const apellidoInput = document.getElementById("apellido-input");
+const legajoInput = document.getElementById("legajo-input");
 
 const matchesView = document.getElementById("matches-view");
 const rankingView = document.getElementById("ranking-view");
@@ -111,7 +114,7 @@ initAuth((user, alias, score) => {
         // Logged In
         loginView.classList.add("hidden");
         mainView.classList.remove("hidden");
-        userAliasDisplay.textContent = `Usuario: ${alias}`;
+        userAliasDisplay.textContent = alias || 'Usuario';
         userPointsDisplay.textContent = `${score} pts`;
         
         const admins = ['asterion30'];
@@ -175,27 +178,35 @@ initAuth((user, alias, score) => {
 // =======================
 loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = emailInput.value.trim();
-    const alias = email.split('@')[0];
+    const email    = emailInput ? emailInput.value.trim() : '';
+    const nombre   = nombreInput   ? nombreInput.value.trim()   : '';
+    const apellido = apellidoInput ? apellidoInput.value.trim() : '';
+    const legajo   = legajoInput   ? legajoInput.value.trim()   : '';
+
     if (!email) return;
+
+    // Validación básica
+    if (!nombre || !apellido || !legajo) {
+        loginError.textContent = "Por favor completá todos los campos: Nombre, Apellido, Legajo y Correo.";
+        loginError.classList.remove("hidden");
+        return;
+    }
 
     showLoader();
     loginError.classList.add("hidden");
     const loginSuccess = document.getElementById("login-success");
     if (loginSuccess) loginSuccess.classList.add("hidden");
-    
+
     try {
-        const res = await loginWithEmail(email, alias);
+        const res = await loginWithEmail(email, nombre, apellido, legajo);
         if (res && res.needsConfirmation) {
             hideLoader();
             if (loginSuccess) {
-                loginSuccess.textContent = "Hemos enviado un enlace a tu correo. Revisa tu bandeja de entrada o SPAM, haz clic en el enlace para entrar.";
+                loginSuccess.textContent = `¡Hola ${nombre}! Te enviamos un enlace mágico a ${email}. Revisá tu bandeja de entrada o SPAM y hacé clic en el enlace para entrar.`;
                 loginSuccess.classList.remove("hidden");
                 loginForm.classList.add("hidden");
             }
         } else {
-            // Fue exitoso y no necesita confirmación. 
-            // Forzamos la recarga para que el observer inicialice todo perfectamente.
             window.location.reload();
         }
     } catch (err) {
@@ -539,24 +550,19 @@ function renderMatches() {
 function renderRanking(ranking) {
     rankingListEl.innerHTML = "";
     const { user: currentUser } = getCurrentUser();
-    
-    // Find current user rank index
+
     const myRankIndex = currentUser ? ranking.findIndex(u => u.id === currentUser.id) : -1;
-    
-    // Determine which users to show
+
     const usersToShow = [];
-    
     ranking.forEach((u, idx) => {
         if (idx < 5) {
             usersToShow.push({ user: u, index: idx });
         } else if (idx === myRankIndex) {
-            // Also include me if I am not in top 5
             usersToShow.push({ user: u, index: idx });
         }
     });
 
     usersToShow.forEach(({ user, index }, i) => {
-        // If there's a gap between top 5 and me, insert a visual separator
         if (i > 0 && index !== usersToShow[i-1].index + 1) {
             const separatorTr = document.createElement("tr");
             separatorTr.innerHTML = `<td colspan="3" class="px-4 py-2 text-center text-slate-500 text-xs tracking-widest bg-slate-800/20">••••••</td>`;
@@ -568,17 +574,20 @@ function renderRanking(ranking) {
         if (index === 0) rankContent = "🥇";
         else if (index === 1) rankContent = "🥈";
         else if (index === 2) rankContent = "🥉";
-        
+
+        // Usar displayName (nombre apellido) si está disponible, sino alias
+        const displayName = user.displayName || user.alias || 'Usuario';
+
         const tr = document.createElement("tr");
         const isMe = currentUser && currentUser.id === user.id;
-        
+
         tr.className = `border-slate-700 transition-colors ${isMe ? 'row-me' : (index % 2 === 0 ? '' : 'row-alt')}`;
         tr.innerHTML = `
             <td class="px-4 py-3 text-center ${isMedal ? 'text-lg' : 'text-slate-400 font-medium'}">
                 ${rankContent}
             </td>
             <td class="px-4 py-3 font-semibold ${index === 0 ? 'text-brand-500' : 'text-slate-200'} flex items-center gap-2">
-                ${escapeHTML(user.alias)}
+                ${escapeHTML(displayName)}
             </td>
             <td class="px-4 py-3 text-right">
                 <span class="bg-brand-900 text-brand-500 font-bold px-2 py-1 rounded">
@@ -774,20 +783,22 @@ if (btnExportCsvMobile) btnExportCsvMobile.addEventListener("click", handleExpor
 if (btnAdminExport) {
     btnAdminExport.addEventListener("click", async () => {
         try {
-            // Re-fetch the full ranking to ensure all users are captured for HR
             const { data: users, error } = await supabase
                 .from('users')
-                .select('alias, score, created_at')
+                .select('nombre, apellido, legajo, alias, score, created_at')
                 .order('score', { ascending: false })
-                .order('alias', { ascending: true });
-                
+                .order('apellido', { ascending: true });
+
             if (error) throw error;
             if (!users || users.length === 0) return alert("No hay usuarios.");
 
-            let csvContent = "Posicion;Alias;Puntaje Total;Fecha Registro\r\n";
+            let csvContent = "Posicion;Nombre;Apellido;Legajo;Puntaje Total;Fecha Registro\r\n";
             users.forEach((u, i) => {
                 const dateStr = new Date(u.created_at).toLocaleDateString();
-                csvContent += `"${i + 1}";"${u.alias}";"${u.score || 0}";"${dateStr}"\r\n`;
+                const nombre   = u.nombre   || u.alias || '';
+                const apellido = u.apellido || '';
+                const legajo   = u.legajo   || '';
+                csvContent += `"${i + 1}";"${nombre}";"${apellido}";"${legajo}";"${u.score || 0}";"${dateStr}"\r\n`;
             });
 
             const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
@@ -796,7 +807,7 @@ if (btnAdminExport) {
             const link = document.createElement("a");
             link.setAttribute("href", url);
             const dateSuffix = new Date().toISOString().split('T')[0];
-            link.setAttribute("download", `Ranking_Global_RRHH_${dateSuffix}.csv`);
+            link.setAttribute("download", `Ranking_RRHH_${dateSuffix}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -925,53 +936,167 @@ if (logoCup) {
     });
 }
 
+// =============================================
+// MODAL EDITAR USUARIO (Admin)
+// =============================================
+const modalEditUser  = document.getElementById("modal-edit-user");
+const editUserId     = document.getElementById("edit-user-id");
+const editNombre     = document.getElementById("edit-nombre");
+const editApellido   = document.getElementById("edit-apellido");
+const editLegajo     = document.getElementById("edit-legajo");
+const editUserError  = document.getElementById("edit-user-error");
+const btnEditCancel  = document.getElementById("btn-edit-cancel");
+const btnEditSave    = document.getElementById("btn-edit-save");
+
+function openEditModal(user) {
+    if (!modalEditUser) return;
+    editUserId.value    = user.id;
+    editNombre.value    = user.nombre   || '';
+    editApellido.value  = user.apellido || '';
+    editLegajo.value    = user.legajo   || '';
+    editUserError.classList.add('hidden');
+    modalEditUser.classList.remove('hidden');
+    modalEditUser.classList.add('flex');
+}
+
+if (btnEditCancel) {
+    btnEditCancel.addEventListener('click', () => {
+        modalEditUser.classList.add('hidden');
+        modalEditUser.classList.remove('flex');
+    });
+}
+
+if (btnEditSave) {
+    btnEditSave.addEventListener('click', async () => {
+        const uid      = editUserId.value;
+        const nombre   = editNombre.value.trim();
+        const apellido = editApellido.value.trim();
+        const legajo   = editLegajo.value.trim();
+
+        if (!nombre || !apellido || !legajo) {
+            editUserError.textContent = "Todos los campos son obligatorios.";
+            editUserError.classList.remove('hidden');
+            return;
+        }
+
+        const alias = `${nombre} ${apellido}`;
+        btnEditSave.disabled = true;
+
+        const { error } = await supabase
+            .from('users')
+            .update({ nombre, apellido, legajo, alias })
+            .eq('id', uid);
+
+        btnEditSave.disabled = false;
+
+        if (error) {
+            editUserError.textContent = 'Error: ' + (error.message.includes('unique') ? 'Ese legajo ya está en uso.' : error.message);
+            editUserError.classList.remove('hidden');
+            return;
+        }
+
+        modalEditUser.classList.add('hidden');
+        modalEditUser.classList.remove('flex');
+        await loadUsersGrid();
+    });
+}
+
 async function loadUsersGrid() {
     const listEl = document.getElementById("users-table-list");
     if (!listEl) return;
-    
+
     showLoader();
     try {
         const { data: rawUsers, error } = await supabase
             .from('users')
-            .select('alias, created_at')
+            .select('id, nombre, apellido, legajo, alias, score, created_at')
             .order('created_at', { ascending: false });
-            
+
         if (error) throw error;
-        
-        const users = rawUsers.filter(u => u.alias.toLowerCase() !== 'asterion30');
-        
+
+        const users = rawUsers.filter(u => (u.alias || '').toLowerCase() !== 'asterion30');
+
         listEl.innerHTML = "";
         if (!users || users.length === 0) {
-            listEl.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-500">No hay usuarios</td></tr>`;
+            listEl.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-slate-500">No hay usuarios</td></tr>`;
             hideLoader();
             return;
         }
-        
+
         users.forEach((u, i) => {
-            const dateStr = new Date(u.created_at).toLocaleDateString();
+            const dateStr    = new Date(u.created_at).toLocaleDateString('es-AR');
+            const nombre     = escapeHTML(u.nombre   || u.alias || '—');
+            const apellido   = escapeHTML(u.apellido || '—');
+            const legajo     = escapeHTML(u.legajo   || '—');
+
             const tr = document.createElement("tr");
             tr.className = "border-slate-700/50 hover:bg-slate-800/30 transition-colors";
             tr.innerHTML = `
-                <td class="px-4 py-3 text-center text-slate-500">${i + 1}</td>
-                <td class="px-4 py-3 font-semibold text-slate-200">${escapeHTML(u.alias)}</td>
-                <td class="px-4 py-3 text-slate-400 hidden sm:table-cell">${dateStr}</td>
+                <td class="px-3 py-3 text-center text-slate-500 text-sm">${i + 1}</td>
+                <td class="px-3 py-3 font-semibold text-slate-200 text-sm">${nombre}</td>
+                <td class="px-3 py-3 font-semibold text-slate-200 text-sm">${apellido}</td>
+                <td class="px-3 py-3 text-slate-400 text-sm font-mono">${legajo}</td>
+                <td class="px-3 py-3 text-slate-500 text-xs hidden md:table-cell">—</td>
+                <td class="px-3 py-3 text-slate-400 text-xs hidden sm:table-cell">${dateStr}</td>
+                <td class="px-3 py-3 text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <button data-uid="${u.id}" class="btn-edit-user bg-slate-700 hover:bg-brand-600 text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1">
+                            <i class="ph-bold ph-pencil-simple"></i>
+                        </button>
+                        <button data-uid="${u.id}" data-name="${nombre} ${apellido}" class="btn-delete-user bg-red-900/60 hover:bg-red-600 text-red-300 hover:text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1">
+                            <i class="ph-bold ph-trash"></i>
+                        </button>
+                    </div>
+                </td>
             `;
             listEl.appendChild(tr);
         });
-        
+
+        // Botones editar
+        listEl.querySelectorAll('.btn-edit-user').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const uid = btn.dataset.uid;
+                const user = users.find(u => u.id === uid);
+                if (user) openEditModal(user);
+            });
+        });
+
+        // Botones eliminar
+        listEl.querySelectorAll('.btn-delete-user').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const uid  = btn.dataset.uid;
+                const name = btn.dataset.name;
+                if (!confirm(`¿Eliminar a ${name} de la plataforma?\nEsto borrará sus predicciones y no podrá acceder más con ese email.`)) return;
+
+                showLoader();
+                // Eliminar de public.users (las predicciones se borran en cascada)
+                const { error } = await supabase.from('users').delete().eq('id', uid);
+                if (error) {
+                    hideLoader();
+                    alert('Error al eliminar: ' + error.message);
+                    return;
+                }
+                // Nota: auth.users solo se puede borrar con service_role desde el server.
+                // El usuario queda sin fila en public.users y si vuelve a hacer login
+                // deberá registrarse nuevamente (se creará perfil vacío).
+                await loadUsersGrid();
+            });
+        });
+
+        // Exportar CSV
         const btnExportUsers = document.getElementById("btn-export-users-csv");
         if (btnExportUsers) {
             btnExportUsers.onclick = () => {
-                let csvContent = "Posicion;Alias;Fecha Registro\r\n";
+                let csvContent = "Posicion;Nombre;Apellido;Legajo;Puntaje;Fecha Registro\r\n";
                 users.forEach((u, i) => {
-                    const dateDesc = new Date(u.created_at).toLocaleDateString();
-                    csvContent += `"${i + 1}";"${u.alias}";"${dateDesc}"\r\n`;
+                    const dateDesc = new Date(u.created_at).toLocaleDateString('es-AR');
+                    csvContent += `"${i+1}";"${u.nombre||''}";"${u.apellido||''}";"${u.legajo||''}";"${u.score||0}";"${dateDesc}"\r\n`;
                 });
-                const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+                const bom  = new Uint8Array([0xEF, 0xBB, 0xBF]);
                 const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
-                link.download = `UsuariosRegistrados_${new Date().toISOString().split('T')[0]}.csv`;
+                link.download = `Usuarios_${new Date().toISOString().split('T')[0]}.csv`;
                 link.click();
             };
         }

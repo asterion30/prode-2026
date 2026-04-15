@@ -38,14 +38,23 @@ export function subscribeToRanking(callback) {
     const fetchRanking = async () => {
         let { data, error } = await supabase
             .from('users')
-            .select('id, alias, score, exact_matches')
+            .select('id, alias, nombre, apellido, score, exact_matches')
             .order('score', { ascending: false })
             .order('exact_matches', { ascending: false })
             .order('created_at', { ascending: true })
             .limit(50);
         
         if (data) {
-            callback(data.filter(u => u.alias.toLowerCase() !== 'asterion30'));
+            callback(
+                data
+                    .filter(u => u.alias.toLowerCase() !== 'asterion30')
+                    .map(u => ({
+                        ...u,
+                        displayName: (u.nombre && u.apellido)
+                            ? `${u.nombre} ${u.apellido}`
+                            : (u.nombre || u.apellido || u.alias || 'Usuario')
+                    }))
+            );
         }
     };
 

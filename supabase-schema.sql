@@ -3,10 +3,19 @@
 -- Users table (Extends Supabase Auth users)
 create table if not exists public.users (
   id uuid references auth.users on delete cascade not null primary key,
-  alias text not null,
+  alias text not null,              -- Se mantiene por compatibilidad; se setea como 'nombre apellido'
+  nombre text not null default '',
+  apellido text not null default '',
+  legajo text not null default '',
   score integer default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Índice único en legajo para evitar doble registro con el mismo número
+-- Se permite legajo vacío solo en la fila vacía de migración.
+create unique index if not exists users_legajo_unique
+  on public.users (legajo)
+  where legajo != '';
 
 -- Matches table
 -- We can seed matches from the frontend or have an admin do it.
@@ -42,6 +51,8 @@ alter table public.users enable row level security;
 alter table public.predictions enable row level security;
 
 -- Policies for public.users
+-- El ranking público solo ve nombre, apellido y score (no legajo).
+-- Para restringir columnas especificas en Supabase se usa una VIEW pública.
 create policy "Users can view all users" 
   on public.users for select 
   using ( true );
@@ -53,6 +64,25 @@ create policy "Users can insert their own profile"
 create policy "Users can update own profile" 
   on public.users for update 
   using ( auth.uid() = id );
+
+-- Política adicional: permite actualizar cualquier perfil (para el panel admin).
+-- La validación real de quién es admin se hace en el frontend.
+create policy "Admin puede actualizar cualquier perfil"
+  on public.users for update
+  using ( true )
+  with check ( true );
+
+-- Política permisiva de DELETE para que el admin pueda eliminar usuarios desde el frontend.
+-- Para producción con mayor seguridad, reemplazar 'true' por:
+--   auth.uid() IN (SELECT id FROM public.users WHERE alias = 'asterion30')
+-- pero requeriría que el admin tenga service_role o una Edge Function.
+create policy "Admin puede eliminar usuarios"
+  on public.users for delete
+  using ( true );
+
+-- Los admins pueden actualizar cualquier usuario (para el panel de admin)
+-- NOTA: La validación de quién es admin se hace en el frontend.
+-- Para mayor seguridad en producción, crear una tabla public.admins y usar auth.uid() IN (SELECT id FROM public.admins).
 
 -- Policies for public.matches
 -- Matches can be globally readable
