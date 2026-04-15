@@ -3,6 +3,7 @@ import { supabase, isMock } from "./supabase-config.js";
 
 let currentUser = null;
 let currentAlias = null;
+let currentAvatarUrl = null;
 
 const MOCK_STORAGE_KEY = "prode_mock_user";
 
@@ -28,7 +29,7 @@ export function initAuth(onUserChange) {
                 // Obtener perfil del usuario desde la tabla users
                 let { data, error } = await supabase
                     .from('users')
-                    .select('alias, nombre, apellido, legajo, score')
+                    .select('alias, nombre, apellido, legajo, score, avatar_url')
                     .eq('id', currentUser.id)
                     .single();
 
@@ -62,9 +63,9 @@ export function initAuth(onUserChange) {
                     score = 0;
 
                 } else if (data && !error) {
-                    // Perfil existente — verificar si necesita completar nombre/apellido/legajo
                     currentAlias = data.alias || (data.nombre + ' ' + data.apellido).trim() || 'Usuario';
                     score = data.score || 0;
+                    currentAvatarUrl = data.avatar_url || null;
 
                     // Si el perfil no tiene nombre (usuario antiguo), actualizamos desde metadata si está disponible
                     if (!data.nombre && currentUser.user_metadata?.nombre) {
@@ -79,7 +80,7 @@ export function initAuth(onUserChange) {
                     }
                 }
 
-                onUserChange(currentUser, currentAlias, score);
+                onUserChange(currentUser, currentAlias, score, currentAvatarUrl);
 
             } else {
                 currentUser = null;
@@ -138,5 +139,17 @@ export async function loginWithEmail(email, nombre, apellido, legajo) {
 }
 
 export function getCurrentUser() {
-    return { user: currentUser, alias: currentAlias };
+    return { user: currentUser, alias: currentAlias, avatarUrl: currentAvatarUrl };
+}
+
+/**
+ * Actualiza el avatar_url en la tabla users y en el estado local.
+ */
+export async function updateAvatarUrl(userId, url) {
+    const { error } = await supabase
+        .from('users')
+        .update({ avatar_url: url })
+        .eq('id', userId);
+    if (!error) currentAvatarUrl = url;
+    return error;
 }

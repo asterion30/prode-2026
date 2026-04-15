@@ -94,8 +94,12 @@
                             <p id="user-alias-display" class="text-sm font-semibold text-white">Alias</p>
                             <p id="user-points-display" class="text-xs text-brand-500 font-medium">0 pts</p>
                         </div>
-                        <div class="hidden sm:flex w-10 h-10 rounded-full bg-slate-700 border-2 border-brand-500 overflow-hidden">
-                            <img id="user-avatar-img" src="/assets/avatar.webp" alt="Avatar" class="w-full h-full object-cover" />
+                        <div class="hidden sm:flex relative w-10 h-10 rounded-full bg-slate-700 border-2 border-brand-500 overflow-hidden group cursor-pointer" title="Clic para cambiar tu foto">
+                            <img id="user-avatar-img" src="/assets/avatar.webp" alt="Avatar" class="w-full h-full object-cover transition-opacity group-hover:opacity-60" />
+                            <!-- Overlay cámara al hover -->
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                <i class="ph-bold ph-camera text-white text-base drop-shadow"></i>
+                            </div>
                         </div>
                     </div>
                 </header>

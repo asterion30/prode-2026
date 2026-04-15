@@ -11,7 +11,7 @@ function escapeHTML(str) {
         .replace(/'/g, "&#039;");
 }
 
-import { initAuth, loginWithEmail, getCurrentUser } from "./auth.js";
+import { initAuth, loginWithEmail, getCurrentUser, updateAvatarUrl } from "./auth.js";
 import { subscribeToMatches, subscribeToUserPredictions, savePrediction } from "./matches.js";
 import { supabase } from "./supabase-config.js";
 import { subscribeToRanking } from "./ranking.js";
@@ -129,7 +129,7 @@ function initCountdown() {
 showLoader();
 initCountdown();
 
-initAuth((user, alias, score) => {
+initAuth((user, alias, score, avatarUrl) => {
     if (user && alias) {
         // Logged In
         loginView.classList.add("hidden");
@@ -189,10 +189,14 @@ initAuth((user, alias, score) => {
             }
         }
 
-        // Cargar preferencia de avatar
+        // Cargar avatar: primero desde BD, luego fallback a localStorage
         const savedAvatar = localStorage.getItem(`avatar_${user.id}`);
-        if (savedAvatar) {
-            userAvatarImg.setAttribute("src", savedAvatar);
+        if (avatarUrl) {
+            userAvatarImg.setAttribute('src', avatarUrl);
+        } else if (savedAvatar) {
+            userAvatarImg.setAttribute('src', savedAvatar);
+        } else {
+            userAvatarImg.setAttribute('src', '/assets/avatar.webp');
         }
 
         if (!isAppInitialized) {
@@ -1006,25 +1010,126 @@ if (btnAdminReset) {
     });
 }
 
+// =======================
+// AVATAR UPLOAD
+// =======================
+
+// Input de archivo oculto
+const avatarFileInput = document.createElement('input');
+avatarFileInput.type = 'file';
+avatarFileInput.accept = 'image/jpeg,image/png,image/webp';
+avatarFileInput.style.display = 'none';
+document.body.appendChild(avatarFileInput);
+
+/**
+ * Comprime una imagen a WebP usando Canvas.
+ * Reduce primero a 300×300px, luego ajusta calidad hasta que pese ≤ 140KB.
+ */
+async function compressToWebP(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onerror = reject;
+            img.onload = () => {
+                const SIZE = 300;
+                const canvas = document.createElement('canvas');
+                canvas.width  = SIZE;
+                canvas.height = SIZE;
+                const ctx = canvas.getContext('2d');
+
+                // Recorte centrado (crop cuadrado)
+                const side = Math.min(img.width, img.height);
+                const sx = (img.width  - side) / 2;
+                const sy = (img.height - side) / 2;
+                ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+
+                // Reducir calidad hasta ≤ 140 KB
+                let quality = 0.85;
+                let blob;
+                const tryCompress = () => {
+                    canvas.toBlob((b) => {
+                        if (!b) { reject(new Error('Canvas toBlob falló')); return; }
+                        if (b.size <= 143360 || quality <= 0.3) {
+                            resolve(b);
+                        } else {
+                            quality -= 0.1;
+                            tryCompress();
+                        }
+                    }, 'image/webp', quality);
+                };
+                tryCompress();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 if (userAvatarImg) {
-    userAvatarImg.addEventListener("click", () => {
+    // Click en avatar → abrir selector de archivo
+    userAvatarImg.style.cursor = 'pointer';
+    userAvatarImg.title = 'Hacer clic para cambiar tu foto de perfil';
+
+    userAvatarImg.addEventListener('click', () => {
+        const { user } = getCurrentUser();
+        if (!user) return;
+        avatarFileInput.click();
+    });
+
+    avatarFileInput.addEventListener('change', async () => {
+        const file = avatarFileInput.files[0];
+        if (!file) return;
+        avatarFileInput.value = ''; // reset para poder elegir el mismo archivo de nuevo
+
         const { user } = getCurrentUser();
         if (!user) return;
 
-        const currentSrc = userAvatarImg.getAttribute("src") || '';
-        // Alternar entre avatar masculino y femenino
-        const newSrc = currentSrc.includes("avatar_female")
-            ? "/assets/avatar.webp"
-            : "/assets/avatar_female_v2.png";
+        // Mostrar anillo de carga sobre el avatar
+        const avatarWrapper = userAvatarImg.parentElement;
+        userAvatarImg.style.opacity = '0.4';
+        avatarWrapper.style.outline = '2px solid #22c55e';
 
-        userAvatarImg.setAttribute("src", newSrc);
-
-        // Persistir preferencia por usuario
-        const key = `avatar_${user.id}`;
         try {
-            localStorage.setItem(key, newSrc);
-        } catch(e) {
-            console.error("No se pudo guardar avatar en localStorage", e);
+            // 1. Comprimir imagen
+            const blob = await compressToWebP(file);
+            const filePath = `${user.id}.webp`;
+
+            // 2. Subir a Supabase Storage (upsert)
+            const { error: uploadErr } = await supabase.storage
+                .from('avatars')
+                .upload(filePath, blob, {
+                    contentType: 'image/webp',
+                    upsert: true
+                });
+
+            if (uploadErr) throw uploadErr;
+
+            // 3. Obtener URL pública
+            const { data: urlData } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(filePath);
+
+            // Añadir cache-buster para forzar recarga
+            const publicUrl = urlData.publicUrl + '?t=' + Date.now();
+
+            // 4. Actualizar tabla users
+            const err = await updateAvatarUrl(user.id, publicUrl);
+            if (err) throw err;
+
+            // 5. Mostrar imagen nueva
+            userAvatarImg.setAttribute('src', publicUrl);
+
+            // Guardar también en localStorage como caché local
+            localStorage.setItem(`avatar_${user.id}`, publicUrl);
+
+        } catch(err) {
+            console.error('Error al subir avatar:', err);
+            alert('No se pudo subir la imagen. Asegurate de que sea JPG, PNG o WebP y pese menos de 150 KB.');
+        } finally {
+            userAvatarImg.style.opacity = '1';
+            avatarWrapper.style.outline = '';
         }
     });
 }
