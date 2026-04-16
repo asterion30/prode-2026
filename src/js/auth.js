@@ -54,6 +54,7 @@ export function initAuth(onUserChange) {
                     const { error: upsertErr } = await supabase.from('users').upsert({
                         id: currentUser.id,
                         alias,
+                        email: currentUser.email, // Sincronizamos email
                         nombre,
                         apellido,
                         legajo,
@@ -82,9 +83,10 @@ export function initAuth(onUserChange) {
                         const nombre   = meta.nombre   || '';
                         const apellido = meta.apellido  || '';
                         const legajo   = meta.legajo    || data.legajo || '';
+                        const email    = currentUser.email;
                         const alias    = (nombre + ' ' + apellido).trim() || data.alias;
 
-                        await supabase.from('users').update({ nombre, apellido, legajo, alias }).eq('id', currentUser.id);
+                        await supabase.from('users').update({ nombre, apellido, legajo, alias, email }).eq('id', currentUser.id);
                         currentAlias = alias;
                     }
                 }
