@@ -8,6 +8,7 @@ create table if not exists public.users (
   apellido text not null default '',
   legajo text not null default '',
   score integer default 0,
+  is_banned boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

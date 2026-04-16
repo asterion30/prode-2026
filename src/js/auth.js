@@ -29,11 +29,19 @@ export function initAuth(onUserChange) {
                 // Obtener perfil del usuario desde la tabla users
                 let { data, error } = await supabase
                     .from('users')
-                    .select('alias, nombre, apellido, legajo, score, avatar_url')
+                    .select('alias, nombre, apellido, legajo, score, avatar_url, is_banned')
                     .eq('id', currentUser.id)
                     .single();
 
                 let score = 0;
+
+                if (data && data.is_banned) {
+                    console.warn("Usuario bloqueado intentando acceder.");
+                    await supabase.auth.signOut();
+                    alert("Tu cuenta ha sido inhabilitada. Si crees que es un error, contacta al administrador.");
+                    onUserChange(null, null, 0);
+                    return;
+                }
 
                 if (error && error.code === 'PGRST116') {
                     // El perfil no existe aún — lo creamos con los datos del registro
@@ -49,7 +57,8 @@ export function initAuth(onUserChange) {
                         nombre,
                         apellido,
                         legajo,
-                        score: 0
+                        score: 0,
+                        is_banned: false
                     });
 
                     if (upsertErr) {

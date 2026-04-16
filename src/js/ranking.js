@@ -38,7 +38,8 @@ export function subscribeToRanking(callback) {
     const fetchRanking = async () => {
         let { data, error } = await supabase
             .from('users')
-            .select('id, alias, nombre, apellido, score, exact_matches')
+            .select('id, alias, nombre, apellido, score, exact_matches, is_banned')
+            .eq('is_banned', false)
             .order('score', { ascending: false })
             .order('exact_matches', { ascending: false })
             .order('created_at', { ascending: true })

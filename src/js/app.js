@@ -1289,7 +1289,7 @@ async function loadUsersGrid() {
     try {
         const { data: rawUsers, error } = await supabase
             .from('users')
-            .select('id, nombre, apellido, legajo, alias, score, created_at')
+            .select('id, nombre, apellido, legajo, alias, score, created_at, is_banned')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -1308,12 +1308,15 @@ async function loadUsersGrid() {
             const nombre     = escapeHTML(u.nombre   || u.alias || '—');
             const apellido   = escapeHTML(u.apellido || '—');
             const legajo     = escapeHTML(u.legajo   || '—');
+            const isBanned   = u.is_banned === true;
 
             const tr = document.createElement("tr");
-            tr.className = "border-slate-700/50 hover:bg-slate-800/30 transition-colors";
+            tr.className = `border-slate-700/50 hover:bg-slate-800/30 transition-colors ${isBanned ? 'opacity-50 grayscale' : ''}`;
             tr.innerHTML = `
                 <td class="px-3 py-3 text-center text-slate-500 text-sm">${i + 1}</td>
-                <td class="px-3 py-3 font-semibold text-slate-200 text-sm">${nombre}</td>
+                <td class="px-3 py-3 font-semibold ${isBanned ? 'text-red-400' : 'text-slate-200'} text-sm">
+                    ${nombre} ${isBanned ? '<span class="text-[10px] bg-red-900/40 px-1 rounded ml-1">BLOQUEADO</span>' : ''}
+                </td>
                 <td class="px-3 py-3 font-semibold text-slate-200 text-sm">${apellido}</td>
                 <td class="px-3 py-3 text-slate-400 text-sm font-mono">${legajo}</td>
                 <td class="px-3 py-3 text-slate-500 text-xs hidden md:table-cell">—</td>
@@ -1324,8 +1327,8 @@ async function loadUsersGrid() {
                             <i class="ph-bold ph-pencil-simple"></i>
                         </button>
                         ${IS_ADMIN ? `
-                        <button data-uid="${u.id}" data-name="${nombre} ${apellido}" data-alias="${escapeHTML(u.alias || '')}" class="btn-delete-user bg-red-900/60 hover:bg-red-600 text-red-300 hover:text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1" title="Eliminar">
-                            <i class="ph-bold ph-trash"></i>
+                        <button data-uid="${u.id}" data-name="${nombre} ${apellido}" data-alias="${escapeHTML(u.alias || '')}" data-banned="${isBanned}" class="btn-delete-user ${isBanned ? 'bg-green-900/60 hover:bg-green-600 text-green-300' : 'bg-red-900/60 hover:bg-red-600 text-red-300'} hover:text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1" title="${isBanned ? 'Reactivar' : 'Bloquear (Lista Negra)'}">
+                            <i class="ph-bold ${isBanned ? 'ph-user-plus' : 'ph-user-minus'}"></i>
                         </button>` : ''}
                     </div>
                 </td>
@@ -1348,20 +1351,31 @@ async function loadUsersGrid() {
                 const uid      = btn.dataset.uid;
                 const name     = btn.dataset.name;
                 const targetAlias = (btn.dataset.alias || '').toLowerCase();
+                const wasBanned   = btn.dataset.banned === 'true';
 
                 // Protección: nadie puede eliminar al superadmin
                 if (targetAlias === SUPER_ADMIN_ALIAS) {
-                    alert('No es posible eliminar al superadministrador.');
+                    alert('No es posible bloquear al superadministrador.');
                     return;
                 }
 
-                if (!confirm(`¿Eliminar a ${name} de la plataforma?\nEsto borrará sus predicciones y no podrá acceder más con ese email.`)) return;
+                const actionLabel = wasBanned ? 'Reactivar' : 'Bloquear (Lista Negra)';
+                const confirmMsg  = wasBanned 
+                    ? `¿Deseas reactivar el acceso para ${name}?`
+                    : `¿Bloquear a ${name}?\n\nAl bloquearlo:\n1. Se cierra su sesión inmediatamente.\n2. NO podrá volver a entrar aunque recargue la página.\n3. Sus datos actuales se mantienen pero quedan inactivos.`;
+
+                if (!confirm(confirmMsg)) return;
 
                 showLoader();
-                const { error } = await supabase.from('users').delete().eq('id', uid);
+                // En lugar de borrar (delete), actualizamos el campo is_banned
+                const { error } = await supabase
+                    .from('users')
+                    .update({ is_banned: !wasBanned })
+                    .eq('id', uid);
+
                 if (error) {
                     hideLoader();
-                    alert('Error al eliminar: ' + error.message);
+                    alert('Error en la operación: ' + error.message);
                     return;
                 }
                 await loadUsersGrid();
