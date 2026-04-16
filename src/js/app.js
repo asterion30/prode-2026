@@ -55,6 +55,7 @@ const btnAdminExport = document.getElementById("btn-admin-export");
 const btnMobileGrid = document.getElementById("btn-mobile-grid");
 const btnCloseSidebar = document.getElementById("btn-close-sidebar");
 const sidebarPredictions = document.getElementById("sidebar-predictions");
+const checkShowInactive = document.getElementById("check-show-inactive");
 
 // =======================
 // THEME LOGIC
@@ -357,6 +358,12 @@ if (btnNavUsers) {
     btnNavUsers.addEventListener('click', async () => {
         setActiveNav(btnNavUsers, usersView);
         await loadUsersGrid();
+    });
+}
+
+if (checkShowInactive) {
+    checkShowInactive.addEventListener('change', () => {
+        loadUsersGrid();
     });
 }
 
@@ -1294,11 +1301,17 @@ async function loadUsersGrid() {
 
         if (error) throw error;
 
-        const users = rawUsers.filter(u => (u.alias || '').toLowerCase() !== 'asterion30');
+        let users = rawUsers.filter(u => (u.alias || '').toLowerCase() !== 'asterion30');
+
+        // Filtrado por inactivos
+        const showInactive = checkShowInactive ? checkShowInactive.checked : false;
+        if (!showInactive) {
+            users = users.filter(u => u.is_banned !== true);
+        }
 
         listEl.innerHTML = "";
         if (!users || users.length === 0) {
-            listEl.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-slate-500">No hay usuarios</td></tr>`;
+            listEl.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-slate-500">No hay usuarios para mostrar</td></tr>`;
             hideLoader();
             return;
         }
@@ -1386,16 +1399,25 @@ async function loadUsersGrid() {
         const btnExportUsers = document.getElementById("btn-export-users-csv");
         if (btnExportUsers) {
             btnExportUsers.onclick = () => {
-                let csvContent = "Posicion;Nombre;Apellido;Legajo;Puntaje;Fecha Registro\r\n";
-                users.forEach((u, i) => {
+                const showInactive = checkShowInactive ? checkShowInactive.checked : false;
+                let usersToExport = users;
+                
+                // Si no está checkeado, exportar solo activos
+                if (!showInactive) {
+                    usersToExport = users.filter(u => u.is_banned !== true);
+                }
+
+                let csvContent = "Posicion;Nombre;Apellido;Legajo;Puntaje;Estado;Fecha Registro\r\n";
+                usersToExport.forEach((u, i) => {
                     const dateDesc = new Date(u.created_at).toLocaleDateString('es-AR');
-                    csvContent += `"${i+1}";"${u.nombre||''}";"${u.apellido||''}";"${u.legajo||''}";"${u.score||0}";"${dateDesc}"\r\n`;
+                    const estado   = u.is_banned ? 'BLOQUEADO' : 'ACTIVO';
+                    csvContent += `"${i+1}";"${u.nombre||''}";"${u.apellido||''}";"${u.legajo||''}";"${u.score||0}";"${estado}";"${dateDesc}"\r\n`;
                 });
                 const bom  = new Uint8Array([0xEF, 0xBB, 0xBF]);
                 const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
-                link.download = `Usuarios_${new Date().toISOString().split('T')[0]}.csv`;
+                link.download = `Usuarios_${showInactive ? 'Todos' : 'Activos'}_${new Date().toISOString().split('T')[0]}.csv`;
                 link.click();
             };
         }
