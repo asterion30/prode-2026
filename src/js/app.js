@@ -97,6 +97,9 @@ let matchesState = [];
 let predictionsState = {};
 let isAppInitialized = false;
 let currentStandingsGroup = 'A'; // grupo activo en la vista de posiciones
+let usersCurrentPage = 0;
+const USERS_PER_PAGE = 15;
+let cachedUsers = []; // Para paginación local en memoria
 
 // ADMIN STATE — se setea al iniciar la sesión
 let IS_SUPER_ADMIN = false;  // solo asterion30
@@ -1296,7 +1299,7 @@ async function loadUsersGrid() {
     try {
         const { data: rawUsers, error } = await supabase
             .from('users')
-            .select('id, nombre, apellido, legajo, alias, score, created_at, is_banned')
+            .select('id, nombre, apellido, legajo, alias, email, score, created_at, is_banned')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -1309,109 +1312,145 @@ async function loadUsersGrid() {
             users = users.filter(u => u.is_banned !== true);
         }
 
-        listEl.innerHTML = "";
         if (!users || users.length === 0) {
             listEl.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-slate-500">No hay usuarios para mostrar</td></tr>`;
+            document.getElementById("users-pagination-info").textContent = "Sin usuarios";
+            document.getElementById("btn-users-prev").disabled = true;
+            document.getElementById("btn-users-next").disabled = true;
             hideLoader();
             return;
         }
 
-        users.forEach((u, i) => {
-            const dateStr    = new Date(u.created_at).toLocaleDateString('es-AR');
-            const nombre     = escapeHTML(u.nombre   || u.alias || '—');
-            const apellido   = escapeHTML(u.apellido || '—');
-            const legajo     = escapeHTML(u.legajo   || '—');
-            const isBanned   = u.is_banned === true;
+        cachedUsers = users; // Guardar para exportación y controles
+        renderUsersTablePage();
+    } catch(e) {
+        console.error("Error loading users grid", e);
+    } finally {
+        hideLoader();
+    }
+}
 
-            const tr = document.createElement("tr");
-            tr.className = `border-slate-700/50 hover:bg-slate-800/30 transition-colors ${isBanned ? 'opacity-50 grayscale' : ''}`;
-            tr.innerHTML = `
-                <td class="px-3 py-3 text-center text-slate-500 text-sm">${i + 1}</td>
-                <td class="px-3 py-3 font-semibold ${isBanned ? 'text-red-400' : 'text-slate-200'} text-sm">
-                    ${nombre} ${isBanned ? '<span class="text-[10px] bg-red-900/40 px-1 rounded ml-1">BLOQUEADO</span>' : ''}
-                </td>
-                <td class="px-3 py-3 font-semibold text-slate-200 text-sm">${apellido}</td>
-                <td class="px-3 py-3 text-slate-400 text-sm font-mono">${legajo}</td>
-                <td class="px-3 py-3 text-slate-500 text-xs hidden md:table-cell">—</td>
-                <td class="px-3 py-3 text-slate-400 text-xs hidden sm:table-cell">${dateStr}</td>
-                <td class="px-3 py-3 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                        <button data-uid="${u.id}" class="btn-edit-user bg-slate-700 hover:bg-brand-600 text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1" title="Editar">
-                            <i class="ph-bold ph-pencil-simple"></i>
-                        </button>
-                        ${IS_ADMIN ? `
-                        <button data-uid="${u.id}" data-name="${nombre} ${apellido}" data-alias="${escapeHTML(u.alias || '')}" data-banned="${isBanned}" class="btn-delete-user ${isBanned ? 'bg-green-900/60 hover:bg-green-600 text-green-300' : 'bg-red-900/60 hover:bg-red-600 text-red-300'} hover:text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1" title="${isBanned ? 'Reactivar' : 'Bloquear (Lista Negra)'}">
-                            <i class="ph-bold ${isBanned ? 'ph-user-plus' : 'ph-user-minus'}"></i>
-                        </button>` : ''}
-                    </div>
-                </td>
-            `;
-            listEl.appendChild(tr);
+function renderUsersTablePage() {
+    const listEl = document.getElementById("users-table-list");
+    if (!listEl) return;
+
+    const start = usersCurrentPage * USERS_PER_PAGE;
+    const end = start + USERS_PER_PAGE;
+    const pageUsers = cachedUsers.slice(start, end);
+
+    listEl.innerHTML = "";
+    pageUsers.forEach((u, i) => {
+        const absoluteIndex = start + i + 1;
+        const dateStr    = new Date(u.created_at).toLocaleDateString('es-AR');
+        const nombre     = escapeHTML(u.nombre   || u.alias || '—');
+        const apellido   = escapeHTML(u.apellido || '—');
+        const legajo     = escapeHTML(u.legajo   || '—');
+        const isBanned   = u.is_banned === true;
+
+        const tr = document.createElement("tr");
+        tr.className = `border-slate-700/50 hover:bg-slate-800/30 transition-colors ${isBanned ? 'opacity-50 grayscale' : ''}`;
+        tr.innerHTML = `
+            <td class="px-3 py-3 text-center text-slate-500 text-sm">${absoluteIndex}</td>
+            <td class="px-3 py-3 font-semibold ${isBanned ? 'text-red-400' : 'text-slate-200'} text-sm">
+                ${nombre} ${isBanned ? '<span class="text-[10px] bg-red-900/40 px-1 rounded ml-1">BLOQUEADO</span>' : ''}
+            </td>
+            <td class="px-3 py-3 font-semibold text-slate-200 text-sm">${apellido}</td>
+            <td class="px-3 py-3 text-slate-400 text-sm font-mono">${legajo}</td>
+            <td class="px-3 py-3 text-center text-xs hidden md:table-cell">
+                ${u.email ? `<a href="mailto:${u.email}" class="text-brand-500 hover:text-brand-400 transition-colors" title="Enviar correo a ${u.email}"><i class="ph-bold ph-envelope-simple text-lg"></i></a>` : '—'}
+            </td>
+            <td class="px-3 py-3 text-slate-400 text-xs hidden sm:table-cell">${dateStr}</td>
+            <td class="px-3 py-3 text-center">
+                <div class="flex items-center justify-center gap-2">
+                    <button data-uid="${u.id}" class="btn-edit-user bg-slate-700 hover:bg-brand-600 text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1" title="Editar">
+                        <i class="ph-bold ph-pencil-simple"></i>
+                    </button>
+                    ${IS_ADMIN ? `
+                    <button data-uid="${u.id}" data-name="${nombre} ${apellido}" data-alias="${escapeHTML(u.alias || '')}" data-banned="${isBanned}" class="btn-delete-user ${isBanned ? 'bg-green-900/60 hover:bg-green-600 text-green-300' : 'bg-red-900/60 hover:bg-red-600 text-red-300'} hover:text-white text-xs font-bold py-1 px-2 rounded-lg transition-all flex items-center gap-1" title="${isBanned ? 'Reactivar' : 'Bloquear (Lista Negra)'}">
+                        <i class="ph-bold ${isBanned ? 'ph-user-plus' : 'ph-user-minus'}"></i>
+                    </button>` : ''}
+                </div>
+            </td>
+        `;
+        listEl.appendChild(tr);
+    });
+
+    // Event listeners para botones generados dinámicamente
+    listEl.querySelectorAll('.btn-edit-user').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const uid = btn.dataset.uid;
+            const user = cachedUsers.find(u => u.id === uid);
+            if (user) openEditModal(user);
         });
+    });
 
-        // Botones editar
-        listEl.querySelectorAll('.btn-edit-user').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const uid = btn.dataset.uid;
-                const user = users.find(u => u.id === uid);
-                if (user) openEditModal(user);
-            });
+    listEl.querySelectorAll('.btn-delete-user').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const uid      = btn.dataset.uid;
+            const name     = btn.dataset.name;
+            const targetAlias = (btn.dataset.alias || '').toLowerCase();
+            const wasBanned   = btn.dataset.banned === 'true';
+
+            if (targetAlias === SUPER_ADMIN_ALIAS) {
+                alert('No es posible bloquear al superadministrador.');
+                return;
+            }
+
+            const confirmMsg  = wasBanned 
+                ? `¿Deseas reactivar el acceso para ${name}?`
+                : `¿Bloquear a ${name}?\n\nAl bloquearlo:\n1. Se cierra su sesión inmediatamente.\n2. NO podrá volver a entrar aunque recargue la página.\n3. Sus datos actuales se mantienen pero quedan inactivos.`;
+
+            if (!confirm(confirmMsg)) return;
+
+            showLoader();
+            const { error } = await supabase
+                .from('users')
+                .update({ is_banned: !wasBanned })
+                .eq('id', uid);
+
+            if (error) {
+                hideLoader();
+                alert('Error en la operación: ' + error.message);
+                return;
+            }
+            await loadUsersGrid();
         });
+    });
 
-        // Botones eliminar — admin puede borrar a cualquiera excepto al superadmin
-        listEl.querySelectorAll('.btn-delete-user').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const uid      = btn.dataset.uid;
-                const name     = btn.dataset.name;
-                const targetAlias = (btn.dataset.alias || '').toLowerCase();
-                const wasBanned   = btn.dataset.banned === 'true';
+    // Actualizar controles de paginación
+    const total = cachedUsers.length;
+    const lastPos = Math.min(end, total);
+    document.getElementById("users-pagination-info").textContent = `Mostrando ${start + 1}-${lastPos} de ${total}`;
+    
+    document.getElementById("btn-users-prev").disabled = usersCurrentPage === 0;
+    document.getElementById("btn-users-next").disabled = end >= total;
+}
 
-                // Protección: nadie puede eliminar al superadmin
-                if (targetAlias === SUPER_ADMIN_ALIAS) {
-                    alert('No es posible bloquear al superadministrador.');
-                    return;
-                }
-
-                const actionLabel = wasBanned ? 'Reactivar' : 'Bloquear (Lista Negra)';
-                const confirmMsg  = wasBanned 
-                    ? `¿Deseas reactivar el acceso para ${name}?`
-                    : `¿Bloquear a ${name}?\n\nAl bloquearlo:\n1. Se cierra su sesión inmediatamente.\n2. NO podrá volver a entrar aunque recargue la página.\n3. Sus datos actuales se mantienen pero quedan inactivos.`;
-
-                if (!confirm(confirmMsg)) return;
-
-                showLoader();
-                // En lugar de borrar (delete), actualizamos el campo is_banned
-                const { error } = await supabase
-                    .from('users')
-                    .update({ is_banned: !wasBanned })
-                    .eq('id', uid);
-
-                if (error) {
-                    hideLoader();
-                    alert('Error en la operación: ' + error.message);
-                    return;
-                }
-                await loadUsersGrid();
-            });
-        });
+// Configuración de botones previos/siguientes una sola vez
+const btnPrev = document.getElementById("btn-users-prev");
+const btnNext = document.getElementById("btn-users-next");
+if (btnPrev && btnNext) {
+    btnPrev.onclick = () => { if (usersCurrentPage > 0) { usersCurrentPage--; renderUsersTablePage(); } };
+    btnNext.onclick = () => { if ((usersCurrentPage + 1) * USERS_PER_PAGE < cachedUsers.length) { usersCurrentPage++; renderUsersTablePage(); } };
+}
 
         // Exportar CSV
         const btnExportUsers = document.getElementById("btn-export-users-csv");
         if (btnExportUsers) {
             btnExportUsers.onclick = () => {
                 const showInactive = checkShowInactive ? checkShowInactive.checked : false;
-                let usersToExport = users;
+                let usersToExport = cachedUsers;
                 
                 // Si no está checkeado, exportar solo activos
                 if (!showInactive) {
-                    usersToExport = users.filter(u => u.is_banned !== true);
+                    usersToExport = cachedUsers.filter(u => u.is_banned !== true);
                 }
 
-                let csvContent = "Posicion;Nombre;Apellido;Legajo;Puntaje;Estado;Fecha Registro\r\n";
+                let csvContent = "Posicion;Nombre;Apellido;Legajo;Email;Puntaje;Estado;Fecha Registro\r\n";
                 usersToExport.forEach((u, i) => {
                     const dateDesc = new Date(u.created_at).toLocaleDateString('es-AR');
                     const estado   = u.is_banned ? 'BLOQUEADO' : 'ACTIVO';
-                    csvContent += `"${i+1}";"${u.nombre||''}";"${u.apellido||''}";"${u.legajo||''}";"${u.score||0}";"${estado}";"${dateDesc}"\r\n`;
+                    csvContent += `"${i+1}";"${u.nombre||''}";"${u.apellido||''}";"${u.legajo||''}";"${u.email||''}";"${u.score||0}";"${estado}";"${dateDesc}"\r\n`;
                 });
                 const bom  = new Uint8Array([0xEF, 0xBB, 0xBF]);
                 const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });

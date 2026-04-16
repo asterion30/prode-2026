@@ -236,6 +236,18 @@
                                     <tbody id="users-table-list" class="divide-y divide-slate-700/50"></tbody>
                                 </table>
                             </div>
+                            <!-- Pagination Controls -->
+                            <div class="flex justify-between items-center px-4 py-3 bg-slate-800/30 border-t border-slate-700/50">
+                                <span id="users-pagination-info" class="text-xs text-slate-500">Cargando...</span>
+                                <div class="flex gap-2">
+                                    <button id="btn-users-prev" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs font-bold transition-all flex items-center gap-1">
+                                        <i class="ph-bold ph-caret-left"></i> Anterior
+                                    </button>
+                                    <button id="btn-users-next" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs font-bold transition-all flex items-center gap-1">
+                                        Siguiente <i class="ph-bold ph-caret-right"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </main>
