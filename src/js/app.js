@@ -1434,35 +1434,28 @@ if (btnPrev && btnNext) {
     btnNext.onclick = () => { if ((usersCurrentPage + 1) * USERS_PER_PAGE < cachedUsers.length) { usersCurrentPage++; renderUsersTablePage(); } };
 }
 
-        // Exportar CSV
-        const btnExportUsers = document.getElementById("btn-export-users-csv");
-        if (btnExportUsers) {
-            btnExportUsers.onclick = () => {
-                const showInactive = checkShowInactive ? checkShowInactive.checked : false;
-                let usersToExport = cachedUsers;
-                
-                // Si no está checkeado, exportar solo activos
-                if (!showInactive) {
-                    usersToExport = cachedUsers.filter(u => u.is_banned !== true);
-                }
-
-                let csvContent = "Posicion;Nombre;Apellido;Legajo;Email;Puntaje;Estado;Fecha Registro\r\n";
-                usersToExport.forEach((u, i) => {
-                    const dateDesc = new Date(u.created_at).toLocaleDateString('es-AR');
-                    const estado   = u.is_banned ? 'BLOQUEADO' : 'ACTIVO';
-                    csvContent += `"${i+1}";"${u.nombre||''}";"${u.apellido||''}";"${u.legajo||''}";"${u.email||''}";"${u.score||0}";"${estado}";"${dateDesc}"\r\n`;
-                });
-                const bom  = new Uint8Array([0xEF, 0xBB, 0xBF]);
-                const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `Usuarios_${showInactive ? 'Todos' : 'Activos'}_${new Date().toISOString().split('T')[0]}.csv`;
-                link.click();
-            };
+// Exportar CSV (se configura fuera para no duplicar listeners)
+const btnExportUsers = document.getElementById("btn-export-users-csv");
+if (btnExportUsers) {
+    btnExportUsers.onclick = () => {
+        const showInactive = document.getElementById("check-show-inactive")?.checked || false;
+        let usersToExport = cachedUsers;
+        
+        if (!showInactive) {
+            usersToExport = cachedUsers.filter(u => u.is_banned !== true);
         }
-    } catch(e) {
-        console.error("Error loading users grid", e);
-    } finally {
-        hideLoader();
-    }
+
+        let csvContent = "Posicion;Nombre;Apellido;Legajo;Email;Puntaje;Estado;Fecha Registro\r\n";
+        usersToExport.forEach((u, i) => {
+            const dateDesc = new Date(u.created_at).toLocaleDateString('es-AR');
+            const estado   = u.is_banned ? 'BLOQUEADO' : 'ACTIVO';
+            csvContent += `"${i+1}";"${u.nombre||''}";"${u.apellido||''}";"${u.legajo||''}";"${u.email||''}";"${u.score||0}";"${estado}";"${dateDesc}"\r\n`;
+        });
+        const bom  = new Uint8Array([0xEF, 0xBB, 0xBF]);
+        const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Usuarios_${showInactive ? 'Todos' : 'Activos'}_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+    };
 }
