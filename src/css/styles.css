@@ -49,14 +49,14 @@
 }
 
 .light-theme {
-  --brand-50: #f1f5f9;
-  --brand-100: #e2e8f0;
+  --brand-50: #334155;
+  --brand-100: #475569;
   --brand-500: #178582;  /* Elegant Teal */
   --brand-600: #0f766e;
   --brand-700: #0d9488;
   --brand-900: #BFA181;  /* Muted Gold */
-  --brand-dark: #cbd5e1; /* Steel Grey background */
-  --brand-card: #f1f5f9; /* Light grey cards */
+  --brand-dark: #1e293b; /* Graphite/Slate-800 background */
+  --brand-card: #334155; /* Slightly lighter cards */
 
   --slate-50: #f8fafc;
   --slate-100: #f1f5f9;
@@ -65,31 +65,31 @@
   --slate-400: #94a3b8;
   --slate-500: #64748b;
   --slate-600: #475569;
-  --slate-700: #0A1828;  /* Classic Navy */
-  --slate-800: #334155;
-  --slate-900: #1e293b;
-  --slate-950: #0f172a;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
 
-  color-scheme: light;
+  color-scheme: dark; /* Now it's effectively a dark scheme */
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Elegant Premium Overrides (Steel Grey Base) */
+/* Elegant Premium Overrides (Dim/Graphite Base) */
 .light-theme {
-    background-color: #cbd5e1; /* Muted stone/steel background */
-    color: #334155;
+    background-color: #1e293b; /* Dim Graphite background */
+    color: #e2e8f0;
 }
 
 .light-theme .text-white, 
 .light-theme h1, 
 .light-theme h2, 
 .light-theme h3 { 
-    color: #0A1828 !important; 
+    color: #ffffff !important; 
 }
 
 .light-theme .text-slate-400, 
 .light-theme .text-slate-300 { 
-    color: #64748b !important; 
+    color: #94a3b8 !important; 
 }
 
 /* Gold medals and trophies */
@@ -104,15 +104,15 @@
 .light-theme .bg-slate-900,
 .light-theme .bg-slate-950,
 .light-theme #prizes-banner { 
-    background-color: #f1f5f9 !important; 
-    border: 1px solid #94a3b8 !important;
-    box-shadow: 0 4px 6px -1px rgba(10, 24, 40, 0.05) !important;
+    background-color: #334155 !important; 
+    border: 1px solid #475569 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
 
 .light-theme .bg-slate-800 *,
 .light-theme .bg-slate-900 *,
 .light-theme .bg-slate-700 * {
-    color: #0A1828 !important;
+    color: #e2e8f0 !important;
 }
 
 .light-theme .bg-brand-dark, 
@@ -123,22 +123,22 @@
 .light-theme .bg-brand-card, 
 .light-theme .bg-brand-card\/80,
 .light-theme #sidebar-predictions { 
-    background-color: #e2e8f0 !important; 
-    border-color: #cbd5e1 !important;
+    background-color: #1e293b !important; 
+    border-color: #334155 !important;
 }
 
 .light-theme .border-slate-800,
 .light-theme .border-slate-700,
 .light-theme .border-white\/5 { 
-    border-color: #e2e8f0 !important; 
+    border-color: #334155 !important; 
 }
 
 /* Nav & Buttons with Teal Accent */
 .light-theme .nav-btn.text-slate-400 { color: #64748b !important; }
 .light-theme .nav-btn.text-brand-500 { 
     color: #ffffff !important; 
-    background-color: #0A1828 !important;
-    border-color: #0A1828 !important;
+    background-color: #178582 !important;
+    border-color: #178582 !important;
 }
 .light-theme .nav-btn:hover { background-color: #178582 !important; color: white !important; }
 
@@ -164,9 +164,9 @@
     border: 1px solid #e2e8f0 !important;
 }
 
-/* Glitch text needs to be Navy in light mode */
+/* Glitch text needs to be Light in Dim mode */
 .light-theme .glitch-text {
-    color: #0A1828 !important;
+    color: #ffffff !important;
 }
 
 
@@ -293,43 +293,44 @@ body, #app-container, header, main, aside, section, div, button, input {
     font-size: 1.25rem;
 }
 
-/* Light Theme refinements */
+/* Light Theme (Dim Mode) refinements */
 .light-theme #app-container {
-    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
-    background-color: #cbd5e1;
-    border-color: #94a3b8;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+    background-color: #1e293b;
+    border-color: #334155;
 }
 
 .light-theme #prizes-banner {
-    background-color: #ffffff !important;
+    background-color: #1e293b !important;
     border: 1px solid #178582 !important;
-    box-shadow: 0 4px 6px -1px rgba(10, 24, 40, 0.05) !important;
+    box-shadow: 0 4px 15px rgba(23, 133, 130, 0.2) !important;
 }
 
 .light-theme .glitch-text {
-    color: #0A1828 !important;
+    color: #ffffff !important;
     text-shadow: none !important;
 }
 
 .light-theme ::-webkit-scrollbar-thumb {
-    background: #94a3b8;
+    background: #475569;
 }
 
 .light-theme ::-webkit-scrollbar-track {
-    background: #cbd5e1;
+    background: #1e293b;
 }
 
 /* Prediction Cards & Inputs */
 .light-theme .prediction-card,
 .light-theme .bg-slate-800\/50.p-3.rounded-xl {
-    background-color: #f1f5f9 !important;
-    border: 1px solid #94a3b8 !important;
+    background-color: #334155 !important;
+    border: 1px solid #475569 !important;
 }
 
+
 .light-theme input {
-    background-color: #f1f5f9 !important;
-    border-color: #e2e8f0 !important;
-    color: #0A1828 !important;
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #ffffff !important;
 }
 
 .light-theme input::placeholder {
@@ -338,12 +339,12 @@ body, #app-container, header, main, aside, section, div, button, input {
 
 /* Sidebar Specifics */
 .light-theme #sidebar-predictions {
-    background-color: #e2e8f0 !important;
-    border-left: 1px solid #94a3b8;
+    background-color: #1e293b !important;
+    border-left: 1px solid #334155;
 }
 
 .light-theme #sidebar-predictions h2 {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #334155;
 }
 
 @media (max-width: 768px) {
