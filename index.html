@@ -35,23 +35,31 @@
                 <p class="text-slate-400">Pronostica los resultados del Mundial</p>
             </div>
 
+            <!-- Login/Register Tabs -->
+            <div class="flex p-1 bg-slate-900/50 border border-slate-700/50 rounded-2xl mb-6 w-full max-w-sm">
+                <button id="tab-login" class="flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all bg-brand-600 text-white shadow-lg">Entrar</button>
+                <button id="tab-register" class="flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white">Registrarse</button>
+            </div>
+
             <form id="login-form" class="w-full max-w-sm space-y-3">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label for="nombre-input" class="block text-xs font-medium text-slate-400 mb-1">Nombre</label>
-                        <input type="text" id="nombre-input" required placeholder="Juan" autocomplete="given-name"
-                            class="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white text-sm">
+                <div id="register-fields" class="hidden animate-fadeIn">
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label for="nombre-input" class="block text-xs font-medium text-slate-400 mb-1">Nombre</label>
+                            <input type="text" id="nombre-input" placeholder="Juan" autocomplete="given-name"
+                                class="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white text-sm">
+                        </div>
+                        <div>
+                            <label for="apellido-input" class="block text-xs font-medium text-slate-400 mb-1">Apellido</label>
+                            <input type="text" id="apellido-input" placeholder="Pérez" autocomplete="family-name"
+                                class="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white text-sm">
+                        </div>
                     </div>
                     <div>
-                        <label for="apellido-input" class="block text-xs font-medium text-slate-400 mb-1">Apellido</label>
-                        <input type="text" id="apellido-input" required placeholder="Pérez" autocomplete="family-name"
+                        <label for="legajo-input" class="block text-xs font-medium text-slate-400 mb-1">N° de Legajo</label>
+                        <input type="text" id="legajo-input" placeholder="Ej: 12345" autocomplete="off" inputmode="numeric"
                             class="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white text-sm">
                     </div>
-                </div>
-                <div>
-                    <label for="legajo-input" class="block text-xs font-medium text-slate-400 mb-1">N° de Legajo</label>
-                    <input type="text" id="legajo-input" required placeholder="Ej: 12345" autocomplete="off" inputmode="numeric"
-                        class="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white text-sm">
                 </div>
                 <div>
                     <label for="email-input" class="block text-xs font-medium text-slate-400 mb-1">Correo Electrónico</label>
@@ -60,7 +68,7 @@
                 </div>
 
                 <button type="submit" id="btn-login-submit" class="w-full mt-1 py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl shadow-lg transition-all active:scale-[0.98] flex justify-center items-center gap-2">
-                    <span>Registrarme / Entrar</span>
+                    <span id="submit-text">¡Entrar ahora!</span>
                     <span>&rarr;</span>
                 </button>
             </form>

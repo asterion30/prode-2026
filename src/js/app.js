@@ -62,6 +62,12 @@ const checkShowInactive = document.getElementById("check-show-inactive");
 // =======================
 const btnThemeToggle = document.getElementById("btn-theme-toggle");
 const themeToggleIcon = document.getElementById("theme-toggle-icon");
+const tabLogin = document.getElementById("tab-login");
+const tabRegister = document.getElementById("tab-register");
+const registerFields = document.getElementById("register-fields");
+const submitText = document.getElementById("submit-text");
+
+let loginMode = 'login'; // 'login' or 'register'
 
 function initTheme() {
     const savedTheme = localStorage.getItem("prode_theme") || "dark";
@@ -91,6 +97,29 @@ if (btnThemeToggle) {
 }
 
 initTheme();
+
+// =======================
+// LOGIN MODES (Login vs Register)
+// =======================
+if (tabLogin && tabRegister && registerFields && submitText) {
+    tabLogin.addEventListener("click", () => {
+        loginMode = 'login';
+        tabLogin.className = "flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all bg-brand-600 text-white shadow-lg";
+        tabRegister.className = "flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white";
+        registerFields.classList.add("hidden");
+        submitText.textContent = "¡Entrar ahora!";
+        loginError.classList.add("hidden");
+    });
+
+    tabRegister.addEventListener("click", () => {
+        loginMode = 'register';
+        tabRegister.className = "flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all bg-brand-600 text-white shadow-lg";
+        tabLogin.className = "flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white";
+        registerFields.classList.remove("hidden");
+        submitText.textContent = "Registrarme y Entrar";
+        loginError.classList.add("hidden");
+    });
+}
 
 // STATE
 let matchesState = [];
@@ -265,9 +294,9 @@ loginForm.addEventListener("submit", async (e) => {
 
     if (!email) return;
 
-    // Validación básica
-    if (!nombre || !apellido || !legajo) {
-        loginError.textContent = "Por favor completá todos los campos: Nombre, Apellido, Legajo y Correo.";
+    // Validación según modo
+    if (loginMode === 'register' && (!nombre || !apellido || !legajo)) {
+        loginError.textContent = "Por favor completá todos los campos para registrarte: Nombre, Apellido y Legajo.";
         loginError.classList.remove("hidden");
         return;
     }
