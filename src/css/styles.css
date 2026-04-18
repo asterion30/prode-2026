@@ -49,16 +49,16 @@
 }
 
 .light-theme {
-  --brand-50: #f0fdfa;
-  --brand-100: #ccfbf1;
+  --brand-50: #f1f5f9;
+  --brand-100: #e2e8f0;
   --brand-500: #178582;  /* Elegant Teal */
   --brand-600: #0f766e;
   --brand-700: #0d9488;
   --brand-900: #BFA181;  /* Muted Gold */
-  --brand-dark: #FFFFFF;
-  --brand-card: #f8fafc;
+  --brand-dark: #cbd5e1; /* Steel Grey background */
+  --brand-card: #f1f5f9; /* Light grey cards */
 
-  --slate-50: #ffffff;
+  --slate-50: #f8fafc;
   --slate-100: #f1f5f9;
   --slate-200: #e2e8f0;
   --slate-300: #cbd5e1;
@@ -66,17 +66,18 @@
   --slate-500: #64748b;
   --slate-600: #475569;
   --slate-700: #0A1828;  /* Classic Navy */
-  --slate-800: #1e293b;
-  --slate-900: #0f172a;
-  --slate-950: #020617;
+  --slate-800: #334155;
+  --slate-900: #1e293b;
+  --slate-950: #0f172a;
 
   color-scheme: light;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Elegant Premium Overrides (#0A1828 + #178582 + #BFA181) */
+/* Elegant Premium Overrides (Steel Grey Base) */
 .light-theme {
-    background-color: #f8fafc;
-    color: #475569;
+    background-color: #cbd5e1; /* Muted stone/steel background */
+    color: #334155;
 }
 
 .light-theme .text-white, 
@@ -103,8 +104,8 @@
 .light-theme .bg-slate-900,
 .light-theme .bg-slate-950,
 .light-theme #prizes-banner { 
-    background-color: #ffffff !important; 
-    border: 1px solid #178582 !important;
+    background-color: #f1f5f9 !important; 
+    border: 1px solid #94a3b8 !important;
     box-shadow: 0 4px 6px -1px rgba(10, 24, 40, 0.05) !important;
 }
 
@@ -122,8 +123,8 @@
 .light-theme .bg-brand-card, 
 .light-theme .bg-brand-card\/80,
 .light-theme #sidebar-predictions { 
-    background-color: #ffffff !important; 
-    border-color: #e2e8f0 !important;
+    background-color: #e2e8f0 !important; 
+    border-color: #cbd5e1 !important;
 }
 
 .light-theme .border-slate-800,
@@ -186,6 +187,14 @@ input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 30px #1e293b inset !important;
     -webkit-text-fill-color: white !important;
     transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Global transitions for theme switching */
+body, #app-container, header, main, aside, section, div, button, input {
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Animations */
@@ -286,8 +295,9 @@ input:-webkit-autofill:active {
 
 /* Light Theme refinements */
 .light-theme #app-container {
-    box-shadow: 0 10px 50px rgba(10, 24, 40, 0.08);
-    background-color: #FFFFFF;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+    background-color: #cbd5e1;
+    border-color: #94a3b8;
 }
 
 .light-theme #prizes-banner {
@@ -302,18 +312,18 @@ input:-webkit-autofill:active {
 }
 
 .light-theme ::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
+    background: #94a3b8;
 }
 
 .light-theme ::-webkit-scrollbar-track {
-    background: #FFFFFF;
+    background: #cbd5e1;
 }
 
 /* Prediction Cards & Inputs */
 .light-theme .prediction-card,
 .light-theme .bg-slate-800\/50.p-3.rounded-xl {
-    background-color: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
+    background-color: #f1f5f9 !important;
+    border: 1px solid #94a3b8 !important;
 }
 
 .light-theme input {
@@ -328,8 +338,8 @@ input:-webkit-autofill:active {
 
 /* Sidebar Specifics */
 .light-theme #sidebar-predictions {
-    background-color: #ffffff !important;
-    border-left: 1px solid #e2e8f0;
+    background-color: #e2e8f0 !important;
+    border-left: 1px solid #94a3b8;
 }
 
 .light-theme #sidebar-predictions h2 {
