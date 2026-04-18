@@ -11,7 +11,7 @@
 El proyecto ha completado su fase de escalabilidad administrativa y refinamiento de UX, alcanzando su madurez total:
 
 - **Días calendario involucrados:** 20 días (30 de marzo a 18 de abril).
-- **Esfuerzo Total Acumulado:** ~60 horas de desarrollo efectivo.
+- **Esfuerzo Total Acumulado:** ~56 horas de desarrollo efectivo.
 - **Estado de Infraestructura:** 100% Serverless (Vercel + Supabase) sin costes fijos de mantenimiento.
 
 ---
