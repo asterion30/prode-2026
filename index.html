@@ -1,322 +1,141 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prode Mundial 2026</title>
-    
-    <!-- Security Headers (Grade A) -->
+    <title>SaPaTE</title>
 
-    <script src="https://unpkg.com/@phosphor-icons/web" crossorigin="anonymous" integrity="sha384-J7cw2fbG1T4C5MirTVUxsZGaMfw2m0XsCgOQEqUvB1OF9VIsHWuZF1GmyVRzs7eu"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web" crossorigin="anonymous"
+        integrity="sha384-J7cw2fbG1T4C5MirTVUxsZGaMfw2m0XsCgOQEqUvB1OF9VIsHWuZF1GmyVRzs7eu"></script>
+
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <link rel="icon" type="image/webp" href="/assets/cup.webp">
 
-    <!-- CSS (Processed by Vite/Tailwind) -->
+    <!-- Tailwind CSS Styles (Reused from the main project) -->
     <link rel="stylesheet" href="./src/css/styles.css">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"
+        crossorigin="anonymous">
 </head>
-<body class="bg-brand-dark text-white font-sans antialiased min-h-screen flex items-start sm:items-center justify-center">
 
-    <!-- App Container -->
-    <div id="app-container" class="w-full max-w-5xl md:h-[800px] flex flex-col md:flex-row relative shadow-2xl bg-brand-dark overflow-hidden sm:border sm:border-slate-800 sm:rounded-3xl sm:my-8 hide-scrollbar mx-auto">
-        
-        <!-- LOGIN VIEW -->
-        <section id="login-view" class="flex-1 w-full flex flex-col justify-start sm:justify-center items-center p-6 sm:p-10 z-10 transition-all duration-500 min-h-screen md:min-h-0">
-            <div class="mt-12 sm:mt-0 mb-8 text-center">
-                <div class="w-24 h-24 bg-brand-500/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)] overflow-hidden p-1">
-                    <img src="/assets/cup.webp" alt="Prode 2026" class="w-full h-full object-contain rounded-full drop-shadow-lg" />
-                </div>
-                <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">Prode 2026</h1>
-                <p class="text-slate-400">Pronostica los resultados del Mundial</p>
-            </div>
+<body class="bg-brand-dark text-white font-sans antialiased min-h-screen relative overflow-x-hidden flex flex-col p-6">
 
-            <!-- Login/Register Tabs -->
-            <div class="flex p-1 bg-slate-900/50 border border-slate-700/50 rounded-2xl mb-6 w-full max-w-sm">
-                <button id="tab-login" class="flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all bg-brand-600 text-white shadow-lg">Entrar</button>
-                <button id="tab-register" class="flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white">Registrarse</button>
-            </div>
-
-            <form id="login-form" class="w-full max-w-sm space-y-3">
-                <div id="register-fields" class="hidden animate-fadeIn">
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label for="nombre-input" class="block text-xs font-medium text-slate-400 mb-1">Nombre</label>
-                            <input type="text" id="nombre-input" placeholder="Juan" autocomplete="given-name"
-                                class="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white text-sm">
-                        </div>
-                        <div>
-                            <label for="apellido-input" class="block text-xs font-medium text-slate-400 mb-1">Apellido</label>
-                            <input type="text" id="apellido-input" placeholder="Pérez" autocomplete="family-name"
-                                class="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white text-sm">
-                        </div>
-                    </div>
-                    <div>
-                        <label for="legajo-input" class="block text-xs font-medium text-slate-400 mb-1">N° de Legajo</label>
-                        <input type="text" id="legajo-input" placeholder="Ej: 12345" autocomplete="off" inputmode="numeric"
-                            class="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white text-sm">
-                    </div>
-                </div>
-                <div>
-                    <label for="email-input" class="block text-xs font-medium text-slate-400 mb-1">Correo Electrónico</label>
-                    <input type="email" id="email-input" required placeholder="ejemplo@empresa.com" autocomplete="email"
-                        class="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-500 text-white text-sm">
-                </div>
-
-                <button type="submit" id="btn-login-submit" class="w-full mt-1 py-3 px-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl shadow-lg transition-all active:scale-[0.98] flex justify-center items-center gap-2">
-                    <span id="submit-text">¡Entrar ahora!</span>
-                    <span>&rarr;</span>
-                </button>
-            </form>
-            
-            <div id="login-error" class="mt-4 text-red-400 text-sm hidden text-center max-w-sm"></div>
-            <div id="login-success" class="mt-4 text-brand-500 text-sm hidden text-center max-w-sm"></div>
-        </section>
-
-        <!-- MAIN APP VIEW -->
-        <section id="main-view" class="flex-1 flex flex-col md:flex-row hidden h-full w-full">
-            
-            <!-- Left Column: Matches & Ranking -->
-            <div class="flex-1 flex flex-col relative h-full md:border-r border-slate-800">
-                <header class="bg-brand-card/80 backdrop-blur-md border-b border-slate-800 p-4 flex justify-between items-center sticky top-0 z-50">
-                    <div class="flex items-center gap-2">
-                        <img id="logo-cup" src="/assets/cup.webp" alt="Copa" class="w-6 h-6 object-contain drop-shadow cursor-pointer" />
-                        <h1 class="hidden sm:block font-bold text-lg">Prode 2026</h1>
-                        
-                        <div class="flex items-center gap-1 sm:gap-2 ml-1 sm:ml-4">
-                            <button id="nav-matches" title="Partidos" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-brand-500 bg-brand-500/10 font-bold text-sm transition-all border border-brand-500/20 flex items-center justify-center">
-                                <i class="ph-bold ph-soccer-ball md:hidden text-lg"></i>
-                                <span class="hidden md:inline">Partidos</span>
-                            </button>
-                            <button id="nav-grupos" title="Grupos" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
-                                <i class="ph-bold ph-users-three md:hidden text-lg"></i>
-                                <span class="hidden md:inline">Grupos</span>
-                            </button>
-                            <button id="nav-ranking" title="Ranking" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
-                                <i class="ph-bold ph-trophy text-lg"></i>
-                            </button>
-                            <button id="nav-users" title="Usuarios" class="nav-btn hidden px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent items-center justify-center">
-                                <i class="ph-bold ph-users text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 sm:gap-3">
-                        <button id="btn-theme-toggle" class="w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-brand-500 border border-slate-700 hover:bg-slate-700 transition-colors" title="Cambiar Tema">
-                            <i id="theme-toggle-icon" class="ph-bold ph-sun text-lg"></i>
-                        </button>
-                        <button id="btn-mobile-grid" class="md:hidden w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-brand-500 border border-slate-700">
-                            <i class="ph-bold ph-grid-four text-lg"></i>
-                        </button>
-                        <div class="text-right">
-                            <p id="user-alias-display" class="text-sm font-semibold text-white">Alias</p>
-                            <p id="user-points-display" class="text-xs text-brand-500 font-medium">0 pts</p>
-                        </div>
-                        <div class="hidden sm:flex relative w-10 h-10 rounded-full bg-slate-700 border-2 border-brand-500 overflow-hidden group cursor-pointer" title="Clic para cambiar tu foto">
-                            <img id="user-avatar-img" src="/assets/avatar.webp" alt="Avatar" class="w-full h-full object-cover transition-opacity group-hover:opacity-60" />
-                            <!-- Overlay cámara al hover -->
-                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                <i class="ph-bold ph-camera text-white text-base drop-shadow"></i>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                <main id="content-area" class="flex-1 overflow-y-auto p-4 space-y-6 pb-6 hide-scrollbar">
-                    <!-- Views will be injected here -->
-                    <div id="matches-view" class="space-y-4">
-                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-bold">Fixture</h2>
-                            <div class="flex gap-2">
-                                <div id="countdown-timer" class="hidden bg-slate-900 border border-slate-700 px-2 py-1 rounded text-[10px] text-brand-500"></div>
-                                <a href="/salud/index.html" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold">Primeros Auxilios</a>
-                            </div>
-                         </div>
-                         <div id="stage-tabs" class="flex gap-2 overflow-x-auto pb-2"></div>
-                         <div id="matches-list" class="space-y-4"></div>
-                    </div>
-
-                    <div id="grupos-view" class="hidden space-y-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <h2 class="text-xl font-bold">Tabla de Posiciones</h2>
-                            <span class="text-xs text-slate-500 italic">Se actualiza con los resultados cargados</span>
-                        </div>
-
-                        <!-- Selector de grupo -->
-                        <div id="group-selector" class="flex gap-2 flex-wrap pb-1">
-                            <!-- Botones de grupo generados por JS -->
-                        </div>
-
-                        <!-- Tabla del grupo seleccionado -->
-                        <div id="group-table-container">
-                            <!-- Contenido generado por JS -->
-                        </div>
-                    </div>
-
-                    <div id="ranking-view" class="hidden space-y-4">
-                         <div class="flex justify-between items-center">
-                            <h2 class="text-xl font-bold">Ranking General</h2>
-                            <div class="flex gap-2">
-                                <button id="btn-admin-test" class="hidden bg-yellow-600 hover:bg-yellow-500 text-white text-[10px] font-bold py-1 px-2 rounded transition-all">Test Score</button>
-                                <button id="btn-admin-reset" class="hidden bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold py-1 px-2 rounded transition-all">Reset Score</button>
-                                <button id="btn-admin-export" class="hidden bg-brand-600 hover:bg-brand-500 text-white text-[10px] font-bold py-1 px-2 rounded transition-all">Export RRHH</button>
-                                <button id="btn-export-csv" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold py-1 px-2 rounded transition-all flex items-center gap-1">
-                                    <i class="ph-bold ph-image"></i> Imagen
-                                </button>
-                                <button id="btn-show-prizes" class="bg-brand-600 hover:bg-brand-500 text-white text-[10px] font-bold py-1 px-2 rounded transition-all flex items-center gap-1">
-                                    <i class="ph-bold ph-gift"></i> Premios
-                                </button>
-                            </div>
-                         </div>
-
-                         <!-- Prizes Banner (Glitch Effect) -->
-                         <div id="prizes-banner" class="hidden relative overflow-hidden rounded-2xl border-2 border-brand-500 bg-slate-900 p-6 shadow-[0_0_20px_rgba(34,197,94,0.3)] animate-pulse">
-                             <div class="absolute inset-0 bg-brand-500/5 pointer-events-none"></div>
-                             <h3 class="text-lg font-black text-white mb-4 uppercase tracking-tighter glitch-text" data-text="PREMIOS DEL MUNDIAL">PREMIOS DEL MUNDIAL</h3>
-                             <ul class="space-y-3 font-mono text-sm">
-                                 <li class="flex justify-between items-center text-brand-400 border-b border-white/5 pb-2">
-                                     <span class="glitch-text" data-text="1° PUESTO">1° PUESTO</span>
-                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
-                                 </li>
-                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
-                                     <span class="glitch-text" data-text="2° PUESTO">2° PUESTO</span>
-                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
-                                 </li>
-                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
-                                     <span class="glitch-text" data-text="3° PUESTO">3° PUESTO</span>
-                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
-                                 </li>
-                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
-                                     <span class="glitch-text" data-text="4° PUESTO">4° PUESTO</span>
-                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
-                                 </li>
-                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
-                                     <span class="glitch-text" data-text="5° PUESTO">5° PUESTO</span>
-                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
-                                 </li>
-                             </ul>
-                             <div class="mt-4 text-[10px] text-slate-500 text-center uppercase tracking-widest italic flex items-center justify-center gap-2">
-                                 <i class="ph-bold ph-warning-circle"></i> Resolviendo interferencias...
-                             </div>
-                         </div>
-
-                         <div class="ranking-panel rounded-2xl overflow-hidden border">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-slate-800 text-slate-300">
-                                    <tr><th class="px-4 py-3">#</th><th class="px-4 py-3">Jugador</th><th class="px-4 py-3 text-right">Pts</th></tr>
-                                </thead>
-                                <tbody id="ranking-list" class="divide-y divide-slate-700"></tbody>
-                            </table>
-                         </div>
-                    </div>
-
-                    <div id="users-view" class="hidden space-y-4">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <h2 class="text-xl font-bold">Usuarios Registrados</h2>
-                            <div class="flex items-center gap-4 w-full sm:w-auto overflow-hidden">
-                                <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer hover:text-slate-200 transition-colors whitespace-nowrap">
-                                    <input type="checkbox" id="check-show-inactive" class="w-4 h-4 rounded border-slate-700 bg-slate-800 text-brand-600 focus:ring-brand-500">
-                                    Mostrar inactivos
-                                </label>
-                                <button id="btn-export-users-csv" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold py-2 px-4 rounded-xl transition-all shadow-lg flex items-center gap-2">
-                                    <i class="ph-bold ph-download-simple"></i>
-                                    Exportar CSV
-                                </button>
-                            </div>
-                        </div>
-                        <div class="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700/50">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm">
-                                    <thead class="bg-slate-800 text-slate-300">
-                                        <tr>
-                                            <th class="px-3 py-3 text-center w-10">#</th>
-                                            <th class="px-3 py-3">Nombre</th>
-                                            <th class="px-3 py-3">Apellido</th>
-                                            <th class="px-3 py-3">Legajo</th>
-                                            <th class="px-3 py-3 hidden md:table-cell">Email</th>
-                                            <th class="px-3 py-3 hidden sm:table-cell">Registro</th>
-                                            <th class="px-3 py-3 text-center">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="users-table-list" class="divide-y divide-slate-700/50"></tbody>
-                                </table>
-                            </div>
-                            <!-- Pagination Controls -->
-                            <div class="flex justify-between items-center px-4 py-3 bg-slate-800/30 border-t border-slate-700/50">
-                                <span id="users-pagination-info" class="text-xs text-slate-500">Cargando...</span>
-                                <div class="flex gap-2">
-                                    <button id="btn-users-prev" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs font-bold transition-all flex items-center gap-1">
-                                        <i class="ph-bold ph-caret-left"></i> Anterior
-                                    </button>
-                                    <button id="btn-users-next" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs font-bold transition-all flex items-center gap-1">
-                                        Siguiente <i class="ph-bold ph-caret-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            </div>
-            
-            <!-- Sidebar Predictions -->
-            <aside id="sidebar-predictions" class="w-full md:w-80 lg:w-96 bg-brand-dark/95 backdrop-blur-md md:bg-slate-900/50 h-full flex flex-col border-t md:border-t-0 border-slate-800 hidden md:flex">
-                <div class="p-4 border-b border-slate-800 flex justify-between items-center">
-                    <h2 class="font-bold">Mi Grilla</h2>
-                    <div class="flex items-center gap-2">
-                        <button id="btn-export-csv-mobile" class="md:hidden text-slate-400 hover:text-white" title="Exportar Imagen">
-                            <i class="ph-bold ph-image text-lg"></i>
-                        </button>
-                        <button id="btn-close-sidebar" class="md:hidden text-slate-400 hover:text-white">
-                            <i class="ph-bold ph-x text-lg"></i>
-                        </button>
-                    </div>
-                </div>
-                <div id="predictions-grid" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24 hide-scrollbar"></div>
-            </aside>
-        </section>
-        
-        <!-- Modal: Editar Usuario (solo admin) -->
-        <div id="modal-edit-user" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="ph-bold ph-pencil-simple text-brand-500"></i>
-                    Editar Usuario
-                </h3>
-                <input type="hidden" id="edit-user-id">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Nombre</label>
-                        <input type="text" id="edit-nombre" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm outline-none focus:ring-2 focus:ring-brand-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Apellido</label>
-                        <input type="text" id="edit-apellido" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm outline-none focus:ring-2 focus:ring-brand-500">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">N° de Legajo</label>
-                    <input type="text" id="edit-legajo" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm outline-none focus:ring-2 focus:ring-brand-500">
-                </div>
-                <p id="edit-user-error" class="text-red-400 text-xs hidden"></p>
-                <div class="flex gap-3 pt-2">
-                    <button id="btn-edit-cancel" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition-all">Cancelar</button>
-                    <button id="btn-edit-save" class="flex-1 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold transition-all flex items-center justify-center gap-2">
-                        <i class="ph-bold ph-floppy-disk"></i>Guardar
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Loading Overlay -->
-        <div id="global-loader" class="fixed inset-0 bg-brand-dark/90 backdrop-blur-sm z-[100] flex flex-col items-center justify-center hidden">
-            <p class="text-brand-500 font-medium animate-pulse">Cargando...</p>
+    <!-- Dynamic Background Effects -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-brand-500/20 rounded-full blur-[120px] mix-blend-screen animate-pulse"
+            style="animation-duration: 8s;"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-blue-600/10 rounded-full blur-[150px] mix-blend-screen animate-pulse"
+            style="animation-duration: 10s;"></div>
+        <div
+            class="absolute top-[40%] left-[30%] w-[30vw] h-[30vw] bg-purple-500/10 rounded-full blur-[100px] mix-blend-screen">
         </div>
     </div>
 
-    <!-- Entry Point -->
-    <script type="module" src="./src/js/app.js"></script>
+    <!-- Main Content Container -->
+    <main class="z-10 w-full max-w-6xl mx-auto flex-1 flex flex-col justify-center space-y-16 py-12">
+
+        <header class="text-center space-y-4">
+            <div
+                class="inline-flex items-center justify-center p-2 bg-slate-800/50 border border-slate-700 rounded-2xl mb-4 backdrop-blur-md">
+                <i class="ph-bold ph-rocket text-2xl text-brand-500 mr-2"></i>
+                <span class="text-sm font-bold tracking-widest uppercase text-slate-300">Portafolio & Ideas</span>
+            </div>
+            <h1
+                class="text-5xl md:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-slate-500 drop-shadow-sm">
+                SaPaTE
+            </h1>
+            <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto font-medium">
+                Un espacio centralizado para explorar ideas, proyectos activos y recursos útiles.
+            </p>
+        </header>
+
+        <!-- Bento Grid Layout for Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+
+            <!-- Prode 2026 -->
+            <a href="/prode.html"
+                class="group relative bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 hover:border-brand-500/80 rounded-[2rem] p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(34,197,94,0.3)] overflow-hidden flex flex-col">
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-brand-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                </div>
+
+                <div class="relative z-10 flex flex-col h-full">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-brand-500/20 text-brand-500 flex items-center justify-center mb-6 border border-brand-500/30 group-hover:scale-110 group-hover:bg-brand-500 group-hover:text-white transition-all duration-500 shadow-lg shadow-brand-500/20">
+                        <i class="ph-bold ph-trophy text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-3 text-white">Prode 2026</h2>
+                    <p class="text-slate-400 flex-1 leading-relaxed">
+                        Plataforma interactiva para pronosticar los resultados del Mundial. Participá y competí en el
+                        ranking general en tiempo real.
+                    </p>
+                    <div class="mt-8 flex items-center text-brand-500 font-bold group-hover:gap-3 gap-2 transition-all">
+                        <span>Ingresar a la app</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Primeros Auxilios -->
+            <a href="/salud/index.html"
+                class="group relative bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 hover:border-red-500/80 rounded-[2rem] p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(239,68,68,0.3)] overflow-hidden flex flex-col">
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                </div>
+
+                <div class="relative z-10 flex flex-col h-full">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-red-500/20 text-red-500 flex items-center justify-center mb-6 border border-red-500/30 group-hover:scale-110 group-hover:bg-red-500 group-hover:text-white transition-all duration-500 shadow-lg shadow-red-500/20">
+                        <i class="ph-bold ph-heartbeat text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-3 text-white">Primeros Auxilios</h2>
+                    <p class="text-slate-400 flex-1 leading-relaxed">
+                        Manual interactivo de emergencias médicas. Información vital, RCP e instrucciones paso a paso
+                        para salvar vidas.
+                    </p>
+                    <div class="mt-8 flex items-center text-red-500 font-bold group-hover:gap-3 gap-2 transition-all">
+                        <span>Consultar manual</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </div>
+                </div>
+            </a>
+
+            <!-- YouTube Channel -->
+            <a href="https://www.youtube.com/channel/UCiA7Vm6_3q3c2CupeEC2G_Q" target="_blank" rel="noopener noreferrer"
+                class="group relative bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 hover:border-[#FF0000]/80 rounded-[2rem] p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(255,0,0,0.3)] overflow-hidden flex flex-col">
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-[#FF0000]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                </div>
+
+                <div class="relative z-10 flex flex-col h-full">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-[#FF0000]/20 text-[#FF0000] flex items-center justify-center mb-6 border border-[#FF0000]/30 group-hover:scale-110 group-hover:bg-[#FF0000] group-hover:text-white transition-all duration-500 shadow-lg shadow-[#FF0000]/20">
+                        <i class="ph-bold ph-youtube-logo text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-3 text-white">Canal de YouTube</h2>
+                    <p class="text-slate-400 flex-1 leading-relaxed">
+                        Mi canal con contenido audiovisual, tutoriales, ideas en desarrollo y cobertura de nuevos
+                        proyectos.
+                    </p>
+                    <div class="mt-8 flex items-center text-[#FF0000] font-bold group-hover:gap-3 gap-2 transition-all">
+                        <span>Ver videos</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <footer class="z-10 text-center py-6 border-t border-slate-800/50 text-slate-500 text-sm mt-auto w-full">
+        <p>&copy; 2026 SaPaTE Creado con dedicación para centralizar ideas.</p>
+    </footer>
+
 </body>
+
 </html>
