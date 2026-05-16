@@ -944,7 +944,7 @@ const handleExportRankingImage = async () => {
     try {
         const btnOriginalText = btnExportCsv ? btnExportCsv.innerHTML : '';
         if (btnExportCsv) {
-            btnExportCsv.innerHTML = '<i class="ph ph-spinner animate-spin"></i>';
+            btnExportCsv.innerHTML = '<span class="spin-loader"></span>';
             btnExportCsv.disabled = true;
         }
         

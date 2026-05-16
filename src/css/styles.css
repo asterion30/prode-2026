@@ -224,6 +224,21 @@ button, input {
     animation: fadeIn 0.4s ease-out forwards;
 }
 
+/* Pure CSS spinner — reemplaza ph-spinner para no cargar Phosphor regular */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.spin-loader {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+    vertical-align: middle;
+}
+
 
 
 /* Legacy RGBA classes for html2canvas compatibility (avoids Tailwind 4 oklch/color-mix) */
