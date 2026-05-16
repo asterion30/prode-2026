@@ -13,9 +13,10 @@
     <link rel="preload" as="image" href="/assets/cup.webp" fetchpriority="high">
 
     <!-- DNS prefetch for external resources -->
-    <link rel="dns-prefetch" href="https://unpkg.com">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
     <!-- CSS (Processed by Vite/Tailwind) -->
     <link rel="stylesheet" href="./src/css/styles.css">
@@ -25,8 +26,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"></noscript>
 
-    <!-- Phosphor Icons: defer para no bloquear renderizado -->
-    <script src="https://unpkg.com/@phosphor-icons/web" crossorigin="anonymous" defer></script>
+
 </head>
 <body class="bg-brand-dark text-white font-sans antialiased min-h-screen flex items-start sm:items-center justify-center">
 
