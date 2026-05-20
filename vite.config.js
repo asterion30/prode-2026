@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
+import sri from 'vite-plugin-sri-gen';
 
 export default defineConfig({
+  plugins: [sri()],
   root: './',
   base: '/',
   build: {
@@ -15,6 +17,9 @@ export default defineConfig({
         drop_console: true,      // Eliminar console.log en producción
         drop_debugger: true,
         pure_funcs: ['console.info', 'console.debug'],
+      },
+      format: {
+        comments: false,         // Remueve comentarios sospechosos/sensibles (CWE-615)
       },
     },
     cssMinify: true,

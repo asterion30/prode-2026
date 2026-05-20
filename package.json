@@ -15,7 +15,8 @@
     "postcss": "^8.5.9",
     "tailwindcss": "^4.2.2",
     "terser": "^5.47.1",
-    "vite": "^8.0.8"
+    "vite": "^8.0.8",
+    "vite-plugin-sri-gen": "^1.5.0"
   },
   "scripts": {
     "dev": "vite",
