@@ -10,18 +10,10 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="description" content="Prode Mundial 2026: Pronostica los resultados del Mundial, compite con amigos y gana premios. La mejor plataforma para seguir el fixture y las posiciones.">
     <link rel="icon" type="image/webp" href="/assets/cup.webp">
+    <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/assets/cup.webp">
     <link rel="preload" as="image" href="/assets/cup.webp" fetchpriority="high">
     <meta name="theme-color" content="#0f172a">
-    <script>
-        // Inyección temprana del manifest para que Chrome en Android lo detecte a tiempo
-        if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-            const manifest = document.createElement('link');
-            manifest.rel = 'manifest';
-            manifest.href = '/manifest.json';
-            document.head.appendChild(manifest);
-        }
-    </script>
     <!-- DNS prefetch for external resources -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
@@ -131,7 +123,7 @@
                                 <i class="ph-bold ph-camera text-white text-base drop-shadow"></i>
                             </div>
                         </div>
-                        <button id="btn-install-pwa" class="hidden w-8 h-8 items-center justify-center bg-blue-500/10 rounded-lg text-blue-400 border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all ml-1 sm:ml-2" title="Instalar App">
+                        <button id="btn-install-pwa" class="flex md:hidden w-8 h-8 items-center justify-center bg-blue-500/10 rounded-lg text-blue-400 border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all ml-1 sm:ml-2" title="Instalar App">
                             <i class="ph-bold ph-download-simple text-lg"></i>
                         </button>
                         <button id="btn-logout" class="w-8 h-8 flex items-center justify-center bg-red-500/10 rounded-lg text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all ml-1 sm:ml-2" title="Cerrar Sesión">
@@ -476,14 +468,6 @@
         // Lógica del botón de instalar PWA personalizado
         let deferredPrompt;
         const installBtn = document.getElementById('btn-install-pwa');
-
-        // Solo mostrar el botón si estamos en un dispositivo móvil
-        if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-            if (installBtn) {
-                installBtn.classList.remove('hidden');
-                installBtn.classList.add('flex');
-            }
-        }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             // Evitar el prompt automático
