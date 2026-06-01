@@ -10,8 +10,10 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="description" content="Prode Mundial 2026: Pronostica los resultados del Mundial, compite con amigos y gana premios. La mejor plataforma para seguir el fixture y las posiciones.">
     <link rel="icon" type="image/webp" href="/assets/cup.webp">
+    <link rel="apple-touch-icon" href="/assets/cup.webp">
     <link rel="preload" as="image" href="/assets/cup.webp" fetchpriority="high">
-
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f172a">
     <!-- DNS prefetch for external resources -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
@@ -457,5 +459,18 @@
 
     <!-- Entry Point -->
     <script type="module" src="./src/js/app.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(reg => {
+                    console.log('PWA Service Worker registrado con éxito', reg.scope);
+                }).catch(err => {
+                    console.error('Error al registrar el Service Worker', err);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
