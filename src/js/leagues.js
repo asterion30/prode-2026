@@ -88,7 +88,7 @@ export async function fetchLeagueDetails(leagueId) {
         .select(`
             user_id,
             status,
-            users:user_id ( id, alias, nombre, apellido, avatar_url, score )
+            users ( id, alias, nombre, apellido, avatar_url, score )
         `)
         .eq('group_id', leagueId);
         
