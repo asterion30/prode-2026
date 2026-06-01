@@ -211,3 +211,15 @@ export async function updateAvatarUrl(userId, url) {
     if (!error) currentAvatarUrl = url;
     return error;
 }
+
+/**
+ * Cierra la sesión (Soporta Google Auth y Mock).
+ */
+export async function logOut() {
+    if (isMock) {
+        localStorage.removeItem(MOCK_STORAGE_KEY);
+    } else {
+        await supabase.auth.signOut();
+    }
+    location.reload();
+}

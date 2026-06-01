@@ -92,16 +92,16 @@
                         <h1 class="hidden sm:block font-bold text-lg">Prode 2026</h1>
                         
                         <div class="flex items-center gap-1 sm:gap-2 ml-1 sm:ml-4">
-                            <button id="nav-matches" title="Partidos" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-brand-500 bg-brand-500/10 font-bold text-sm transition-all border border-brand-500/20 flex items-center justify-center">
-                                <i class="ph-bold ph-soccer-ball md:hidden text-lg"></i>
+                            <button id="nav-matches" title="Partidos" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-brand-500 bg-brand-500/10 font-bold text-sm transition-all border border-brand-500/20 flex items-center justify-center gap-1.5">
+                                <i class="ph-bold ph-soccer-ball text-lg"></i>
                                 <span class="hidden md:inline">Partidos</span>
                             </button>
-                            <button id="nav-grupos" title="Grupos" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
-                                <i class="ph-bold ph-users-three md:hidden text-lg"></i>
+                            <button id="nav-grupos" title="Grupos" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center gap-1.5">
+                                <i class="ph-bold ph-users-three text-lg"></i>
                                 <span class="hidden md:inline">Grupos</span>
                             </button>
-                            <button id="nav-legendary" title="Liga Legendaria" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
-                                <i class="ph-bold ph-shield-star md:hidden text-lg"></i>
+                            <button id="nav-legendary" title="Liga Legendaria" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center gap-1.5">
+                                <i class="ph-bold ph-shield-star text-lg"></i>
                                 <span class="hidden md:inline">Liga Legendaria</span>
                             </button>
                             <button id="nav-ranking" title="Ranking" aria-label="Ver Ranking" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
@@ -130,6 +130,9 @@
                                 <i class="ph-bold ph-camera text-white text-base drop-shadow"></i>
                             </div>
                         </div>
+                        <button id="btn-logout" class="w-8 h-8 flex items-center justify-center bg-red-500/10 rounded-lg text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all ml-1 sm:ml-2" title="Cerrar Sesión">
+                            <i class="ph-bold ph-sign-out text-lg"></i>
+                        </button>
                     </div>
                 </header>
 
@@ -210,9 +213,14 @@
                                 </h2>
                                 <p id="league-details-desc" class="text-xs text-slate-400 font-medium"></p>
                             </div>
-                            <div class="text-right">
-                                <span class="text-[9px] text-slate-500 uppercase font-bold block">Código de Invitación</span>
-                                <span id="league-details-code" class="text-sm font-mono text-brand-400 font-bold bg-brand-900/30 px-2 py-1 rounded"></span>
+                            <div class="text-right flex flex-col items-end gap-2">
+                                <div>
+                                    <span class="text-[9px] text-slate-500 uppercase font-bold block">Código de Invitación</span>
+                                    <span id="league-details-code" class="text-sm font-mono text-brand-400 font-bold bg-brand-900/30 px-2 py-1 rounded"></span>
+                                </div>
+                                <button id="btn-share-league" class="text-[10px] bg-brand-600 hover:bg-brand-500 text-white font-bold py-1.5 px-3 rounded-lg flex items-center gap-1 transition-all shadow-lg hidden">
+                                    <i class="ph-bold ph-paper-plane-tilt"></i> Invitar
+                                </button>
                             </div>
                         </div>
 

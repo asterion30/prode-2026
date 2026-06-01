@@ -11,7 +11,7 @@ function escapeHTML(str) {
         .replace(/'/g, "&#039;");
 }
 
-import { initAuth, loginWithEmail, getCurrentUser, updateAvatarUrl, signInWithSocial, loginMockUser } from "./auth.js";
+import { initAuth, loginWithEmail, getCurrentUser, updateAvatarUrl, signInWithSocial, loginMockUser, logOut } from "./auth.js";
 import { subscribeToMatches, subscribeToUserPredictions, savePrediction } from "./matches.js";
 import { supabase, isMock } from "./supabase-config.js";
 import { subscribeToRanking } from "./ranking.js";
@@ -316,6 +316,18 @@ if (btnMockLogin) {
         }
         showLoader();
         loginMockUser(alias);
+    });
+}
+
+if (btnLogout) {
+    btnLogout.addEventListener("click", async () => {
+        showLoader();
+        try {
+            await logOut();
+        } catch(err) {
+            hideLoader();
+            alert("Error al cerrar sesión: " + err.message);
+        }
     });
 }
 
@@ -1682,6 +1694,28 @@ async function renderLeagueDetailsView(league) {
     nameEl.textContent = league.name;
     descEl.textContent = league.description || "Sin descripción.";
     codeEl.textContent = league.invite_code;
+
+    const btnShareLeague = document.getElementById("btn-share-league");
+    if (btnShareLeague) {
+        btnShareLeague.classList.remove("hidden");
+        btnShareLeague.onclick = async () => {
+            const shareText = `¡Únete a mi Liga Legendaria "${league.name}" en Prode Mundial 2026!\n\nCódigo de Invitación: ${league.invite_code}\n\nIngresa aquí: ${window.location.origin}`;
+            
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Invitación a Liga Legendaria',
+                        text: shareText
+                    });
+                } catch (err) {
+                    console.log("Compartir cancelado o no soportado.", err);
+                }
+            } else {
+                // Fallback a cliente de correo nativo si Web Share no está disponible
+                window.location.href = `mailto:?subject=${encodeURIComponent("Invitación a Liga Legendaria")}&body=${encodeURIComponent(shareText)}`;
+            }
+        };
+    }
 
     if (league.prizes) {
         prizesEl.textContent = league.prizes;
