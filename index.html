@@ -133,6 +133,20 @@
                 <div id="content-area" class="flex-1 overflow-y-auto p-4 space-y-6 pb-6 hide-scrollbar">
                     <!-- Views will be injected here -->
                     <div id="matches-view" class="space-y-4">
+                        <!-- ESTADIO VIRTUAL (Streaming) -->
+                        <div id="streaming-container" class="rounded-2xl overflow-hidden border border-brand-500/30 bg-slate-900 shadow-[0_0_15px_rgba(34,197,94,0.15)] relative mb-2">
+                            <div class="bg-slate-900/80 backdrop-blur-sm px-4 py-2 border-b border-white/5 flex justify-between items-center cursor-pointer" id="btn-toggle-stream">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-red-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded animate-pulse flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full"></span> VIVO</span>
+                                    <span class="text-xs font-bold text-slate-300"><i class="ph-bold ph-monitor-play text-brand-400"></i> Estadio Virtual</span>
+                                </div>
+                                <i id="stream-icon" class="ph-bold ph-caret-down text-slate-400"></i>
+                            </div>
+                            <div id="stream-wrapper" class="hidden aspect-video w-full transition-all duration-300 bg-black">
+                                <!-- Reproductor de Twitch. El parent es vital para que funcione -->
+                                <iframe src="https://player.twitch.tv/?channel=twitchsports&parent=sapate.net.ar&parent=localhost&muted=true" frameborder="0" allowfullscreen="true" scrolling="no" height="100%" width="100%" class="w-full h-full"></iframe>
+                            </div>
+                        </div>
                          <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-bold">Fixture</h2>
                             <div class="flex gap-2">
@@ -261,41 +275,7 @@
                                 <button id="btn-export-csv" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold py-1 px-2 rounded transition-all flex items-center gap-1">
                                     <i class="ph-bold ph-image"></i> Imagen
                                 </button>
-                                <button id="btn-show-prizes" class="bg-brand-600 hover:bg-brand-500 text-white text-[10px] font-bold py-1 px-2 rounded transition-all flex items-center gap-1">
-                                    <i class="ph-bold ph-gift"></i> Premios
-                                </button>
                             </div>
-                         </div>
-
-                         <!-- Prizes Banner (Glitch Effect) -->
-                         <div id="prizes-banner" class="hidden relative overflow-hidden rounded-2xl border-2 border-brand-500 bg-slate-900 p-6 shadow-[0_0_20px_rgba(34,197,94,0.3)] animate-pulse">
-                             <div class="absolute inset-0 bg-brand-500/5 pointer-events-none"></div>
-                             <h3 class="text-lg font-black text-white mb-4 uppercase tracking-tighter glitch-text" data-text="PREMIOS DEL MUNDIAL">PREMIOS DEL MUNDIAL</h3>
-                             <ul class="space-y-3 font-mono text-sm">
-                                 <li class="flex justify-between items-center text-brand-400 border-b border-white/5 pb-2">
-                                     <span class="glitch-text" data-text="1° PUESTO">1° PUESTO</span>
-                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
-                                 </li>
-                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
-                                     <span class="glitch-text" data-text="2° PUESTO">2° PUESTO</span>
-                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
-                                 </li>
-                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
-                                     <span class="glitch-text" data-text="3° PUESTO">3° PUESTO</span>
-                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
-                                 </li>
-                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
-                                     <span class="glitch-text" data-text="4° PUESTO">4° PUESTO</span>
-                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
-                                 </li>
-                                 <li class="flex justify-between items-center text-slate-300 border-b border-white/5 pb-2">
-                                     <span class="glitch-text" data-text="5° PUESTO">5° PUESTO</span>
-                                     <span class="text-white font-bold glitch-text" data-text="SORPRESA">SORPRESA</span>
-                                 </li>
-                             </ul>
-                             <div class="mt-4 text-[10px] text-slate-500 text-center uppercase tracking-widest italic flex items-center justify-center gap-2">
-                                 <i class="ph-bold ph-warning-circle"></i> Resolviendo interferencias...
-                             </div>
                          </div>
 
                          <div class="ranking-panel rounded-2xl overflow-hidden border">

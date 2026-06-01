@@ -420,12 +420,20 @@ if (checkShowInactive) {
     });
 }
 
-const btnShowPrizes = document.getElementById("btn-show-prizes");
-const prizesBanner  = document.getElementById("prizes-banner");
+const btnToggleStream = document.getElementById("btn-toggle-stream");
+const streamWrapper = document.getElementById("stream-wrapper");
+const streamIcon = document.getElementById("stream-icon");
 
-if (btnShowPrizes && prizesBanner) {
-    btnShowPrizes.addEventListener('click', () => {
-        prizesBanner.classList.toggle('hidden');
+if (btnToggleStream && streamWrapper && streamIcon) {
+    btnToggleStream.addEventListener("click", () => {
+        const isHidden = streamWrapper.classList.contains("hidden");
+        if (isHidden) {
+            streamWrapper.classList.remove("hidden");
+            streamIcon.classList.replace("ph-caret-down", "ph-caret-up");
+        } else {
+            streamWrapper.classList.add("hidden");
+            streamIcon.classList.replace("ph-caret-up", "ph-caret-down");
+        }
     });
 }
 
@@ -812,6 +820,19 @@ function renderRanking(ranking) {
         // Usar displayName (nombre apellido) si está disponible, sino alias
         const displayName = user.displayName || user.alias || 'Usuario';
 
+        let badgesHtml = "";
+        if (user.score === 0) {
+            badgesHtml += `<span class="text-[12px] ml-1 cursor-help" title="🥶 El Mufa (0 Puntos)">🥶</span>`;
+        } else if (index === 0 && user.score > 0) {
+            badgesHtml += `<span class="text-[12px] ml-1 cursor-help" title="🔮 El Nostradamus (Líder Absoluto)">🔮</span>`;
+        }
+
+        let chicanaBtn = "";
+        if (myRankIndex !== -1 && index === myRankIndex - 1 && user.score > 0) {
+            const msg = encodeURIComponent(`¡Ojo por el retrovisor ${displayName}! Te estoy pisando los talones en el Ranking General del Prode Mundial 2026 🚗💨😈`);
+            chicanaBtn = `<a href="https://api.whatsapp.com/send?text=${msg}" target="_blank" class="ml-2 inline-flex items-center justify-center bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500 hover:text-white transition-all px-1.5 py-0.5 rounded text-[9px] uppercase font-bold" title="Chicanear por WhatsApp"><i class="ph-bold ph-whatsapp-logo mr-1 text-sm"></i> Chicana</a>`;
+        }
+
         const tr = document.createElement("tr");
         const isMe = currentUser && currentUser.id === user.id;
 
@@ -820,8 +841,10 @@ function renderRanking(ranking) {
             <td class="px-4 py-3 text-center ${isMedal ? 'text-lg' : 'text-slate-400 font-medium'}">
                 ${rankContent}
             </td>
-            <td class="px-4 py-3 font-semibold ${index === 0 ? 'text-brand-500' : 'text-slate-200'} flex items-center gap-2">
+            <td class="px-4 py-3 font-semibold flex items-center flex-wrap gap-1 ${index === 0 ? 'text-brand-500' : 'text-slate-200'}">
                 ${escapeHTML(displayName)}
+                ${badgesHtml}
+                ${chicanaBtn}
             </td>
             <td class="px-4 py-3 text-right">
                 <span class="bg-brand-900 text-brand-500 font-bold px-2 py-1 rounded">
@@ -1738,6 +1761,8 @@ async function renderLeagueDetailsView(league) {
         membersCountEl.textContent = `${members.length} miembro(s)`;
         rankingBody.innerHTML = "";
 
+        const myIndex = members.findIndex(m => m.id === user.id);
+
         members.forEach((member, index) => {
             const isMedal = index < 3;
             let rankContent = `${index + 1}`;
@@ -1747,6 +1772,19 @@ async function renderLeagueDetailsView(league) {
 
             const displayName = member.alias || (member.nombre + ' ' + member.apellido).trim() || "Usuario";
             const isMe = member.id === user.id;
+
+            let badgesHtml = "";
+            if (member.score === 0) {
+                badgesHtml += `<span class="text-[12px] ml-1 cursor-help" title="🥶 El Mufa (0 Puntos)">🥶</span>`;
+            } else if (index === 0 && member.score > 0) {
+                badgesHtml += `<span class="text-[12px] ml-1 cursor-help" title="🔮 El Nostradamus (Líder Absoluto)">🔮</span>`;
+            }
+
+            let chicanaBtn = "";
+            if (myIndex !== -1 && index === myIndex - 1 && member.score > 0) {
+                const msg = encodeURIComponent(`¡Ojo por el retrovisor ${displayName}! Te estoy pisando los talones en el Prode Mundial 2026 🚗💨😈`);
+                chicanaBtn = `<a href="https://api.whatsapp.com/send?text=${msg}" target="_blank" class="ml-2 inline-flex items-center justify-center bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500 hover:text-white transition-all px-1.5 py-0.5 rounded text-[9px] uppercase font-bold" title="Chicanear por WhatsApp"><i class="ph-bold ph-whatsapp-logo mr-1 text-sm"></i> Chicana</a>`;
+            }
 
             const tr = document.createElement("tr");
             tr.className = `border-slate-800 transition-colors ${isMe ? 'bg-brand-500/10 text-white font-bold' : (index % 2 === 0 ? '' : 'bg-slate-800/20')}`;
@@ -1773,9 +1811,13 @@ async function renderLeagueDetailsView(league) {
             tr.innerHTML = `
                 <td class="px-4 py-3 text-center font-bold ${isMedal ? 'text-lg' : 'text-slate-400'}">${rankContent}</td>
                 <td class="px-4 py-3">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         ${flagHtml}
-                        <span class="text-xs sm:text-sm line-clamp-1">${escapeHTML(displayName)} ${isMe ? ' (Vos)' : ''}</span>
+                        <div class="flex items-center">
+                            <span class="text-xs sm:text-sm line-clamp-1">${escapeHTML(displayName)} ${isMe ? ' (Vos)' : ''}</span>
+                            ${badgesHtml}
+                            ${chicanaBtn}
+                        </div>
                     </div>
                 </td>
                 <td class="px-4 py-3 text-right font-black text-slate-200">${member.score || 0} pts</td>
