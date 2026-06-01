@@ -122,6 +122,9 @@
                                 <i class="ph-bold ph-camera text-white text-base drop-shadow"></i>
                             </div>
                         </div>
+                        <button id="btn-install-pwa" class="hidden w-8 h-8 items-center justify-center bg-blue-500/10 rounded-lg text-blue-400 border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all ml-1 sm:ml-2" title="Instalar App">
+                            <i class="ph-bold ph-download-simple text-lg"></i>
+                        </button>
                         <button id="btn-logout" class="w-8 h-8 flex items-center justify-center bg-red-500/10 rounded-lg text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all ml-1 sm:ml-2" title="Cerrar Sesión">
                             <i class="ph-bold ph-sign-out text-lg"></i>
                         </button>
@@ -459,7 +462,7 @@
     <!-- Entry Point -->
     <script type="module" src="./src/js/app.js"></script>
 
-    <!-- PWA Service Worker Registration & Mobile Only Manifest -->
+    <!-- PWA Service Worker Registration & Custom Install Logic -->
     <script>
         // Cargar el manifest.json SOLO si es un dispositivo móvil
         if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
@@ -469,6 +472,45 @@
             document.head.appendChild(manifestLink);
         }
 
+        // Lógica del botón de instalar PWA personalizado
+        let deferredPrompt;
+        const installBtn = document.getElementById('btn-install-pwa');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Evitar el prompt automático
+            e.preventDefault();
+            deferredPrompt = e;
+            // Mostrar botón
+            if (installBtn) {
+                installBtn.classList.remove('hidden');
+                installBtn.classList.add('flex');
+            }
+        });
+
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('App instalada por el usuario');
+                    }
+                    deferredPrompt = null;
+                    installBtn.classList.add('hidden');
+                    installBtn.classList.remove('flex');
+                }
+            });
+        }
+
+        window.addEventListener('appinstalled', () => {
+            if (installBtn) {
+                installBtn.classList.add('hidden');
+                installBtn.classList.remove('flex');
+            }
+            console.log('PWA ha sido instalada en el sistema.');
+        });
+
+        // Registro del Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').then(reg => {
