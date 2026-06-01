@@ -514,7 +514,7 @@ function renderGroupsView() {
                         ${groupData.map((team, idx) => {
                             const isQualifying = idx < 2;
                             const flagSrc = team.flag !== 'un'
-                                ? `https://flagcdn.com/w40/${team.flag}.png`
+                                ? `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${team.flag}.svg`
                                 : null;
                             const flagHtml = flagSrc
                                 ? `<img src="${flagSrc}" alt="${escapeHTML(team.team)}" class="w-5 h-auto rounded-sm object-cover border border-slate-600" onerror="this.style.display='none'">`
@@ -660,7 +660,7 @@ function renderMatches() {
             if (flagName === 'un') {
                 return `<div class="w-7 h-7 mt-1 bg-slate-700 rounded-full flex items-center justify-center border border-slate-600 shadow-inner"><i class="ph-bold ph-question text-slate-400"></i></div>`;
             }
-            return `<img src="https://flagcdn.com/w40/${flagName}.png" alt="${teamName}" class="w-7 h-auto drop-shadow-md rounded-[2px] mt-1 object-cover border border-slate-700">`;
+            return `<img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${flagName}.svg" alt="${teamName}" class="w-7 h-auto drop-shadow-md rounded-[2px] mt-1 object-cover border border-slate-700">`;
         };
 
         let statusBadge = '';
