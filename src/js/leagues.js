@@ -82,26 +82,34 @@ export async function fetchUserLeagues(userId) {
  * Obtiene los detalles de una liga y sus miembros (ranking)
  */
 export async function fetchLeagueDetails(leagueId) {
-    // Obtenemos los miembros y hacemos join con la tabla public.users para traer sus puntajes
-    const { data, error } = await supabase
+    // Obtenemos los miembros
+    const { data: membersData, error: memError } = await supabase
         .from('group_members')
-        .select(`
-            user_id,
-            status,
-            users ( id, alias, nombre, apellido, avatar_url, score )
-        `)
+        .select('user_id, status')
         .eq('group_id', leagueId);
         
-    if (error) throw error;
+    if (memError) throw memError;
+    if (!membersData || membersData.length === 0) return [];
+
+    const userIds = membersData.map(m => m.user_id);
+
+    // Obtenemos los datos de los usuarios correspondientes
+    const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('id, alias, nombre, apellido, avatar_url, score')
+        .in('id', userIds);
+
+    if (usersError) throw usersError;
 
     // Aplanamos y ordenamos por puntaje
-    const members = data
-        .filter(m => m.users) // Por si algún usuario fue borrado de public.users
-        .map(m => ({
-            ...m.users,
+    const members = membersData.map(m => {
+        const u = usersData.find(usr => usr.id === m.user_id);
+        return {
+            ...u,
             status: m.status
-        }))
-        .sort((a, b) => (b.score || 0) - (a.score || 0));
+        };
+    }).filter(m => m.id) // Asegurar que encontramos al usuario
+      .sort((a, b) => (b.score || 0) - (a.score || 0));
 
     return members;
 }
