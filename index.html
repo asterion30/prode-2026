@@ -477,11 +477,19 @@
         let deferredPrompt;
         const installBtn = document.getElementById('btn-install-pwa');
 
+        // Solo mostrar el botón si estamos en un dispositivo móvil
+        if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            if (installBtn) {
+                installBtn.classList.remove('hidden');
+                installBtn.classList.add('flex');
+            }
+        }
+
         window.addEventListener('beforeinstallprompt', (e) => {
             // Evitar el prompt automático
             e.preventDefault();
             deferredPrompt = e;
-            // Mostrar botón
+            // Mostrar botón por si no se mostró
             if (installBtn) {
                 installBtn.classList.remove('hidden');
                 installBtn.classList.add('flex');
@@ -495,10 +503,13 @@
                     const { outcome } = await deferredPrompt.userChoice;
                     if (outcome === 'accepted') {
                         console.log('App instalada por el usuario');
+                        installBtn.classList.add('hidden');
+                        installBtn.classList.remove('flex');
                     }
                     deferredPrompt = null;
-                    installBtn.classList.add('hidden');
-                    installBtn.classList.remove('flex');
+                } else {
+                    // Fallback instructions for iOS or when prompt is not available
+                    alert("Para instalar la aplicación:\n\n📱 En iPhone/iPad: Toca el botón 'Compartir' (cuadrado con flecha) y selecciona 'Agregar a Inicio'.\n\n🤖 En Android: Toca los 3 puntos del navegador y selecciona 'Instalar aplicación' o 'Añadir a pantalla de inicio'.");
                 }
             });
         }
