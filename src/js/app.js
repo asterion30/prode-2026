@@ -131,7 +131,7 @@ let IS_ADMIN = false;        // asterion30 + delegados
 
 // El superadmin se identifica por el alias 'asterion30' en la BD (campo alias).
 const SUPER_ADMIN_ALIAS = 'asterion30';
-const SUPER_ADMIN_EMAIL = '';  // email del superadmin (opcional)
+const SUPER_ADMIN_EMAIL = 'asterion30@gmail.com';  // email del superadmin
 
 // Admins delegados con acceso permanente (por email).
 // Se activan automaticamente cuando el usuario se registra con ese e-mail.
