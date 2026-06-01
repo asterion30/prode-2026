@@ -13,6 +13,15 @@
     <link rel="apple-touch-icon" href="/assets/cup.webp">
     <link rel="preload" as="image" href="/assets/cup.webp" fetchpriority="high">
     <meta name="theme-color" content="#0f172a">
+    <script>
+        // Inyección temprana del manifest para que Chrome en Android lo detecte a tiempo
+        if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            const manifest = document.createElement('link');
+            manifest.rel = 'manifest';
+            manifest.href = '/manifest.json';
+            document.head.appendChild(manifest);
+        }
+    </script>
     <!-- DNS prefetch for external resources -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
@@ -464,14 +473,6 @@
 
     <!-- PWA Service Worker Registration & Custom Install Logic -->
     <script>
-        // Cargar el manifest.json SOLO si es un dispositivo móvil
-        if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-            const manifestLink = document.createElement('link');
-            manifestLink.rel = 'manifest';
-            manifestLink.href = '/manifest.json';
-            document.head.appendChild(manifestLink);
-        }
-
         // Lógica del botón de instalar PWA personalizado
         let deferredPrompt;
         const installBtn = document.getElementById('btn-install-pwa');
