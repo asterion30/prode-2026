@@ -21,12 +21,9 @@
     <!-- CSS (Processed by Vite/Tailwind) -->
     <link rel="stylesheet" href="./src/css/styles.css">
 
-    <!-- Google Fonts: cargado via JS al final para no bloquear render y respetar CSP -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Preload de Phosphor Icons bold (descarga en paralelo con JS, no despues) -->
-    <link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" crossorigin="anonymous" integrity="sha384-nblAP2mo2pVPyMQZDw9Xy9Cwgs9lowushAYep4w5+Q9kF4Ibf3n0B/gCMVdR+Vqy">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"></noscript>
+    <!-- Fonts & Icons (Direct Load for Reliability) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" crossorigin="anonymous" integrity="sha384-nblAP2mo2pVPyMQZDw9Xy9Cwgs9lowushAYep4w5+Q9kF4Ibf3n0B/gCMVdR+Vqy">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" crossorigin="anonymous">
 
 
 </head>
@@ -486,7 +483,5 @@
 
     <!-- Entry Point -->
     <script type="module" src="./src/js/app.js"></script>
-    <!-- Google Fonts: carga diferida via JS (compatible con CSP) -->
-    <script type="module" src="./src/js/load-fonts.js"></script>
 </body>
 </html>
