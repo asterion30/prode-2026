@@ -1851,3 +1851,49 @@ async function renderLeagueDetailsView(league) {
         hideLoader();
     }
 }
+
+// =============================================
+// PWA Service Worker & Custom Install Logic (Non-inline for CSP compliance)
+// =============================================
+let deferredPrompt;
+const installBtn = document.getElementById('btn-install-pwa');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+});
+
+if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('App instalada por el usuario');
+                installBtn.classList.add('hidden');
+                installBtn.classList.remove('flex');
+            }
+            deferredPrompt = null;
+        } else {
+            alert("Para instalar la aplicación:\n\n📱 En iPhone/iPad: Toca el botón 'Compartir' (cuadrado con flecha) y selecciona 'Agregar a Inicio'.\n\n🤖 En Android: Toca los 3 puntos del navegador y selecciona 'Instalar aplicación' o 'Añadir a pantalla de inicio'.");
+        }
+    });
+}
+
+window.addEventListener('appinstalled', () => {
+    if (installBtn) {
+        installBtn.classList.add('hidden');
+        installBtn.classList.remove('flex');
+    }
+    console.log('PWA ha sido instalada en el sistema.');
+});
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+            console.log('PWA Service Worker registrado con éxito', reg.scope);
+        }).catch(err => {
+            console.error('Error al registrar el Service Worker', err);
+        });
+    });
+}
