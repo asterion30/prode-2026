@@ -81,6 +81,7 @@ const checkShowInactive = document.getElementById("check-show-inactive");
 // =======================
 const btnThemeToggle = document.getElementById("btn-theme-toggle");
 const themeToggleIcon = document.getElementById("theme-toggle-icon");
+const btnLogout = document.getElementById("btn-logout");
 
 
 let loginMode = 'login'; // 'login' or 'register'
