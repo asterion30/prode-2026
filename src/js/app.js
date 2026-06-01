@@ -11,11 +11,12 @@ function escapeHTML(str) {
         .replace(/'/g, "&#039;");
 }
 
-import { initAuth, loginWithEmail, getCurrentUser, updateAvatarUrl } from "./auth.js";
+import { initAuth, loginWithEmail, getCurrentUser, updateAvatarUrl, signInWithSocial, loginMockUser } from "./auth.js";
 import { subscribeToMatches, subscribeToUserPredictions, savePrediction } from "./matches.js";
-import { supabase } from "./supabase-config.js";
+import { supabase, isMock } from "./supabase-config.js";
 import { subscribeToRanking } from "./ranking.js";
 import { calculateStandings, GROUP_MAP } from "./standings.js";
+import { createLeague, joinLeagueByCode, fetchUserLeagues, fetchLeagueDetails, removeLeagueMember } from "./leagues.js";
 
 // =======================
 // DOM ELEMENTS
@@ -23,11 +24,6 @@ import { calculateStandings, GROUP_MAP } from "./standings.js";
 const userAvatarImg = document.getElementById("user-avatar-img");
 const loginView = document.getElementById("login-view");
 const mainView = document.getElementById("main-view");
-const loginForm = document.getElementById("login-form");
-const emailInput = document.getElementById("email-input");
-const nombreInput = document.getElementById("nombre-input");
-const apellidoInput = document.getElementById("apellido-input");
-const legajoInput = document.getElementById("legajo-input");
 
 const matchesView = document.getElementById("matches-view");
 const rankingView = document.getElementById("ranking-view");
@@ -42,6 +38,29 @@ const btnNavMatches = document.getElementById("nav-matches");
 const btnNavRanking = document.getElementById("nav-ranking");
 const btnNavGrupos  = document.getElementById("nav-grupos");
 const btnNavUsers = document.getElementById("nav-users");
+
+// Leagues DOM Elements
+const legendaryView = document.getElementById("legendary-view");
+const leagueDetailsView = document.getElementById("league-details-view");
+const btnNavLegendary = document.getElementById("nav-legendary");
+
+const btnCreateLeague = document.getElementById("btn-create-league");
+const btnJoinLeague = document.getElementById("btn-join-league");
+const modalCreateLeague = document.getElementById("modal-create-league");
+const modalJoinLeague = document.getElementById("modal-join-league");
+const btnCancelCreateLeague = document.getElementById("btn-cancel-create-league");
+const btnCancelJoinLeague = document.getElementById("btn-cancel-join-league");
+const btnSaveLeague = document.getElementById("btn-save-league");
+const btnConfirmJoin = document.getElementById("btn-confirm-join");
+
+const leagueNameInput = document.getElementById("league-name-input");
+const leagueDescInput = document.getElementById("league-desc-input");
+const leaguePrizesInput = document.getElementById("league-prizes-input");
+const joinCodeInput = document.getElementById("join-code-input");
+
+const leaguesEmptyState = document.getElementById("leagues-empty-state");
+const leaguesContainer = document.getElementById("leagues-container");
+const btnBackToLeagues = document.getElementById("btn-back-to-leagues");
 const btnExportCsv = document.getElementById("btn-export-csv");
 const btnExportCsvMobile = document.getElementById("btn-export-csv-mobile");
 const loader = document.getElementById("global-loader");
@@ -62,10 +81,7 @@ const checkShowInactive = document.getElementById("check-show-inactive");
 // =======================
 const btnThemeToggle = document.getElementById("btn-theme-toggle");
 const themeToggleIcon = document.getElementById("theme-toggle-icon");
-const tabLogin = document.getElementById("tab-login");
-const tabRegister = document.getElementById("tab-register");
-const registerFields = document.getElementById("register-fields");
-const submitText = document.getElementById("submit-text");
+
 
 let loginMode = 'login'; // 'login' or 'register'
 
@@ -98,28 +114,7 @@ if (btnThemeToggle) {
 
 initTheme();
 
-// =======================
-// LOGIN MODES (Login vs Register)
-// =======================
-if (tabLogin && tabRegister && registerFields && submitText) {
-    tabLogin.addEventListener("click", () => {
-        loginMode = 'login';
-        tabLogin.className = "flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all bg-brand-600 text-white shadow-lg";
-        tabRegister.className = "flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white";
-        registerFields.classList.add("hidden");
-        submitText.textContent = "¡Entrar ahora!";
-        loginError.classList.add("hidden");
-    });
 
-    tabRegister.addEventListener("click", () => {
-        loginMode = 'register';
-        tabRegister.className = "flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all bg-brand-600 text-white shadow-lg";
-        tabLogin.className = "flex-1 py-2 px-4 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white";
-        registerFields.classList.remove("hidden");
-        submitText.textContent = "Registrarme y Entrar";
-        loginError.classList.add("hidden");
-    });
-}
 
 // STATE
 let matchesState = [];
@@ -283,47 +278,46 @@ initAuth((user, alias, score, avatarUrl) => {
 });
 
 // =======================
-// LOGIN LOGIC
+// LOGIN LOGIC (Google & Mock)
 // =======================
-loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email    = emailInput ? emailInput.value.trim() : '';
-    const nombre   = nombreInput   ? nombreInput.value.trim()   : '';
-    const apellido = apellidoInput ? apellidoInput.value.trim() : '';
-    const legajo   = legajoInput   ? legajoInput.value.trim()   : '';
+const btnGoogleLogin = document.getElementById("btn-google-login");
+const mockLoginContainer = document.getElementById("mock-login-container");
+const btnMockLogin = document.getElementById("btn-mock-login");
+const mockAliasInput = document.getElementById("mock-alias-input");
 
-    if (!email) return;
+// Mostrar contenedor de mock si isMock es true o si se pasa ?mock=true en la URL
+const urlParams = new URLSearchParams(window.location.search);
+const hasMockParam = urlParams.get('mock') === 'true';
 
-    // Validación según modo
-    if (loginMode === 'register' && (!nombre || !apellido || !legajo)) {
-        loginError.textContent = "Por favor completá todos los campos para registrarte: Nombre, Apellido y Legajo.";
-        loginError.classList.remove("hidden");
-        return;
-    }
+if (mockLoginContainer && (isMock || hasMockParam)) {
+    mockLoginContainer.classList.remove("hidden");
+}
 
-    showLoader();
-    loginError.classList.add("hidden");
-    const loginSuccess = document.getElementById("login-success");
-    if (loginSuccess) loginSuccess.classList.add("hidden");
-
-    try {
-        const res = await loginWithEmail(email, nombre, apellido, legajo);
-        if (res && res.needsConfirmation) {
+if (btnGoogleLogin) {
+    btnGoogleLogin.addEventListener("click", async () => {
+        showLoader();
+        loginError.classList.add("hidden");
+        try {
+            await signInWithSocial('google');
+        } catch (err) {
+            loginError.textContent = "Error de conexión con Google: " + err.message;
+            loginError.classList.remove("hidden");
             hideLoader();
-            if (loginSuccess) {
-                loginSuccess.textContent = `¡Hola ${nombre}! Te enviamos un enlace mágico a ${email}. Revisá tu bandeja de entrada o SPAM y hacé clic en el enlace para entrar.`;
-                loginSuccess.classList.remove("hidden");
-                loginForm.classList.add("hidden");
-            }
-        } else {
-            window.location.reload();
         }
-    } catch (err) {
-        loginError.textContent = "Error: " + err.message;
-        loginError.classList.remove("hidden");
-        hideLoader();
-    }
-});
+    });
+}
+
+if (btnMockLogin) {
+    btnMockLogin.addEventListener("click", () => {
+        const alias = mockAliasInput ? mockAliasInput.value.trim() : '';
+        if (!alias) {
+            alert("Por favor ingresa un nombre para el usuario mock.");
+            return;
+        }
+        showLoader();
+        loginMockUser(alias);
+    });
+}
 
 // =======================
 // MAIN APP LOGIC
@@ -352,8 +346,8 @@ function setupAppSubscriptions(uid) {
 // =======================
 // NAVIGATION HELPERS
 // =======================
-const ALL_VIEWS = [matchesView, gruposView, rankingView, usersView].filter(Boolean);
-const ALL_NAV_BTNS = [btnNavMatches, btnNavGrupos, btnNavRanking, btnNavUsers].filter(Boolean);
+const ALL_VIEWS = [matchesView, gruposView, legendaryView, leagueDetailsView, rankingView, usersView].filter(Boolean);
+const ALL_NAV_BTNS = [btnNavMatches, btnNavGrupos, btnNavLegendary, btnNavRanking, btnNavUsers].filter(Boolean);
 
 function setActiveNav(activeBtn, activeView) {
     ALL_VIEWS.forEach(v => v.classList.add('hidden'));
@@ -383,6 +377,20 @@ if (btnNavGrupos) {
     btnNavGrupos.addEventListener('click', () => {
         setActiveNav(btnNavGrupos, gruposView);
         renderGroupsView();
+    });
+}
+
+if (btnNavLegendary) {
+    btnNavLegendary.addEventListener('click', () => {
+        setActiveNav(btnNavLegendary, legendaryView);
+        renderLegendaryView();
+    });
+}
+
+if (btnBackToLeagues) {
+    btnBackToLeagues.addEventListener('click', () => {
+        setActiveNav(btnNavLegendary, legendaryView);
+        renderLegendaryView();
     });
 }
 
@@ -1487,4 +1495,282 @@ if (btnExportUsers) {
         link.download = `Usuarios_${showInactive ? 'Todos' : 'Activos'}_${new Date().toISOString().split('T')[0]}.csv`;
         link.click();
     };
+}
+
+// =======================
+// LEGENDARY LEAGUES WORKFLOWS
+// =======================
+
+// Eventos de Modales de Liga
+if (btnCreateLeague && modalCreateLeague) {
+    btnCreateLeague.addEventListener("click", () => {
+        modalCreateLeague.classList.remove("hidden");
+        modalCreateLeague.classList.add("flex");
+        if (leagueNameInput) leagueNameInput.value = "";
+        if (leagueDescInput) leagueDescInput.value = "";
+        if (leaguePrizesInput) leaguePrizesInput.value = "";
+    });
+}
+
+if (btnCancelCreateLeague && modalCreateLeague) {
+    btnCancelCreateLeague.addEventListener("click", () => {
+        modalCreateLeague.classList.add("hidden");
+        modalCreateLeague.classList.remove("flex");
+    });
+}
+
+if (btnJoinLeague && modalJoinLeague) {
+    btnJoinLeague.addEventListener("click", () => {
+        modalJoinLeague.classList.remove("hidden");
+        modalJoinLeague.classList.add("flex");
+        if (joinCodeInput) joinCodeInput.value = "";
+    });
+}
+
+if (btnCancelJoinLeague && modalJoinLeague) {
+    btnCancelJoinLeague.addEventListener("click", () => {
+        modalJoinLeague.classList.add("hidden");
+        modalJoinLeague.classList.remove("flex");
+    });
+}
+
+if (btnSaveLeague) {
+    btnSaveLeague.addEventListener("click", async () => {
+        const name = leagueNameInput?.value.trim();
+        const desc = leagueDescInput?.value.trim() || "";
+        const prizes = leaguePrizesInput?.value.trim() || "";
+
+        if (!name) {
+            alert("Por favor ingresa un nombre para la liga.");
+            return;
+        }
+
+        const { user } = getCurrentUser();
+        if (!user) return;
+
+        showLoader();
+        try {
+            await createLeague(user.id, name, desc, prizes);
+            modalCreateLeague.classList.add("hidden");
+            modalCreateLeague.classList.remove("flex");
+            await renderLegendaryView();
+        } catch (err) {
+            alert("Error al crear la liga: " + err.message);
+        } finally {
+            hideLoader();
+        }
+    });
+}
+
+if (btnConfirmJoin) {
+    btnConfirmJoin.addEventListener("click", async () => {
+        const code = joinCodeInput?.value.trim();
+
+        if (!code) {
+            alert("Por favor ingresa un código de invitación.");
+            return;
+        }
+
+        const { user } = getCurrentUser();
+        if (!user) return;
+
+        showLoader();
+        try {
+            await joinLeagueByCode(user.id, code);
+            modalJoinLeague.classList.add("hidden");
+            modalJoinLeague.classList.remove("flex");
+            await renderLegendaryView();
+            alert("¡Te has unido con éxito a la liga!");
+        } catch (err) {
+            alert("Error al unirte a la liga: " + err.message);
+        } finally {
+            hideLoader();
+        }
+    });
+}
+
+async function renderLegendaryView() {
+    const { user } = getCurrentUser();
+    if (!user) return;
+
+    if (!leaguesContainer || !leaguesEmptyState) return;
+
+    showLoader();
+    try {
+        const leaguesData = await fetchUserLeagues(user.id);
+        if (!leaguesData || leaguesData.length === 0) {
+            leaguesEmptyState.classList.remove("hidden");
+            leaguesContainer.classList.add("hidden");
+            return;
+        }
+
+        leaguesEmptyState.classList.add("hidden");
+        leaguesContainer.classList.remove("hidden");
+        leaguesContainer.innerHTML = "";
+
+        leaguesData.forEach(item => {
+            const league = item.user_groups;
+            if (!league) return;
+
+            const isOwner = league.owner_id === user.id;
+            const card = document.createElement("div");
+            card.className = "bg-slate-800/80 border border-slate-700/60 p-6 rounded-[2rem] shadow-lg flex flex-col justify-between space-y-4 hover:border-brand-500/30 transition-all duration-300";
+            
+            card.innerHTML = `
+                <div class="space-y-2">
+                    <div class="flex justify-between items-start gap-2">
+                        <h3 class="text-lg font-black text-white uppercase tracking-tight line-clamp-1">${escapeHTML(league.name)}</h3>
+                        ${isOwner 
+                            ? `<span class="text-[9px] bg-brand-500/10 text-brand-400 border border-brand-500/20 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Creador</span>` 
+                            : `<span class="text-[9px] bg-slate-700/40 text-slate-400 border border-slate-600/30 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Miembro</span>`
+                        }
+                    </div>
+                    ${league.description 
+                        ? `<p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">${escapeHTML(league.description)}</p>` 
+                        : `<p class="text-xs text-slate-500 italic">Sin descripción.</p>`
+                    }
+                    ${league.prizes 
+                        ? `<div class="bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-xl flex items-start gap-1.5 mt-2">
+                            <i class="ph-bold ph-gift text-amber-400 text-xs mt-0.5"></i>
+                            <p class="text-[10px] text-amber-400/90 font-medium line-clamp-1">${escapeHTML(league.prizes)}</p>
+                           </div>`
+                        : ''
+                    }
+                </div>
+                <div class="flex gap-2 items-center justify-between pt-2 border-t border-slate-700/40">
+                    <div class="text-left">
+                        <span class="text-[9px] text-slate-500 block uppercase font-bold tracking-wider">Código</span>
+                        <span class="text-xs font-mono font-bold text-brand-400">${escapeHTML(league.invite_code)}</span>
+                    </div>
+                    <button class="btn-view-league px-4 py-2 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-xl border border-slate-700 hover:border-slate-600 transition-all flex items-center gap-1">
+                        Ver Detalles <i class="ph-bold ph-caret-right"></i>
+                    </button>
+                </div>
+            `;
+
+            const btn = card.querySelector(".btn-view-league");
+            btn.onclick = () => {
+                setActiveNav(btnNavLegendary, leagueDetailsView);
+                renderLeagueDetailsView(league);
+            };
+
+            leaguesContainer.appendChild(card);
+        });
+
+    } catch (err) {
+        alert("Error al cargar tus ligas: " + err.message);
+    } finally {
+        hideLoader();
+    }
+}
+
+async function renderLeagueDetailsView(league) {
+    const { user } = getCurrentUser();
+    if (!user) return;
+
+    const nameEl = document.getElementById("league-details-name");
+    const descEl = document.getElementById("league-details-desc");
+    const codeEl = document.getElementById("league-details-code");
+    const prizesContainer = document.getElementById("league-details-prizes-container");
+    const prizesEl = document.getElementById("league-details-prizes");
+    const membersCountEl = document.getElementById("league-members-count");
+    const rankingBody = document.getElementById("league-ranking-body");
+    const colEliminarMiembro = document.getElementById("col-eliminar-miembro");
+
+    if (!nameEl || !rankingBody) return;
+
+    nameEl.textContent = league.name;
+    descEl.textContent = league.description || "Sin descripción.";
+    codeEl.textContent = league.invite_code;
+
+    if (league.prizes) {
+        prizesEl.textContent = league.prizes;
+        prizesContainer.classList.remove("hidden");
+    } else {
+        prizesContainer.classList.add("hidden");
+    }
+
+    const isOwner = league.owner_id === user.id;
+    if (isOwner) {
+        colEliminarMiembro.classList.remove("hidden");
+    } else {
+        colEliminarMiembro.classList.add("hidden");
+    }
+
+    showLoader();
+    try {
+        const members = await fetchLeagueDetails(league.id);
+        membersCountEl.textContent = `${members.length} miembro(s)`;
+        rankingBody.innerHTML = "";
+
+        members.forEach((member, index) => {
+            const isMedal = index < 3;
+            let rankContent = `${index + 1}`;
+            if (index === 0) rankContent = "🥇";
+            else if (index === 1) rankContent = "🥈";
+            else if (index === 2) rankContent = "🥉";
+
+            const displayName = member.alias || (member.nombre + ' ' + member.apellido).trim() || "Usuario";
+            const isMe = member.id === user.id;
+
+            const tr = document.createElement("tr");
+            tr.className = `border-slate-800 transition-colors ${isMe ? 'bg-brand-500/10 text-white font-bold' : (index % 2 === 0 ? '' : 'bg-slate-800/20')}`;
+
+            let actionHtml = "";
+            if (isOwner) {
+                if (member.id === league.owner_id) {
+                    actionHtml = `<td class="px-4 py-3 text-center text-[10px] text-slate-500 italic font-semibold">Creador</td>`;
+                } else {
+                    actionHtml = `
+                        <td class="px-4 py-3 text-center">
+                            <button class="btn-expel-member px-2 py-1 bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 rounded-lg text-[10px] font-bold transition-all" data-id="${member.id}" data-alias="${escapeHTML(displayName)}">
+                                Expulsar
+                            </button>
+                        </td>
+                    `;
+                }
+            }
+
+            const flagHtml = member.avatar_url
+                ? `<img src="${escapeHTML(member.avatar_url)}" alt="Avatar" class="w-6 h-6 rounded-full object-cover border border-slate-700">`
+                : `<div class="w-6 h-6 bg-slate-700 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-bold">${displayName.substring(0,2).toUpperCase()}</div>`;
+
+            tr.innerHTML = `
+                <td class="px-4 py-3 text-center font-bold ${isMedal ? 'text-lg' : 'text-slate-400'}">${rankContent}</td>
+                <td class="px-4 py-3">
+                    <div class="flex items-center gap-2">
+                        ${flagHtml}
+                        <span class="text-xs sm:text-sm line-clamp-1">${escapeHTML(displayName)} ${isMe ? ' (Vos)' : ''}</span>
+                    </div>
+                </td>
+                <td class="px-4 py-3 text-right font-black text-slate-200">${member.score || 0} pts</td>
+                ${isOwner ? actionHtml : ''}
+            `;
+
+            if (isOwner && member.id !== league.owner_id) {
+                const btnExpel = tr.querySelector(".btn-expel-member");
+                btnExpel.onclick = async () => {
+                    const confirmText = `¿Estás seguro de que querés expulsar a ${displayName} de esta liga?`;
+                    if (confirm(confirmText)) {
+                        showLoader();
+                        try {
+                            await removeLeagueMember(league.id, member.id);
+                            await renderLeagueDetailsView(league);
+                        } catch (err) {
+                            alert("Error al expulsar al miembro: " + err.message);
+                        } finally {
+                            hideLoader();
+                        }
+                    }
+                };
+            }
+
+            rankingBody.appendChild(tr);
+        });
+
+    } catch (err) {
+        alert("Error al cargar los miembros: " + err.message);
+    } finally {
+        hideLoader();
+    }
 }

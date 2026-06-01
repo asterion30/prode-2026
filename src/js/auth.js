@@ -44,12 +44,15 @@ export function initAuth(onUserChange) {
                 }
 
                 if (error && error.code === 'PGRST116') {
-                    // El perfil no existe aún — lo creamos con los datos del registro
+                    // El perfil no existe aún — lo creamos con los datos del proveedor social
                     const meta = currentUser.user_metadata || {};
-                    const nombre   = meta.nombre   || '';
-                    const apellido = meta.apellido  || '';
-                    const legajo   = meta.legajo    || '';
-                    const alias    = (nombre + ' ' + apellido).trim() || currentUser.email?.split('@')[0] || 'Usuario';
+                    
+                    // Extraer nombres inteligentemente de metadatos de Google
+                    const nombre = meta.nombre || meta.given_name || meta.full_name?.split(' ')[0] || '';
+                    const apellido = meta.apellido || meta.family_name || meta.full_name?.split(' ').slice(1).join(' ') || '';
+                    const legajo = meta.legajo || '';
+                    const alias = meta.alias || (nombre + ' ' + apellido).trim() || meta.full_name || currentUser.email?.split('@')[0] || 'Usuario';
+                    const avatar_url = meta.avatar_url || meta.picture || null;
 
                     const { error: upsertErr } = await supabase.from('users').upsert({
                         id: currentUser.id,
@@ -59,7 +62,8 @@ export function initAuth(onUserChange) {
                         apellido,
                         legajo,
                         score: 0,
-                        is_banned: false
+                        is_banned: false,
+                        avatar_url
                     });
 
                     if (upsertErr) {
@@ -70,6 +74,7 @@ export function initAuth(onUserChange) {
                     }
 
                     currentAlias = alias;
+                    currentAvatarUrl = avatar_url;
                     score = 0;
 
                 } else if (data && !error) {
@@ -77,17 +82,35 @@ export function initAuth(onUserChange) {
                     score = data.score || 0;
                     currentAvatarUrl = data.avatar_url || null;
 
-                    // Si el perfil no tiene nombre (usuario antiguo), actualizamos desde metadata si está disponible
-                    if (!data.nombre && currentUser.user_metadata?.nombre) {
-                        const meta = currentUser.user_metadata;
-                        const nombre   = meta.nombre   || '';
-                        const apellido = meta.apellido  || '';
-                        const legajo   = meta.legajo    || data.legajo || '';
-                        const email    = currentUser.email;
-                        const alias    = (nombre + ' ' + apellido).trim() || data.alias;
+                    // Si el perfil no tiene nombre o avatar, y los metadatos de Google sí los tienen, los actualizamos
+                    const meta = currentUser.user_metadata || {};
+                    const googleAvatar = meta.avatar_url || meta.picture;
+                    const googleNombre = meta.given_name || meta.full_name?.split(' ')[0];
+                    const googleApellido = meta.family_name || meta.full_name?.split(' ').slice(1).join(' ');
 
-                        await supabase.from('users').update({ nombre, apellido, legajo, alias, email }).eq('id', currentUser.id);
-                        currentAlias = alias;
+                    let shouldUpdate = false;
+                    const updates = {};
+
+                    if (!data.nombre && googleNombre) {
+                        updates.nombre = googleNombre;
+                        shouldUpdate = true;
+                    }
+                    if (!data.apellido && googleApellido) {
+                        updates.apellido = googleApellido;
+                        shouldUpdate = true;
+                    }
+                    if (!data.avatar_url && googleAvatar) {
+                        updates.avatar_url = googleAvatar;
+                        currentAvatarUrl = googleAvatar;
+                        shouldUpdate = true;
+                    }
+                    if (!data.email && currentUser.email) {
+                        updates.email = currentUser.email;
+                        shouldUpdate = true;
+                    }
+
+                    if (shouldUpdate) {
+                        await supabase.from('users').update(updates).eq('id', currentUser.id);
                     }
                 }
 
@@ -116,17 +139,41 @@ export function initAuth(onUserChange) {
 }
 
 /**
+ * Inicia sesión con un proveedor social (Google, etc)
+ */
+export async function signInWithSocial(provider) {
+    if (isMock) {
+        alert("El login social no está disponible en Modo Mock.");
+        return;
+    }
+    const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+            redirectTo: window.location.origin
+        }
+    });
+    if (error) throw error;
+}
+
+/**
+ * Inicia sesión en modo mock con un alias dado.
+ */
+export function loginMockUser(alias) {
+    const mockUid = "mock_" + Math.random().toString(36).substr(2, 9);
+    const finalAlias = (alias || '').trim() || "Usuario Invitado";
+    const userData = { uid: mockUid, alias: finalAlias, score: 0 };
+    localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(userData));
+    setTimeout(() => location.reload(), 500);
+}
+
+/**
  * Envía un magic link al email dado.
- * Guarda nombre, apellido y legajo en user_metadata para recuperarlos al confirmar.
+ * Mantenido por compatibilidad técnica.
  */
 export async function loginWithEmail(email, nombre, apellido, legajo) {
     if (isMock) {
-        const mockUid = "mock_" + Math.random().toString(36).substr(2, 9);
-        const alias = (nombre + ' ' + apellido).trim() || email.split('@')[0];
-        const userData = { uid: mockUid, alias, score: 0 };
-        localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(userData));
-        setTimeout(() => location.reload(), 500);
-        return;
+        loginMockUser(nombre + ' ' + apellido);
+        return { needsConfirmation: true };
     }
 
     const nombreClean   = (nombre   || '').trim();
