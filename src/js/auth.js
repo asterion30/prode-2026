@@ -219,7 +219,18 @@ export async function logOut() {
     if (isMock) {
         localStorage.removeItem(MOCK_STORAGE_KEY);
     } else {
-        await supabase.auth.signOut();
+        try {
+            await supabase.auth.signOut();
+        } catch (e) {
+            console.warn("Supabase signOut error, forcing local cleanup:", e);
+        }
+        // Limpieza forzada de tokens de Supabase por si falla la API
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('sb-')) {
+                localStorage.removeItem(key);
+            }
+        }
     }
     location.reload();
 }
