@@ -423,6 +423,9 @@ if (checkShowInactive) {
 const btnToggleStream = document.getElementById("btn-toggle-stream");
 const streamWrapper = document.getElementById("stream-wrapper");
 const streamIcon = document.getElementById("stream-icon");
+const btnChangeTwitch = document.getElementById("btn-change-twitch");
+const twitchChannelInput = document.getElementById("twitch-channel-input");
+const twitchPlayer = document.getElementById("twitch-player");
 
 if (btnToggleStream && streamWrapper && streamIcon) {
     btnToggleStream.addEventListener("click", () => {
@@ -433,6 +436,21 @@ if (btnToggleStream && streamWrapper && streamIcon) {
         } else {
             streamWrapper.classList.add("hidden");
             streamIcon.classList.replace("ph-caret-up", "ph-caret-down");
+        }
+    });
+}
+
+if (btnChangeTwitch && twitchChannelInput && twitchPlayer) {
+    btnChangeTwitch.addEventListener("click", () => {
+        const channel = twitchChannelInput.value.trim();
+        if (channel) {
+            twitchPlayer.src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=sapate.net.ar&parent=localhost&muted=true`;
+        }
+    });
+    
+    twitchChannelInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            btnChangeTwitch.click();
         }
     });
 }
