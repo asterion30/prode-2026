@@ -24,6 +24,7 @@ import { createLeague, joinLeagueByCode, fetchUserLeagues, fetchLeagueDetails, r
 const userAvatarImg = document.getElementById("user-avatar-img");
 const loginView = document.getElementById("login-view");
 const mainView = document.getElementById("main-view");
+const appContainer = document.getElementById("app-container");
 
 const matchesView = document.getElementById("matches-view");
 const rankingView = document.getElementById("ranking-view");
@@ -198,6 +199,7 @@ initAuth((user, alias, score, avatarUrl) => {
         // Logged In
         loginView.classList.add("hidden");
         mainView.classList.remove("hidden");
+        if (appContainer) appContainer.classList.add("md:h-[800px]");
         userAliasDisplay.textContent = alias || 'Usuario';
         userPointsDisplay.textContent = `${score} pts`;
 
@@ -274,6 +276,7 @@ initAuth((user, alias, score, avatarUrl) => {
         // Logged Out
         mainView.classList.add("hidden");
         loginView.classList.remove("hidden");
+        if (appContainer) appContainer.classList.remove("md:h-[800px]");
         hideLoader();
     }
 });
