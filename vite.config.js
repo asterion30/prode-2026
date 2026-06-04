@@ -2,7 +2,15 @@ import { defineConfig } from 'vite';
 import sri from 'vite-plugin-sri-gen';
 
 export default defineConfig({
-  plugins: [sri()],
+  plugins: [
+    sri({
+      skipResources: [
+        'google-fonts-preload',
+        'https://fonts.googleapis.com/*',
+        'https://fonts.gstatic.com/*'
+      ]
+    })
+  ],
   root: './',
   base: '/',
   build: {
