@@ -1,4 +1,4 @@
-import { toPng } from 'html-to-image';
+import './load-fonts.js';
 
 // Helper to prevent XSS
 function escapeHTML(str) {
@@ -427,15 +427,23 @@ const btnChangeTwitch = document.getElementById("btn-change-twitch");
 const twitchChannelInput = document.getElementById("twitch-channel-input");
 const twitchPlayer = document.getElementById("twitch-player");
 
+let activeTwitchChannel = "leodickinsonsumo";
+
 if (btnToggleStream && streamWrapper && streamIcon) {
     btnToggleStream.addEventListener("click", () => {
         const isHidden = streamWrapper.classList.contains("hidden");
         if (isHidden) {
             streamWrapper.classList.remove("hidden");
             streamIcon.classList.replace("ph-caret-down", "ph-caret-up");
+            if (twitchPlayer) {
+                twitchPlayer.src = `https://player.twitch.tv/?channel=${encodeURIComponent(activeTwitchChannel)}&parent=sapate.net.ar&parent=localhost&muted=true`;
+            }
         } else {
             streamWrapper.classList.add("hidden");
             streamIcon.classList.replace("ph-caret-up", "ph-caret-down");
+            if (twitchPlayer) {
+                twitchPlayer.src = "";
+            }
         }
     });
 }
@@ -444,7 +452,11 @@ if (btnChangeTwitch && twitchChannelInput && twitchPlayer) {
     btnChangeTwitch.addEventListener("click", () => {
         const channel = twitchChannelInput.value.trim();
         if (channel) {
-            twitchPlayer.src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=sapate.net.ar&parent=localhost&muted=true`;
+            activeTwitchChannel = channel;
+            const isVisible = !streamWrapper.classList.contains("hidden");
+            if (isVisible) {
+                twitchPlayer.src = `https://player.twitch.tv/?channel=${encodeURIComponent(activeTwitchChannel)}&parent=sapate.net.ar&parent=localhost&muted=true`;
+            }
         }
     });
     
@@ -535,7 +547,7 @@ function renderGroupsView() {
                                 ? `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${team.flag}.svg`
                                 : null;
                             const flagHtml = flagSrc
-                                ? `<img src="${flagSrc}" alt="${escapeHTML(team.team)}" class="w-5 h-auto rounded-sm object-cover border border-slate-600" onerror="this.style.display='none'">`
+                                ? `<img src="${flagSrc}" alt="${escapeHTML(team.team)}" class="w-5 h-auto rounded-sm object-cover border border-slate-600" loading="lazy" onerror="this.style.display='none'">`
                                 : `<div class="w-5 h-3.5 bg-slate-700 rounded-sm border border-slate-600"></div>`;
                             return `
                                 <tr class="hover:bg-slate-800/40 transition-colors ${isQualifying ? 'border-l-2 border-brand-500' : 'border-l-2 border-transparent'}">
@@ -678,7 +690,7 @@ function renderMatches() {
             if (flagName === 'un') {
                 return `<div class="w-7 h-7 mt-1 bg-slate-700 rounded-full flex items-center justify-center border border-slate-600 shadow-inner"><i class="ph-bold ph-question text-slate-400"></i></div>`;
             }
-            return `<img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${flagName}.svg" alt="${teamName}" class="w-7 h-auto drop-shadow-md rounded-[2px] mt-1 object-cover border border-slate-700">`;
+            return `<img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${flagName}.svg" alt="${teamName}" class="w-7 h-auto drop-shadow-md rounded-[2px] mt-1 object-cover border border-slate-700" loading="lazy">`;
         };
 
         let statusBadge = '';
@@ -1022,6 +1034,7 @@ const handleExportRankingImage = async () => {
             originalConsoleError(...args);
         };
 
+        const { toPng } = await import('html-to-image');
         const dataUrl = await toPng(rankingView, {
             backgroundColor: '#0f172a', // brand-dark
             pixelRatio: 2 // High quality

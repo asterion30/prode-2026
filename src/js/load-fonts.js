@@ -18,8 +18,15 @@ if (preloadedBold) {
 }
 
 // 2. Google Fonts — Inter (no crítico, se carga después del render inicial)
-const fontLink = document.createElement('link');
-fontLink.rel = 'stylesheet';
-fontLink.crossOrigin = 'anonymous';
-fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap';
-document.head.appendChild(fontLink);
+//    El <link rel="preload"> del head ya descargó el archivo. Solo cambiamos rel a stylesheet.
+const preloadedInter = document.querySelector('link[rel="preload"][href*="fonts.googleapis.com"]');
+if (preloadedInter) {
+    preloadedInter.rel = 'stylesheet';
+} else {
+    // Fallback si el preload no estaba disponible
+    const fontLink = document.createElement('link');
+    fontLink.rel = 'stylesheet';
+    fontLink.crossOrigin = 'anonymous';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap';
+    document.head.appendChild(fontLink);
+}
