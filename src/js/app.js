@@ -266,10 +266,13 @@ initAuth((user, alias, score, avatarUrl) => {
 
         // Cargar avatar: primero desde BD, luego fallback a localStorage
         const savedAvatar = localStorage.getItem(`avatar_${user.id}`);
-        if (avatarUrl) {
-            userAvatarImg.setAttribute('src', avatarUrl);
-        } else if (savedAvatar) {
-            userAvatarImg.setAttribute('src', savedAvatar);
+        const cleanedAvatarUrl = (avatarUrl && avatarUrl !== 'null' && avatarUrl !== 'undefined') ? avatarUrl.trim() : null;
+        const cleanedSavedAvatar = (savedAvatar && savedAvatar !== 'null' && savedAvatar !== 'undefined') ? savedAvatar.trim() : null;
+
+        if (cleanedAvatarUrl) {
+            userAvatarImg.setAttribute('src', cleanedAvatarUrl);
+        } else if (cleanedSavedAvatar) {
+            userAvatarImg.setAttribute('src', cleanedSavedAvatar);
         } else {
             userAvatarImg.setAttribute('src', '/assets/avatar.webp');
         }
@@ -1882,8 +1885,10 @@ async function renderLeagueDetailsView(league) {
                 }
             }
 
-            const flagHtml = member.avatar_url
-                ? `<img src="${escapeHTML(member.avatar_url)}" alt="Avatar" class="w-6 h-6 rounded-full object-cover border border-slate-700">`
+            const avatarVal = member.avatar_url ? member.avatar_url.trim() : null;
+            const hasValidAvatar = avatarVal && avatarVal !== "" && avatarVal !== "null" && avatarVal !== "undefined";
+            const flagHtml = hasValidAvatar
+                ? `<img src="${escapeHTML(avatarVal)}" alt="Avatar" class="w-6 h-6 rounded-full object-cover border border-slate-700" onerror="this.onerror=null; this.src='/assets/avatar.webp';">`
                 : `<div class="w-6 h-6 bg-slate-700 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-bold">${displayName.substring(0,2).toUpperCase()}</div>`;
 
             tr.innerHTML = `
