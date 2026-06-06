@@ -508,7 +508,7 @@ async function updateShortsPlayer() {
     if (activeShortsPlaylist.length > 0) {
         const firstId = activeShortsPlaylist[0];
         const restIds = activeShortsPlaylist.slice(1).join(",");
-        shortsPlayer.src = `https://www.youtube.com/embed/${firstId}?playlist=${restIds}&loop=1&autoplay=1&mute=1&controls=1&modestbranding=1&rel=0`;
+        shortsPlayer.src = `https://www.youtube-nocookie.com/embed/${firstId}?playlist=${restIds}&loop=1&autoplay=1&mute=1&controls=1&modestbranding=1&rel=0`;
     }
 }
 
