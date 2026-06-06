@@ -2412,10 +2412,10 @@ async function updateEspecialesRanking() {
         teamFlags[t.team] = t.flag;
     });
 
-    // Votos base para semilla (seed)
-    const baseFav = { "Argentina": 5, "Brasil": 3, "Francia": 2 };
-    const baseSor = { "Ecuador": 4, "Marruecos": 4, "Japón": 2 };
-    const baseDec = { "Alemania": 5, "España": 3, "Inglaterra": 2 };
+    // Votos base para semilla (seed) con 0 votos iniciales
+    const baseFav = { "Argentina": 0, "Brasil": 0, "Francia": 0 };
+    const baseSor = { "Ecuador": 0, "Marruecos": 0, "Japón": 0 };
+    const baseDec = { "Alemania": 0, "España": 0, "Inglaterra": 0 };
 
     // Obtener votos reales de Supabase
     const { data: allVotes, error } = await supabase
@@ -2434,10 +2434,11 @@ async function updateEspecialesRanking() {
     const renderSection = (container, votes, barColorClass) => {
         container.innerHTML = "";
         
-        // Convertir a array y ordenar desc
+        // Convertir a array, ordenar desc y mantener solo los primeros 3 (Top 3)
         const sorted = Object.entries(votes)
             .map(([teamName, count]) => ({ teamName, count }))
-            .sort((a, b) => b.count - a.count);
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 3);
 
         const maxVotes = Math.max(...sorted.map(s => s.count)) || 1;
 
