@@ -1976,7 +1976,24 @@ async function renderLeagueDetailsView(league) {
 
         const myIndex = members.findIndex(m => m.id === user.id);
 
-        members.forEach((member, index) => {
+        const membersToShow = [];
+        members.forEach((m, idx) => {
+            if (idx < 5) {
+                membersToShow.push({ member: m, index: idx });
+            } else if (idx === myIndex) {
+                membersToShow.push({ member: m, index: idx });
+            }
+        });
+
+        membersToShow.forEach(({ member, index }, i) => {
+            if (i > 0 && index !== membersToShow[i-1].index + 1) {
+                const separatorTr = document.createElement("tr");
+                separatorTr.className = "border-slate-800 bg-slate-800/10";
+                const colSpan = isOwner ? 4 : 3;
+                separatorTr.innerHTML = `<td colspan="${colSpan}" class="px-4 py-2 text-center text-slate-500 text-xs tracking-widest bg-slate-800/20">••••••</td>`;
+                rankingBody.appendChild(separatorTr);
+            }
+
             const isMedal = index < 3;
             let rankContent = `${index + 1}`;
             if (index === 0) rankContent = "🥇";
@@ -2020,8 +2037,8 @@ async function renderLeagueDetailsView(league) {
             const avatarVal = member.avatar_url ? member.avatar_url.trim() : null;
             const hasValidAvatar = avatarVal && avatarVal !== "" && avatarVal !== "null" && avatarVal !== "undefined";
             const flagHtml = hasValidAvatar
-                ? `<img src="${escapeHTML(avatarVal)}" alt="Avatar" class="w-6 h-6 rounded-full object-cover border border-slate-700" onerror="this.onerror=null; this.src='/assets/avatar.webp';">`
-                : `<div class="w-6 h-6 bg-slate-700 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-bold">${displayName.substring(0,2).toUpperCase()}</div>`;
+                ? `<img src="${escapeHTML(avatarVal)}" alt="" class="w-6 h-6 rounded-full object-cover border border-slate-700" onerror="this.outerHTML='<div class=\\'w-6 h-6 bg-slate-700 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-bold\\'>${escapeHTML(displayName.substring(0,2).toUpperCase())}</div>';">`
+                : `<div class="w-6 h-6 bg-slate-700 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-bold">${escapeHTML(displayName.substring(0,2).toUpperCase())}</div>`;
 
             tr.innerHTML = `
                 <td class="px-4 py-3 text-center font-bold ${isMedal ? 'text-lg' : 'text-slate-400'}">${rankContent}</td>
@@ -2041,20 +2058,22 @@ async function renderLeagueDetailsView(league) {
 
             if (isOwner && member.id !== league.owner_id) {
                 const btnExpel = tr.querySelector(".btn-expel-member");
-                btnExpel.onclick = async () => {
-                    const confirmText = `¿Estás seguro de que querés expulsar a ${displayName} de esta liga?`;
-                    if (confirm(confirmText)) {
-                        showLoader();
-                        try {
-                            await removeLeagueMember(league.id, member.id);
-                            await renderLeagueDetailsView(league);
-                        } catch (err) {
-                            alert("Error al expulsar al miembro: " + err.message);
-                        } finally {
-                            hideLoader();
+                if (btnExpel) {
+                    btnExpel.onclick = async () => {
+                        const confirmText = `¿Estás seguro de que querés expulsar a ${displayName} de esta liga?`;
+                        if (confirm(confirmText)) {
+                            showLoader();
+                            try {
+                                await removeLeagueMember(league.id, member.id);
+                                await renderLeagueDetailsView(league);
+                            } catch (err) {
+                                alert("Error al expulsar al miembro: " + err.message);
+                            } finally {
+                                hideLoader();
+                            }
                         }
-                    }
-                };
+                    };
+                }
             }
 
             rankingBody.appendChild(tr);
