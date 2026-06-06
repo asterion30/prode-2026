@@ -438,46 +438,82 @@ if (checkShowInactive) {
 const btnToggleStream = document.getElementById("btn-toggle-stream");
 const streamWrapper = document.getElementById("stream-wrapper");
 const streamIcon = document.getElementById("stream-icon");
-const btnChangeTwitch = document.getElementById("btn-change-twitch");
-const twitchChannelInput = document.getElementById("twitch-channel-input");
-const twitchPlayer = document.getElementById("twitch-player");
+const btnSearchShorts = document.getElementById("btn-search-shorts");
+const shortsQueryInput = document.getElementById("shorts-query-input");
+const shortsPlayer = document.getElementById("shorts-player");
 
-let activeTwitchChannel = "leodickinsonsumo";
+const FALLBACK_SHORTS = [
+    "QmbSZSjUqeQ",
+    "lR1DSAyoIDI",
+    "uht-tdFSLNU",
+    "nFGxeA1K5tE",
+    "Vj8rlVWk0fg",
+    "t_plIcP4vGM"
+];
+
+let activeShortsPlaylist = [...FALLBACK_SHORTS];
+let currentSearchQuery = "mundial 2026 shorts";
+
+async function fetchShorts(query) {
+    try {
+        const response = await fetch(`/api/shorts?q=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error("Search failed");
+        const json = await response.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            return json.data;
+        }
+    } catch (err) {
+        console.warn("Failed to fetch shorts from API, using fallback list:", err);
+    }
+    return FALLBACK_SHORTS;
+}
+
+async function updateShortsPlayer() {
+    if (!shortsPlayer) return;
+    const isVisible = !streamWrapper.classList.contains("hidden");
+    if (!isVisible) return;
+    
+    shortsPlayer.src = "";
+    
+    const playlist = await fetchShorts(currentSearchQuery);
+    activeShortsPlaylist = playlist;
+    
+    if (activeShortsPlaylist.length > 0) {
+        const firstId = activeShortsPlaylist[0];
+        const restIds = activeShortsPlaylist.slice(1).join(",");
+        shortsPlayer.src = `https://www.youtube.com/embed/${firstId}?playlist=${restIds}&loop=1&autoplay=1&mute=1&controls=1&modestbranding=1&rel=0`;
+    }
+}
 
 if (btnToggleStream && streamWrapper && streamIcon) {
-    btnToggleStream.addEventListener("click", () => {
+    btnToggleStream.addEventListener("click", async () => {
         const isHidden = streamWrapper.classList.contains("hidden");
         if (isHidden) {
             streamWrapper.classList.remove("hidden");
             streamIcon.classList.replace("ph-caret-down", "ph-caret-up");
-            if (twitchPlayer) {
-                twitchPlayer.src = `https://player.twitch.tv/?channel=${encodeURIComponent(activeTwitchChannel)}&parent=sapate.net.ar&parent=localhost&muted=true`;
-            }
+            await updateShortsPlayer();
         } else {
             streamWrapper.classList.add("hidden");
             streamIcon.classList.replace("ph-caret-up", "ph-caret-down");
-            if (twitchPlayer) {
-                twitchPlayer.src = "";
+            if (shortsPlayer) {
+                shortsPlayer.src = "";
             }
         }
     });
 }
 
-if (btnChangeTwitch && twitchChannelInput && twitchPlayer) {
-    btnChangeTwitch.addEventListener("click", () => {
-        const channel = twitchChannelInput.value.trim();
-        if (channel) {
-            activeTwitchChannel = channel;
-            const isVisible = !streamWrapper.classList.contains("hidden");
-            if (isVisible) {
-                twitchPlayer.src = `https://player.twitch.tv/?channel=${encodeURIComponent(activeTwitchChannel)}&parent=sapate.net.ar&parent=localhost&muted=true`;
-            }
+if (btnSearchShorts && shortsQueryInput && shortsPlayer) {
+    btnSearchShorts.addEventListener("click", async () => {
+        const query = shortsQueryInput.value.trim();
+        if (query) {
+            currentSearchQuery = query;
+            await updateShortsPlayer();
         }
     });
     
-    twitchChannelInput.addEventListener("keypress", (e) => {
+    shortsQueryInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
-            btnChangeTwitch.click();
+            btnSearchShorts.click();
         }
     });
 }
