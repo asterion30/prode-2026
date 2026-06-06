@@ -2461,9 +2461,15 @@ async function updateEspecialesRanking() {
                     <span class="font-bold text-slate-400">${item.count} ${item.count === 1 ? 'voto' : 'votos'}</span>
                 </div>
                 <div class="w-full bg-slate-800/80 h-1.5 rounded-full overflow-hidden border border-slate-850">
-                    <div class="h-full rounded-full ${barColorClass}" style="width: ${percentage}%"></div>
+                    <div class="progress-bar h-full rounded-full ${barColorClass}"></div>
                 </div>
             `;
+            
+            // Programmatically set style width to avoid CSP style-src-attr policy block
+            const progressBar = div.querySelector(".progress-bar");
+            if (progressBar) {
+                progressBar.style.width = `${percentage}%`;
+            }
             
             // Programmatic error listener to prevent broken image warnings under strict CSP
             const imgEl = div.querySelector("img");
