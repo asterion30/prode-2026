@@ -39,6 +39,11 @@ let currentLeagueId = null;
 // DOM ELEMENTS
 // =======================
 const userAvatarImg = document.getElementById("user-avatar-img");
+if (userAvatarImg) {
+    userAvatarImg.addEventListener("error", () => {
+        userAvatarImg.src = '/assets/avatar.webp';
+    });
+}
 const loginView = document.getElementById("login-view");
 const mainView = document.getElementById("main-view");
 const appContainer = document.getElementById("app-container");
@@ -609,7 +614,7 @@ function renderGroupsView() {
                                 ? `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${team.flag}.svg`
                                 : null;
                             const flagHtml = flagSrc
-                                ? `<img src="${flagSrc}" alt="${escapeHTML(team.team)}" class="w-5 h-auto rounded-sm object-cover border border-slate-600" loading="lazy" onerror="this.style.display='none'">`
+                                ? `<img src="${flagSrc}" alt="${escapeHTML(team.team)}" class="w-5 h-auto rounded-sm object-cover border border-slate-600" loading="lazy">`
                                 : `<div class="w-5 h-3.5 bg-slate-700 rounded-sm border border-slate-600"></div>`;
                             return `
                                 <tr class="hover:bg-slate-800/40 transition-colors ${isQualifying ? 'border-l-2 border-brand-500' : 'border-l-2 border-transparent'}">
@@ -642,6 +647,12 @@ function renderGroupsView() {
             </div>
         </div>
     `;
+
+    containerEl.querySelectorAll("img").forEach(img => {
+        img.addEventListener("error", () => {
+            img.style.display = "none";
+        });
+    });
 }
 
 
@@ -2103,7 +2114,7 @@ function displayLeagueRankingPage() {
                 <div class="absolute inset-0 bg-slate-700 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-bold">
                     ${escapeHTML(displayName.substring(0,2).toUpperCase())}
                 </div>
-                ${hasValidAvatar ? `<img src="${escapeHTML(avatarVal)}" alt="" class="absolute inset-0 w-full h-full rounded-full object-cover border border-slate-700 z-10" onerror="this.style.display='none';">` : ''}
+                ${hasValidAvatar ? `<img src="${escapeHTML(avatarVal)}" alt="" class="avatar-img absolute inset-0 w-full h-full rounded-full object-cover border border-slate-700 z-10">` : ''}
             </div>
         `;
 
@@ -2122,6 +2133,15 @@ function displayLeagueRankingPage() {
             <td class="px-4 py-3 text-right font-black text-slate-200">${member.score || 0} pts</td>
             ${isOwner ? actionHtml : ''}
         `;
+
+        if (hasValidAvatar) {
+            const imgEl = tr.querySelector(".avatar-img");
+            if (imgEl) {
+                imgEl.addEventListener("error", () => {
+                    imgEl.style.display = "none";
+                });
+            }
+        }
 
         if (isOwner && member.id !== currentLeagueOwnerId) {
             const btnExpel = tr.querySelector(".btn-expel-member");
