@@ -54,10 +54,22 @@
     <!-- CSS (Processed by Vite/Tailwind) -->
     <link rel="stylesheet" href="./src/css/styles.css">
 
-    <!-- Fonts & Icons (Preloaded to prevent render-blocking) -->
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" as="style" crossorigin="anonymous" integrity="sha384-nblAP2mo2pVPyMQZDw9Xy9Cwgs9lowushAYep4w5+Q9kF4Ibf3n0B/gCMVdR+Vqy">
-    <link id="google-fonts-preload" rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style" crossorigin="anonymous">
+    <!-- Fonts & Icons: preload hints only (applied by JS to avoid CSP inline handler issues) -->
+    <!-- Phosphor Icons: preloaded, then applied non-blocking -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css"
+          as="style" crossorigin="anonymous"
+          integrity="sha384-nblAP2mo2pVPyMQZDw9Xy9Cwgs9lowushAYep4w5+Q9kF4Ibf3n0B/gCMVdR+Vqy">
 
+    <!-- Google Fonts: preloaded, then applied non-blocking -->
+    <link id="google-fonts-preload" rel="preload"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          as="style" crossorigin="anonymous">
+
+    <!-- Fallback: if JS disabled, load stylesheets normally -->
+    <noscript>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    </noscript>
 
 </head>
 <body class="bg-brand-dark text-white font-sans antialiased min-h-screen flex items-start sm:items-center justify-center">

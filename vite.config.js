@@ -18,6 +18,8 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: false,
     emptyOutDir: true,
+    // Target modern browsers for better tree-shaking
+    target: 'es2020',
     // Minificación agresiva
     minify: 'terser',
     terserOptions: {
@@ -25,12 +27,16 @@ export default defineConfig({
         drop_console: true,      // Eliminar console.log en producción
         drop_debugger: true,
         pure_funcs: ['console.info', 'console.debug'],
+        passes: 2,               // Two passes for better dead code elimination
+        toplevel: true,
       },
       format: {
         comments: false,         // Remueve comentarios sospechosos/sensibles (CWE-615)
       },
     },
     cssMinify: true,
+    // Module preload disabled: handled natively by modern browsers
+    modulePreload: { polyfill: false },
     // Separar vendors del código de la app (mejora caché) — función para Vite 8/rolldown
     rollupOptions: {
       output: {

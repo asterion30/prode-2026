@@ -384,3 +384,18 @@ button, input {
         display: none;
     }
 }
+
+/* =========================================
+   PERFORMANCE: content-visibility
+   Skips layout/paint for off-screen hidden sections.
+   Browser won't spend time rendering what's not visible.
+   ========================================= */
+#grupos-view,
+#especiales-view,
+#legendary-view,
+#league-details-view,
+#ranking-view,
+#users-view {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+}
