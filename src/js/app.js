@@ -1059,6 +1059,23 @@ document.addEventListener('touchmove', function(e) {
 // =======================
 // EXPORT LOGIC (Image)
 // =======================
+const dataURLtoBlob = (dataurl) => {
+    try {
+        const arr = dataurl.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], { type: mime });
+    } catch (e) {
+        console.error("Error converting dataUrl to Blob", e);
+        return null;
+    }
+};
+
 const handleExportRankingImage = async () => {
     if (!rankingView) return;
     
@@ -1100,22 +1117,32 @@ const handleExportRankingImage = async () => {
         const aliasText = userAliasDisplay ? userAliasDisplay.textContent.trim().replace(/\s+/g, '_') : 'Prode';
         const fileName = `Ranking_Prode_${aliasText}.png`;
         
-        // Convert base64 dataUrl to File for sharing
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
+        // Convert base64 dataUrl to File using synchronous Blob helper
+        const blob = dataURLtoBlob(dataUrl);
+        if (!blob) throw new Error("Could not parse image blob");
         const file = new File([blob], fileName, { type: 'image/png' });
         
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        let shared = false;
+        if (navigator.share && navigator.canShare) {
             try {
-                await navigator.share({
-                    files: [file],
-                    title: 'Ranking Prode General',
-                    text: '¡Mirá cómo viene el ranking general del Prode!'
-                });
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Ranking Prode General',
+                        text: '¡Mirá cómo viene el ranking general del Prode!'
+                    });
+                    shared = true;
+                }
             } catch (shareErr) {
                 console.log("Compartir cancelado o fallido:", shareErr);
+                // If they cancelled, count as shared to avoid forcing a download
+                if (shareErr.name === 'AbortError') {
+                    shared = true;
+                }
             }
-        } else {
+        }
+        
+        if (!shared) {
             // Fallback: download
             const link = document.createElement("a");
             link.download = fileName;
@@ -1175,22 +1202,32 @@ const handleExportLeagueRankingImage = async () => {
         const leagueNameText = leagueDetailsName ? leagueDetailsName.textContent.trim().replace(/\s+/g, '_') : 'Legendaria';
         const fileName = `Ranking_Liga_${leagueNameText}.png`;
         
-        // Convert base64 dataUrl to File for sharing
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
+        // Convert base64 dataUrl to File using synchronous Blob helper
+        const blob = dataURLtoBlob(dataUrl);
+        if (!blob) throw new Error("Could not parse image blob");
         const file = new File([blob], fileName, { type: 'image/png' });
         
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        let shared = false;
+        if (navigator.share && navigator.canShare) {
             try {
-                await navigator.share({
-                    files: [file],
-                    title: 'Ranking Liga Legendaria',
-                    text: '¡Mirá cómo va nuestra Liga Legendaria en el Prode!'
-                });
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Ranking Liga Legendaria',
+                        text: '¡Mirá cómo va nuestra Liga Legendaria en el Prode!'
+                    });
+                    shared = true;
+                }
             } catch (shareErr) {
                 console.log("Compartir cancelado o fallido:", shareErr);
+                // If they cancelled, count as shared to avoid forcing a download
+                if (shareErr.name === 'AbortError') {
+                    shared = true;
+                }
             }
-        } else {
+        }
+        
+        if (!shared) {
             // Fallback: download
             const link = document.createElement("a");
             link.download = fileName;
