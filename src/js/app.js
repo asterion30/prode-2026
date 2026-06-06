@@ -28,6 +28,14 @@ if (inviteCodeParam) {
 }
 
 // =======================
+// LEAGUE PAGINATION STATE
+// =======================
+let currentLeaguePage = 0;
+let currentLeagueMembers = [];
+let currentLeagueOwnerId = null;
+let currentLeagueId = null;
+
+// =======================
 // DOM ELEMENTS
 // =======================
 const userAvatarImg = document.getElementById("user-avatar-img");
@@ -1179,6 +1187,11 @@ const handleExportLeagueRankingImage = async () => {
             btnExportLeagueImage.disabled = true;
         }
         
+        // Hide pagination and export buttons during image generation
+        const paginationControls = document.getElementById("league-pagination-controls");
+        if (paginationControls) paginationControls.style.setProperty("display", "none", "important");
+        if (btnExportLeagueImage) btnExportLeagueImage.style.setProperty("display", "none", "important");
+
         // Wait for DOM layout
         await new Promise(r => setTimeout(r, 200));
         
@@ -1198,6 +1211,10 @@ const handleExportLeagueRankingImage = async () => {
         });
         
         console.error = originalConsoleError;
+
+        // Restore pagination and export buttons
+        if (paginationControls) paginationControls.style.removeProperty("display");
+        if (btnExportLeagueImage) btnExportLeagueImage.style.removeProperty("display");
         
         const leagueNameText = leagueDetailsName ? leagueDetailsName.textContent.trim().replace(/\s+/g, '_') : 'Legendaria';
         const fileName = `Ranking_Liga_${leagueNameText}.png`;
@@ -1250,6 +1267,29 @@ if (btnExportCsvMobile) btnExportCsvMobile.addEventListener("click", handleExpor
 
 const btnExportLeagueImage = document.getElementById("btn-export-league-image");
 if (btnExportLeagueImage) btnExportLeagueImage.addEventListener("click", handleExportLeagueRankingImage);
+
+const btnLeaguePrev = document.getElementById("btn-league-prev");
+const btnLeagueNext = document.getElementById("btn-league-next");
+
+if (btnLeaguePrev) {
+    btnLeaguePrev.addEventListener("click", () => {
+        if (currentLeaguePage > 0) {
+            currentLeaguePage--;
+            displayLeagueRankingPage();
+        }
+    });
+}
+
+if (btnLeagueNext) {
+    btnLeagueNext.addEventListener("click", () => {
+        const itemsPerPage = 5;
+        const totalPages = Math.ceil(currentLeagueMembers.length / itemsPerPage) || 1;
+        if (currentLeaguePage < totalPages - 1) {
+            currentLeaguePage++;
+            displayLeagueRankingPage();
+        }
+    });
+}
 
 // =======================
 // ADMIN EXPORT CSV LOGIC
@@ -1972,117 +2012,151 @@ async function renderLeagueDetailsView(league) {
     try {
         const members = await fetchLeagueDetails(league.id);
         membersCountEl.textContent = `${members.length} miembro(s)`;
-        rankingBody.innerHTML = "";
-
-        const myIndex = members.findIndex(m => m.id === user.id);
-
-        const membersToShow = [];
-        members.forEach((m, idx) => {
-            if (idx < 5) {
-                membersToShow.push({ member: m, index: idx });
-            } else if (idx === myIndex) {
-                membersToShow.push({ member: m, index: idx });
-            }
-        });
-
-        membersToShow.forEach(({ member, index }, i) => {
-            if (i > 0 && index !== membersToShow[i-1].index + 1) {
-                const separatorTr = document.createElement("tr");
-                separatorTr.className = "border-slate-800 bg-slate-800/10";
-                const colSpan = isOwner ? 4 : 3;
-                separatorTr.innerHTML = `<td colspan="${colSpan}" class="px-4 py-2 text-center text-slate-500 text-xs tracking-widest bg-slate-800/20">••••••</td>`;
-                rankingBody.appendChild(separatorTr);
-            }
-
-            const isMedal = index < 3;
-            let rankContent = `${index + 1}`;
-            if (index === 0) rankContent = "🥇";
-            else if (index === 1) rankContent = "🥈";
-            else if (index === 2) rankContent = "🥉";
-
-            const displayName = member.alias || (member.nombre + ' ' + member.apellido).trim() || "Usuario";
-            const isMe = member.id === user.id;
-
-            let badgesHtml = "";
-            if (member.score === 0) {
-                badgesHtml += `<span class="text-[12px] ml-1 cursor-help" title="🥶 El Mufa (0 Puntos)">🥶</span>`;
-            } else if (index === 0 && member.score > 0) {
-                badgesHtml += `<span class="text-[12px] ml-1 cursor-help" title="🔮 El Nostradamus (Líder Absoluto)">🔮</span>`;
-            }
-
-            let chicanaBtn = "";
-            if (myIndex !== -1 && index === myIndex - 1 && member.score > 0) {
-                const msg = encodeURIComponent(`¡Ojo por el retrovisor ${displayName}! Te estoy pisando los talones en el Prode Mundial 2026 🚗💨😈`);
-                chicanaBtn = `<a href="https://api.whatsapp.com/send?text=${msg}" target="_blank" class="ml-2 inline-flex items-center justify-center bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500 hover:text-white transition-all px-1.5 py-0.5 rounded text-[9px] uppercase font-bold" title="Chicanear por WhatsApp"><i class="ph-bold ph-whatsapp-logo mr-1 text-sm"></i> Chicana</a>`;
-            }
-
-            const tr = document.createElement("tr");
-            tr.className = `border-slate-800 transition-colors ${isMe ? 'bg-brand-500/10 text-white font-bold' : (index % 2 === 0 ? '' : 'bg-slate-800/20')}`;
-
-            let actionHtml = "";
-            if (isOwner) {
-                if (member.id === league.owner_id) {
-                    actionHtml = `<td class="px-4 py-3 text-center text-[10px] text-slate-500 italic font-semibold">Creador</td>`;
-                } else {
-                    actionHtml = `
-                        <td class="px-4 py-3 text-center">
-                            <button class="btn-expel-member px-2 py-1 bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 rounded-lg text-[10px] font-bold transition-all" data-id="${member.id}" data-alias="${escapeHTML(displayName)}">
-                                Expulsar
-                            </button>
-                        </td>
-                    `;
-                }
-            }
-
-            const avatarVal = member.avatar_url ? member.avatar_url.trim() : null;
-            const hasValidAvatar = avatarVal && avatarVal !== "" && avatarVal !== "null" && avatarVal !== "undefined";
-            const flagHtml = hasValidAvatar
-                ? `<img src="${escapeHTML(avatarVal)}" alt="" class="w-6 h-6 rounded-full object-cover border border-slate-700" onerror="this.outerHTML='<div class=\\'w-6 h-6 bg-slate-700 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-bold\\'>${escapeHTML(displayName.substring(0,2).toUpperCase())}</div>';">`
-                : `<div class="w-6 h-6 bg-slate-700 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-bold">${escapeHTML(displayName.substring(0,2).toUpperCase())}</div>`;
-
-            tr.innerHTML = `
-                <td class="px-4 py-3 text-center font-bold ${isMedal ? 'text-lg' : 'text-slate-400'}">${rankContent}</td>
-                <td class="px-4 py-3">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        ${flagHtml}
-                        <div class="flex items-center">
-                            <span class="text-xs sm:text-sm line-clamp-1">${escapeHTML(displayName)} ${isMe ? ' (Vos)' : ''}</span>
-                            ${badgesHtml}
-                            ${chicanaBtn}
-                        </div>
-                    </div>
-                </td>
-                <td class="px-4 py-3 text-right font-black text-slate-200">${member.score || 0} pts</td>
-                ${isOwner ? actionHtml : ''}
-            `;
-
-            if (isOwner && member.id !== league.owner_id) {
-                const btnExpel = tr.querySelector(".btn-expel-member");
-                if (btnExpel) {
-                    btnExpel.onclick = async () => {
-                        const confirmText = `¿Estás seguro de que querés expulsar a ${displayName} de esta liga?`;
-                        if (confirm(confirmText)) {
-                            showLoader();
-                            try {
-                                await removeLeagueMember(league.id, member.id);
-                                await renderLeagueDetailsView(league);
-                            } catch (err) {
-                                alert("Error al expulsar al miembro: " + err.message);
-                            } finally {
-                                hideLoader();
-                            }
-                        }
-                    };
-                }
-            }
-
-            rankingBody.appendChild(tr);
-        });
-
+        
+        currentLeagueMembers = members;
+        currentLeaguePage = 0;
+        currentLeagueOwnerId = league.owner_id;
+        currentLeagueId = league.id;
+        
+        displayLeagueRankingPage();
     } catch (err) {
         alert("Error al cargar los miembros: " + err.message);
     } finally {
         hideLoader();
+    }
+}
+
+function displayLeagueRankingPage() {
+    const { user } = getCurrentUser();
+    if (!user) return;
+
+    const rankingBody = document.getElementById("league-ranking-body");
+    const paginationControls = document.getElementById("league-pagination-controls");
+    const pageInfo = document.getElementById("league-page-info");
+    const btnLeaguePrev = document.getElementById("btn-league-prev");
+    const btnLeagueNext = document.getElementById("btn-league-next");
+
+    if (!rankingBody) return;
+    rankingBody.innerHTML = "";
+
+    const itemsPerPage = 5;
+    const totalPages = Math.ceil(currentLeagueMembers.length / itemsPerPage) || 1;
+
+    if (currentLeaguePage >= totalPages) currentLeaguePage = totalPages - 1;
+    if (currentLeaguePage < 0) currentLeaguePage = 0;
+
+    const startIndex = currentLeaguePage * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageMembers = currentLeagueMembers.slice(startIndex, endIndex);
+
+    const isOwner = currentLeagueOwnerId === user.id;
+
+    pageMembers.forEach((member, i) => {
+        const index = startIndex + i;
+        const isMedal = index < 3;
+        let rankContent = `${index + 1}`;
+        if (index === 0) rankContent = "🥇";
+        else if (index === 1) rankContent = "🥈";
+        else if (index === 2) rankContent = "🥉";
+
+        const displayName = member.alias || (member.nombre + ' ' + member.apellido).trim() || "Usuario";
+        const isMe = member.id === user.id;
+
+        let badgesHtml = "";
+        if (member.score === 0) {
+            badgesHtml += `<span class="text-[12px] ml-1 cursor-help" title="🥶 El Mufa (0 Puntos)">🥶</span>`;
+        } else if (index === 0 && member.score > 0) {
+            badgesHtml += `<span class="text-[12px] ml-1 cursor-help" title="🔮 El Nostradamus (Líder Absoluto)">🔮</span>`;
+        }
+
+        let chicanaBtn = "";
+        const myIndexInAll = currentLeagueMembers.findIndex(m => m.id === user.id);
+        if (myIndexInAll !== -1 && index === myIndexInAll - 1 && member.score > 0) {
+            const msg = encodeURIComponent(`¡Ojo por el retrovisor ${displayName}! Te estoy pisando los talones en el Prode Mundial 2026 🚗💨😈`);
+            chicanaBtn = `<a href="https://api.whatsapp.com/send?text=${msg}" target="_blank" class="ml-2 inline-flex items-center justify-center bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500 hover:text-white transition-all px-1.5 py-0.5 rounded text-[9px] uppercase font-bold" title="Chicanear por WhatsApp"><i class="ph-bold ph-whatsapp-logo mr-1 text-sm"></i> Chicana</a>`;
+        }
+
+        const tr = document.createElement("tr");
+        tr.className = `border-slate-800 transition-colors ${isMe ? 'bg-brand-500/10 text-white font-bold' : (index % 2 === 0 ? '' : 'bg-slate-800/20')}`;
+
+        let actionHtml = "";
+        if (isOwner) {
+            if (member.id === currentLeagueOwnerId) {
+                actionHtml = `<td class="px-4 py-3 text-center text-[10px] text-slate-500 italic font-semibold">Creador</td>`;
+            } else {
+                actionHtml = `
+                    <td class="px-4 py-3 text-center">
+                        <button class="btn-expel-member px-2 py-1 bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 rounded-lg text-[10px] font-bold transition-all" data-id="${member.id}" data-alias="${escapeHTML(displayName)}">
+                            Expulsar
+                        </button>
+                    </td>
+                `;
+            }
+        }
+
+        const avatarVal = member.avatar_url ? member.avatar_url.trim() : null;
+        const hasValidAvatar = avatarVal && avatarVal !== "" && avatarVal !== "null" && avatarVal !== "undefined";
+        
+        // CSS-overlay container avatar system to prevent broken image placeholders in Safari/Android
+        const flagHtml = `
+            <div class="relative w-6 h-6 flex-shrink-0">
+                <div class="absolute inset-0 bg-slate-700 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-bold">
+                    ${escapeHTML(displayName.substring(0,2).toUpperCase())}
+                </div>
+                ${hasValidAvatar ? `<img src="${escapeHTML(avatarVal)}" alt="" class="absolute inset-0 w-full h-full rounded-full object-cover border border-slate-700 z-10" onerror="this.style.display='none';">` : ''}
+            </div>
+        `;
+
+        tr.innerHTML = `
+            <td class="px-4 py-3 text-center font-bold ${isMedal ? 'text-lg' : 'text-slate-400'}">${rankContent}</td>
+            <td class="px-4 py-3">
+                <div class="flex items-center gap-2 flex-wrap">
+                    ${flagHtml}
+                    <div class="flex items-center">
+                        <span class="text-xs sm:text-sm line-clamp-1">${escapeHTML(displayName)} ${isMe ? ' (Vos)' : ''}</span>
+                        ${badgesHtml}
+                        ${chicanaBtn}
+                    </div>
+                </div>
+            </td>
+            <td class="px-4 py-3 text-right font-black text-slate-200">${member.score || 0} pts</td>
+            ${isOwner ? actionHtml : ''}
+        `;
+
+        if (isOwner && member.id !== currentLeagueOwnerId) {
+            const btnExpel = tr.querySelector(".btn-expel-member");
+            if (btnExpel) {
+                btnExpel.onclick = async () => {
+                    const confirmText = `¿Estás seguro de que querés expulsar a ${displayName} de esta liga?`;
+                    if (confirm(confirmText)) {
+                        showLoader();
+                        try {
+                            await removeLeagueMember(currentLeagueId, member.id);
+                            const members = await fetchLeagueDetails(currentLeagueId);
+                            currentLeagueMembers = members;
+                            displayLeagueRankingPage();
+                        } catch (err) {
+                            alert("Error al expulsar al miembro: " + err.message);
+                        } finally {
+                            hideLoader();
+                        }
+                    }
+                };
+            }
+        }
+
+        rankingBody.appendChild(tr);
+    });
+
+    if (paginationControls && pageInfo && btnLeaguePrev && btnLeagueNext) {
+        if (totalPages <= 1) {
+            paginationControls.classList.add("hidden");
+        } else {
+            paginationControls.classList.remove("hidden");
+            pageInfo.textContent = `Página ${currentLeaguePage + 1} de ${totalPages}`;
+            btnLeaguePrev.disabled = currentLeaguePage === 0;
+            btnLeagueNext.disabled = currentLeaguePage === totalPages - 1;
+        }
     }
 }
 
