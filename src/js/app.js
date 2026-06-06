@@ -67,6 +67,9 @@ const legendaryView = document.getElementById("legendary-view");
 const leagueDetailsView = document.getElementById("league-details-view");
 const btnNavLegendary = document.getElementById("nav-legendary");
 
+const especialesView = document.getElementById("especiales-view");
+const btnNavEspeciales = document.getElementById("nav-especiales");
+
 const btnCreateLeague = document.getElementById("btn-create-league");
 const btnJoinLeague = document.getElementById("btn-join-league");
 const modalCreateLeague = document.getElementById("modal-create-league");
@@ -293,6 +296,7 @@ initAuth((user, alias, score, avatarUrl) => {
         if (!isAppInitialized) {
             setupAppSubscriptions(user.uid || user.id);
             renderStageTabs();
+            initEspecialesView();
             isAppInitialized = true;
             
             // Process pending invite code if any
@@ -390,8 +394,8 @@ function setupAppSubscriptions(uid) {
 // =======================
 // NAVIGATION HELPERS
 // =======================
-const ALL_VIEWS = [matchesView, gruposView, legendaryView, leagueDetailsView, rankingView, usersView].filter(Boolean);
-const ALL_NAV_BTNS = [btnNavMatches, btnNavGrupos, btnNavLegendary, btnNavRanking, btnNavUsers].filter(Boolean);
+const ALL_VIEWS = [matchesView, gruposView, legendaryView, leagueDetailsView, rankingView, usersView, especialesView].filter(Boolean);
+const ALL_NAV_BTNS = [btnNavMatches, btnNavGrupos, btnNavLegendary, btnNavRanking, btnNavUsers, btnNavEspeciales].filter(Boolean);
 
 function setActiveNav(activeBtn, activeView) {
     ALL_VIEWS.forEach(v => v.classList.add('hidden'));
@@ -442,6 +446,13 @@ if (btnNavUsers) {
     btnNavUsers.addEventListener('click', async () => {
         setActiveNav(btnNavUsers, usersView);
         await loadUsersGrid();
+    });
+}
+
+if (btnNavEspeciales) {
+    btnNavEspeciales.addEventListener('click', () => {
+        setActiveNav(btnNavEspeciales, especialesView);
+        initEspecialesView();
     });
 }
 
@@ -2290,4 +2301,176 @@ if ('serviceWorker' in navigator) {
             console.error('Error al registrar el Service Worker', err);
         });
     });
+}
+
+// =============================================
+// PRONÓSTICOS ESPECIALES LOGIC (Production Mode)
+// =============================================
+async function initEspecialesView() {
+    const selectFavorito = document.getElementById("select-favorito");
+    const selectSorpresa = document.getElementById("select-sorpresa");
+    const selectDecepcion = document.getElementById("select-decepcion");
+    const btnSaveEspeciales = document.getElementById("btn-save-especiales");
+
+    if (!selectFavorito || !selectSorpresa || !selectDecepcion) return;
+
+    // Obtener todos los equipos únicos ordenados de standings.js
+    const teams = Object.values(GROUP_MAP)
+        .flat()
+        .map(t => ({ name: t.team, flag: t.flag }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+    // Llenar los selects
+    const populateSelect = (selectEl) => {
+        selectEl.innerHTML = '<option value="">Seleccionar país...</option>';
+        teams.forEach(t => {
+            const opt = document.createElement("option");
+            opt.value = t.name;
+            opt.textContent = t.name;
+            selectEl.appendChild(opt);
+        });
+    };
+
+    populateSelect(selectFavorito);
+    populateSelect(selectSorpresa);
+    populateSelect(selectDecepcion);
+
+    if (currentUser) {
+        // Cargar selección de Supabase
+        const { data: userData } = await supabase
+            .from('especiales')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .single();
+
+        if (userData) {
+            selectFavorito.value = userData.favorito || "";
+            selectSorpresa.value = userData.sorpresa || "";
+            selectDecepcion.value = userData.decepcion || "";
+        }
+    }
+
+    // Renderizar rankings
+    updateEspecialesRanking();
+
+    // Guardar al hacer click
+    if (btnSaveEspeciales) {
+        btnSaveEspeciales.onclick = async () => {
+            if (!currentUser) {
+                alert("Debes iniciar sesión para guardar.");
+                return;
+            }
+            
+            btnSaveEspeciales.disabled = true;
+            btnSaveEspeciales.textContent = "Guardando...";
+
+            const fav = selectFavorito.value;
+            const sor = selectSorpresa.value;
+            const dec = selectDecepcion.value;
+
+            const { error } = await supabase
+                .from('especiales')
+                .upsert({ 
+                    user_id: currentUser.id, 
+                    favorito: fav, 
+                    sorpresa: sor, 
+                    decepcion: dec,
+                    updated_at: new Date().toISOString()
+                });
+
+            if (error) {
+                console.error("Error al guardar especiales:", error);
+                alert("Hubo un error al guardar tus elecciones.");
+            } else {
+                updateEspecialesRanking();
+                alert("¡Tus elecciones especiales se guardaron correctamente!");
+            }
+            
+            btnSaveEspeciales.disabled = false;
+            btnSaveEspeciales.textContent = "Guardar Elecciones";
+        };
+    }
+}
+
+async function updateEspecialesRanking() {
+    const listFav = document.getElementById("ranking-mock-favoritos");
+    const listSor = document.getElementById("ranking-mock-sorpresas");
+    const listDec = document.getElementById("ranking-mock-decepciones");
+
+    if (!listFav || !listSor || !listDec) return;
+
+    // Obtener banderas
+    const teamFlags = {};
+    Object.values(GROUP_MAP).flat().forEach(t => {
+        teamFlags[t.team] = t.flag;
+    });
+
+    // Votos base para semilla (seed)
+    const baseFav = { "Argentina": 5, "Brasil": 3, "Francia": 2 };
+    const baseSor = { "Ecuador": 4, "Marruecos": 4, "Japón": 2 };
+    const baseDec = { "Alemania": 5, "España": 3, "Inglaterra": 2 };
+
+    // Obtener votos reales de Supabase
+    const { data: allVotes, error } = await supabase
+        .from('especiales')
+        .select('favorito, sorpresa, decepcion');
+
+    if (!error && allVotes) {
+        allVotes.forEach(v => {
+            if (v.favorito) baseFav[v.favorito] = (baseFav[v.favorito] || 0) + 1;
+            if (v.sorpresa) baseSor[v.sorpresa] = (baseSor[v.sorpresa] || 0) + 1;
+            if (v.decepcion) baseDec[v.decepcion] = (baseDec[v.decepcion] || 0) + 1;
+        });
+    }
+
+    // Ordenar y renderizar cada sección
+    const renderSection = (container, votes, barColorClass) => {
+        container.innerHTML = "";
+        
+        // Convertir a array y ordenar desc
+        const sorted = Object.entries(votes)
+            .map(([teamName, count]) => ({ teamName, count }))
+            .sort((a, b) => b.count - a.count);
+
+        const maxVotes = Math.max(...sorted.map(s => s.count)) || 1;
+
+        sorted.forEach(item => {
+            const flagName = teamFlags[item.teamName] || "un";
+            const flagUrl = flagName !== "un" ? `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${flagName}.svg` : null;
+            const flagHtml = flagUrl 
+                ? `<img src="${flagUrl}" class="w-4 h-auto rounded-[1px] border border-slate-700 object-cover" onerror="this.style.display='none';">`
+                : `<div class="w-4 h-3 bg-slate-700 rounded-[1px]"></div>`;
+
+            const percentage = (item.count / maxVotes) * 100;
+
+            const div = document.createElement("div");
+            div.className = "space-y-1";
+            div.innerHTML = `
+                <div class="flex items-center justify-between text-xs text-slate-300">
+                    <div class="flex items-center gap-1.5 font-semibold">
+                        ${flagHtml}
+                        <span class="font-medium">${escapeHTML(item.teamName)}</span>
+                    </div>
+                    <span class="font-bold text-slate-400">${item.count} ${item.count === 1 ? 'voto' : 'votos'}</span>
+                </div>
+                <div class="w-full bg-slate-800/80 h-1.5 rounded-full overflow-hidden border border-slate-850">
+                    <div class="h-full rounded-full ${barColorClass}" style="width: ${percentage}%"></div>
+                </div>
+            `;
+            
+            // Programmatic error listener to prevent broken image warnings under strict CSP
+            const imgEl = div.querySelector("img");
+            if (imgEl) {
+                imgEl.addEventListener("error", () => {
+                    imgEl.style.display = "none";
+                });
+            }
+
+            container.appendChild(div);
+        });
+    };
+
+    renderSection(listFav, baseFav, "bg-amber-500");
+    renderSection(listSor, baseSor, "bg-purple-500");
+    renderSection(listDec, baseDec, "bg-red-500");
 }

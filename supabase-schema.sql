@@ -165,3 +165,28 @@ begin
   end loop;
 end;
 $$ language plpgsql security definer set search_path = '';
+
+-- ==========================================
+-- ESPECIALES TABLE
+-- ==========================================
+create table if not exists public.especiales (
+  user_id uuid references public.users on delete cascade not null primary key,
+  favorito text,
+  sorpresa text,
+  decepcion text,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.especiales enable row level security;
+
+create policy "Users can view all especiales" 
+  on public.especiales for select 
+  using ( true );
+
+create policy "Users can insert their own especiales" 
+  on public.especiales for insert 
+  with check ( auth.uid() = user_id );
+
+create policy "Users can update their own especiales" 
+  on public.especiales for update 
+  using ( auth.uid() = user_id );

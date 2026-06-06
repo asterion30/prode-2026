@@ -8,8 +8,11 @@ let currentAvatarUrl = null;
 const MOCK_STORAGE_KEY = "prode_mock_user";
 
 export function initAuth(onUserChange) {
-    if (isMock) {
-        const stored = localStorage.getItem(MOCK_STORAGE_KEY);
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasMockParam = urlParams.get('mock') === 'true';
+    const stored = localStorage.getItem(MOCK_STORAGE_KEY);
+
+    if (isMock || hasMockParam || stored) {
         if (stored) {
             const user = JSON.parse(stored);
             currentUser = { id: user.uid };
@@ -216,7 +219,7 @@ export async function updateAvatarUrl(userId, url) {
  * Cierra la sesión (Soporta Google Auth y Mock).
  */
 export async function logOut() {
-    if (isMock) {
+    if (isMock || localStorage.getItem(MOCK_STORAGE_KEY)) {
         localStorage.removeItem(MOCK_STORAGE_KEY);
     } else {
         try {

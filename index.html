@@ -170,6 +170,9 @@
                             <button id="nav-legendary" title="Liga Legendaria" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
                                 <i class="ph-bold ph-shield-star text-lg"></i>
                             </button>
+                            <button id="nav-especiales" title="Especiales" aria-label="Ver Especiales" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
+                                <i class="ph-bold ph-crown text-lg"></i>
+                            </button>
                             <button id="nav-ranking" title="Ranking" aria-label="Ver Ranking" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
                                 <i class="ph-bold ph-trophy text-lg"></i>
                             </button>
@@ -179,9 +182,6 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2 sm:gap-3">
-                        <button id="btn-mobile-grid" class="md:hidden w-8 h-8 flex items-center justify-center bg-slate-800 rounded-lg text-brand-500 border border-slate-700">
-                            <i class="ph-bold ph-grid-four text-lg"></i>
-                        </button>
                         <div class="text-right">
                             <p id="user-alias-display" class="text-sm font-semibold text-white">Alias</p>
                             <p id="user-points-display" class="text-xs text-brand-500 font-medium">0 pts</p>
@@ -286,6 +286,113 @@
                             
                             <div class="text-[10px] text-slate-500 italic text-center pt-1">
                                 <i class="ph-bold ph-warning-circle text-amber-500/80 mr-1"></i> Recordá que podés guardar y modificar tus pronósticos hasta 1 hora antes de que comience cada partido.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRONÓSTICOS ESPECIALES VIEW -->
+                    <div id="especiales-view" class="hidden space-y-6 animate-fadeIn">
+                        <div class="flex justify-between items-center mb-2">
+                            <div>
+                                <h2 class="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+                                    <i class="ph-bold ph-crown text-brand-500"></i> Pronósticos Especiales
+                                </h2>
+                                <p class="text-xs text-slate-400 font-medium">Seleccioná tu favorito, la sorpresa y la decepción del mundial.</p>
+                            </div>
+                        </div>
+
+                        <!-- Panel de Selección -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Tarjeta Favorito -->
+                            <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-500">
+                                                <i class="ph-bold ph-trophy text-lg"></i>
+                                            </div>
+                                            <h3 class="font-bold text-white text-sm">El Favorito</h3>
+                                        </div>
+                                        <span class="bg-amber-500/15 text-amber-400 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-amber-500/20 tracking-wide">+15 pts</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 leading-relaxed">¿Quién creés que se va a consagrar Campeón del Mundo?</p>
+                                </div>
+                                <select id="select-favorito" class="w-full bg-slate-800 text-slate-200 border border-slate-700 rounded-xl px-3 py-2.5 text-xs focus:ring-brand-500 focus:border-brand-500">
+                                    <option value="">Seleccionar país...</option>
+                                </select>
+                            </div>
+
+                            <!-- Tarjeta Sorpresa -->
+                            <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-500">
+                                                <i class="ph-bold ph-magic-wand text-lg"></i>
+                                            </div>
+                                            <h3 class="font-bold text-white text-sm">La Sorpresa</h3>
+                                        </div>
+                                        <span class="bg-purple-500/15 text-purple-400 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-purple-500/20 tracking-wide">+10 pts</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 leading-relaxed">¿Cuál selección va a dar el batacazo y llegar más lejos?</p>
+                                </div>
+                                <select id="select-sorpresa" class="w-full bg-slate-800 text-slate-200 border border-slate-700 rounded-xl px-3 py-2.5 text-xs focus:ring-brand-500 focus:border-brand-500">
+                                    <option value="">Seleccionar país...</option>
+                                </select>
+                            </div>
+
+                            <!-- Tarjeta Decepción -->
+                            <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 bg-red-500/10 rounded-lg flex items-center justify-center text-red-500">
+                                                <i class="ph-bold ph-thumbs-down text-lg"></i>
+                                            </div>
+                                            <h3 class="font-bold text-white text-sm">La Decepción</h3>
+                                        </div>
+                                        <span class="bg-red-500/15 text-red-400 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-red-500/20 tracking-wide">+5 pts</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 leading-relaxed">¿Qué selección gigante se va a quedar afuera temprano?</p>
+                                </div>
+                                <select id="select-decepcion" class="w-full bg-slate-800 text-slate-200 border border-slate-700 rounded-xl px-3 py-2.5 text-xs focus:ring-brand-500 focus:border-brand-500">
+                                    <option value="">Seleccionar país...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Botón Guardar -->
+                        <div class="flex justify-end">
+                            <button id="btn-save-especiales" class="w-full sm:w-auto px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                                <i class="ph-bold ph-floppy-disk text-sm"></i> Guardar Elección
+                            </button>
+                        </div>
+
+                        <!-- Rankings de la Comunidad -->
+                        <div class="bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 space-y-6">
+                            <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+                                <i class="ph-bold ph-chart-bar text-brand-500 text-lg"></i>
+                                <h3 class="font-bold text-white text-xs uppercase tracking-wider">Tendencias de la Comunidad (Muestra)</h3>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Ranking Favoritos -->
+                                <div class="space-y-3">
+                                    <h4 class="text-xs font-bold text-amber-500 uppercase flex items-center gap-1">🏆 Favoritos</h4>
+                                    <div class="space-y-2" id="ranking-mock-favoritos"></div>
+                                </div>
+
+                                <!-- Ranking Sorpresas -->
+                                <div class="space-y-3">
+                                    <h4 class="text-xs font-bold text-purple-500 uppercase flex items-center gap-1">🔮 Sorpresas</h4>
+                                    <div class="space-y-2" id="ranking-mock-sorpresas"></div>
+                                </div>
+
+                                <!-- Ranking Decepciones -->
+                                <div class="space-y-3">
+                                    <h4 class="text-xs font-bold text-red-500 uppercase flex items-center gap-1">🥶 Decepciones</h4>
+                                    <div class="space-y-2" id="ranking-mock-decepciones"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
