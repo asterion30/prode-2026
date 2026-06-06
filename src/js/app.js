@@ -786,8 +786,9 @@ function renderMatches() {
                 </div>
             </div>
             
-            <div class="mt-3 flex justify-center h-4">
-                <span id="status-${match.id}" class="text-[10px] text-brand-500 font-medium opacity-0 transition-opacity">Guardado ✓</span>
+            <div class="mt-3 flex flex-col items-center justify-center gap-1">
+                <span id="status-${match.id}" class="text-[10px] text-brand-500 font-medium opacity-0 transition-opacity h-4">Guardado ✓</span>
+                <span class="text-[9px] text-slate-500 italic text-center leading-tight">Los resultados pueden modificarse hasta una hora antes del partido</span>
             </div>
         `;
         
