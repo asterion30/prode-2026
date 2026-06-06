@@ -1097,10 +1097,31 @@ const handleExportRankingImage = async () => {
         
         console.error = originalConsoleError;
         
-        const link = document.createElement("a");
-        link.download = `Ranking_Prode_${userAliasDisplay.textContent}.png`;
-        link.href = dataUrl;
-        link.click();
+        const aliasText = userAliasDisplay ? userAliasDisplay.textContent.trim().replace(/\s+/g, '_') : 'Prode';
+        const fileName = `Ranking_Prode_${aliasText}.png`;
+        
+        // Convert base64 dataUrl to File for sharing
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], fileName, { type: 'image/png' });
+        
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'Ranking Prode General',
+                    text: '¡Mirá cómo viene el ranking general del Prode!'
+                });
+            } catch (shareErr) {
+                console.log("Compartir cancelado o fallido:", shareErr);
+            }
+        } else {
+            // Fallback: download
+            const link = document.createElement("a");
+            link.download = fileName;
+            link.href = dataUrl;
+            link.click();
+        }
         
         if (btnExportCsv) {
             btnExportCsv.innerHTML = btnOriginalText;
@@ -1117,8 +1138,81 @@ const handleExportRankingImage = async () => {
     }
 };
 
+const handleExportLeagueRankingImage = async () => {
+    const btnExportLeagueImage = document.getElementById("btn-export-league-image");
+    const leagueRankingCard = document.getElementById("league-ranking-card");
+    const leagueDetailsName = document.getElementById("league-details-name");
+    
+    if (!leagueRankingCard) return;
+    
+    try {
+        const btnOriginalText = btnExportLeagueImage ? btnExportLeagueImage.innerHTML : '';
+        if (btnExportLeagueImage) {
+            btnExportLeagueImage.innerHTML = '<span class="spin-loader"></span>';
+            btnExportLeagueImage.disabled = true;
+        }
+        
+        // Wait for DOM layout
+        await new Promise(r => setTimeout(r, 200));
+        
+        // Mute SecurityError logs
+        const originalConsoleError = console.error;
+        console.error = (...args) => {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('Error inlining remote css file')) return;
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('Error while reading CSS rules')) return;
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('Error loading remote stylesheet')) return;
+            originalConsoleError(...args);
+        };
+
+        const { toPng } = await import('html-to-image');
+        const dataUrl = await toPng(leagueRankingCard, {
+            backgroundColor: '#0f172a',
+            pixelRatio: 2
+        });
+        
+        console.error = originalConsoleError;
+        
+        const leagueNameText = leagueDetailsName ? leagueDetailsName.textContent.trim().replace(/\s+/g, '_') : 'Legendaria';
+        const fileName = `Ranking_Liga_${leagueNameText}.png`;
+        
+        // Convert base64 dataUrl to File for sharing
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], fileName, { type: 'image/png' });
+        
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'Ranking Liga Legendaria',
+                    text: '¡Mirá cómo va nuestra Liga Legendaria en el Prode!'
+                });
+            } catch (shareErr) {
+                console.log("Compartir cancelado o fallido:", shareErr);
+            }
+        } else {
+            // Fallback: download
+            const link = document.createElement("a");
+            link.download = fileName;
+            link.href = dataUrl;
+            link.click();
+        }
+    } catch (err) {
+        console.error("Error al exportar imagen de la liga", err);
+        alert("Hubo un error al crear la imagen del ranking.");
+    } finally {
+        if (btnExportLeagueImage) {
+            btnExportLeagueImage.innerHTML = btnOriginalText;
+            btnExportLeagueImage.disabled = false;
+        }
+    }
+};
+
 if (btnExportCsv) btnExportCsv.addEventListener("click", handleExportRankingImage);
 if (btnExportCsvMobile) btnExportCsvMobile.addEventListener("click", handleExportRankingImage);
+
+const btnExportLeagueImage = document.getElementById("btn-export-league-image");
+if (btnExportLeagueImage) btnExportLeagueImage.addEventListener("click", handleExportLeagueRankingImage);
 
 // =======================
 // ADMIN EXPORT CSV LOGIC
