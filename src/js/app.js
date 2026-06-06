@@ -543,6 +543,11 @@ if (btnSearchShorts && shortsQueryInput && shortsPlayer) {
             btnSearchShorts.click();
         }
     });
+
+    const shortsSearchContainer = document.getElementById("shorts-search-container");
+    if (shortsSearchContainer) {
+        shortsSearchContainer.addEventListener("click", (e) => e.stopPropagation());
+    }
 }
 
 if (btnMobileGrid && sidebarPredictions && btnCloseSidebar) {
@@ -2314,6 +2319,8 @@ async function initEspecialesView() {
 
     if (!selectFavorito || !selectSorpresa || !selectDecepcion) return;
 
+    const { user: currentUser } = getCurrentUser();
+
     // Obtener todos los equipos únicos ordenados de standings.js
     const teams = Object.values(GROUP_MAP)
         .flat()
@@ -2438,7 +2445,7 @@ async function updateEspecialesRanking() {
             const flagName = teamFlags[item.teamName] || "un";
             const flagUrl = flagName !== "un" ? `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${flagName}.svg` : null;
             const flagHtml = flagUrl 
-                ? `<img src="${flagUrl}" class="w-4 h-auto rounded-[1px] border border-slate-700 object-cover" onerror="this.style.display='none';">`
+                ? `<img src="${flagUrl}" class="w-4 h-auto rounded-[1px] border border-slate-700 object-cover">`
                 : `<div class="w-4 h-3 bg-slate-700 rounded-[1px]"></div>`;
 
             const percentage = (item.count / maxVotes) * 100;
