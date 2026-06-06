@@ -17,16 +17,16 @@ export const GROUP_MAP = {
         { team: 'Suiza',              flag: 'ch' },
     ],
     'C': [
-        { team: 'Estados Unidos',     flag: 'us' },
-        { team: 'Paraguay',           flag: 'py' },
-        { team: 'Australia',          flag: 'au' },
-        { team: 'Turquía',            flag: 'tr' },
-    ],
-    'D': [
         { team: 'Brasil',             flag: 'br' },
         { team: 'Marruecos',          flag: 'ma' },
         { team: 'Escocia',            flag: 'gb-sct' },
         { team: 'Haití',              flag: 'ht' },
+    ],
+    'D': [
+        { team: 'Estados Unidos',     flag: 'us' },
+        { team: 'Paraguay',           flag: 'py' },
+        { team: 'Australia',          flag: 'au' },
+        { team: 'Turquía',            flag: 'tr' },
     ],
     'E': [
         { team: 'Alemania',           flag: 'de' },
@@ -41,16 +41,16 @@ export const GROUP_MAP = {
         { team: 'Túnez',              flag: 'tn' },
     ],
     'G': [
-        { team: 'España',             flag: 'es' },
-        { team: 'Cabo Verde',         flag: 'cv' },
-        { team: 'Arabia Saudí',       flag: 'sa' },
-        { team: 'Uruguay',            flag: 'uy' },
-    ],
-    'H': [
         { team: 'Bélgica',            flag: 'be' },
         { team: 'Egipto',             flag: 'eg' },
         { team: 'RI de Irán',         flag: 'ir' },
         { team: 'Nueva Zelanda',      flag: 'nz' },
+    ],
+    'H': [
+        { team: 'España',             flag: 'es' },
+        { team: 'Cabo Verde',         flag: 'cv' },
+        { team: 'Arabia Saudí',       flag: 'sa' },
+        { team: 'Uruguay',            flag: 'uy' },
     ],
     'I': [
         { team: 'Francia',            flag: 'fr' },
@@ -65,16 +65,16 @@ export const GROUP_MAP = {
         { team: 'Jordania',           flag: 'jo' },
     ],
     'K': [
-        { team: 'Inglaterra',         flag: 'gb-eng' },
-        { team: 'Croacia',            flag: 'hr' },
-        { team: 'Ghana',              flag: 'gh' },
-        { team: 'Panamá',             flag: 'pa' },
-    ],
-    'L': [
         { team: 'Portugal',           flag: 'pt' },
         { team: 'RD Congo',           flag: 'cd' },
         { team: 'Uzbekistán',         flag: 'uz' },
         { team: 'Colombia',           flag: 'co' },
+    ],
+    'L': [
+        { team: 'Inglaterra',         flag: 'gb-eng' },
+        { team: 'Croacia',            flag: 'hr' },
+        { team: 'Ghana',              flag: 'gh' },
+        { team: 'Panamá',             flag: 'pa' },
     ],
 };
 
