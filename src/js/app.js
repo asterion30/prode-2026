@@ -2130,7 +2130,7 @@ function displayLeagueRankingPage() {
                 <div class="absolute inset-0 bg-slate-700 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-bold">
                     ${escapeHTML(displayName.substring(0,2).toUpperCase())}
                 </div>
-                ${hasValidAvatar ? `<img src="${escapeHTML(avatarVal)}" crossorigin="anonymous" alt="" class="avatar-img absolute inset-0 w-full h-full rounded-full object-cover border border-slate-700 z-10">` : ''}
+                ${hasValidAvatar ? `<img src="${escapeHTML(avatarVal)}" alt="" class="avatar-img absolute inset-0 w-full h-full rounded-full object-cover border border-slate-700 z-10">` : ''}
             </div>
         `;
 
