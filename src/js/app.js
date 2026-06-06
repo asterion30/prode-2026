@@ -18,6 +18,15 @@ import { subscribeToRanking } from "./ranking.js";
 import { calculateStandings, GROUP_MAP } from "./standings.js";
 import { createLeague, joinLeagueByCode, fetchUserLeagues, fetchLeagueDetails, removeLeagueMember } from "./leagues.js";
 
+// Parse and preserve invite query parameter on load
+const initialParams = new URLSearchParams(window.location.search);
+const inviteCodeParam = initialParams.get('invite');
+if (inviteCodeParam) {
+    localStorage.setItem('pending_invite_code', inviteCodeParam.trim());
+    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+}
+
 // =======================
 // DOM ELEMENTS
 // =======================
@@ -269,6 +278,9 @@ initAuth((user, alias, score, avatarUrl) => {
             setupAppSubscriptions(user.uid || user.id);
             renderStageTabs();
             isAppInitialized = true;
+            
+            // Process pending invite code if any
+            handlePendingInvite(user.uid || user.id);
         }
 
         hideLoader();
@@ -1707,11 +1719,7 @@ async function renderLegendaryView() {
                         : ''
                     }
                 </div>
-                <div class="flex gap-2 items-center justify-between pt-2 border-t border-slate-700/40">
-                    <div class="text-left">
-                        <span class="text-[9px] text-slate-500 block uppercase font-bold tracking-wider">Código</span>
-                        <span class="text-xs font-mono font-bold text-brand-400">${escapeHTML(league.invite_code)}</span>
-                    </div>
+                <div class="flex gap-2 items-center justify-end pt-2 border-t border-slate-700/40">
                     <button class="btn-view-league px-4 py-2 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-xl border border-slate-700 hover:border-slate-600 transition-all flex items-center gap-1">
                         Ver Detalles <i class="ph-bold ph-caret-right"></i>
                     </button>
@@ -1757,7 +1765,7 @@ async function renderLeagueDetailsView(league) {
     if (btnShareLeague) {
         btnShareLeague.classList.remove("hidden");
         btnShareLeague.onclick = async () => {
-            const shareText = `¡Únete a mi Liga Legendaria "${league.name}" en Prode Mundial 2026!\n\nCódigo de Invitación: ${league.invite_code}\n\nIngresa aquí: ${window.location.origin}`;
+            const shareText = `¡Únete a mi Liga Legendaria "${league.name}" en Prode Mundial 2026!\n\nIngresa a este enlace para aceptar el desafío:\n${window.location.origin}/?invite=${league.invite_code}`;
             
             if (navigator.share) {
                 try {
@@ -1921,6 +1929,72 @@ window.addEventListener('appinstalled', () => {
     }
     console.log('PWA ha sido instalada en el sistema.');
 });
+
+async function handlePendingInvite(userId) {
+    const pendingCode = localStorage.getItem('pending_invite_code');
+    if (!pendingCode) return;
+    
+    localStorage.removeItem('pending_invite_code');
+    
+    try {
+        showLoader();
+        // 1. Fetch group details using invite code
+        const { data: league, error: searchError } = await supabase
+            .from('user_groups')
+            .select('id, name, description, prizes, invite_code, owner_id')
+            .ilike('invite_code', pendingCode)
+            .single();
+            
+        if (searchError || !league) {
+            console.error("No se encontró la liga para el código de invitación pendiente.");
+            return;
+        }
+        
+        // 2. Check if user is already a member
+        const { data: memberRecord, error: memberError } = await supabase
+            .from('group_members')
+            .select('status')
+            .eq('group_id', league.id)
+            .eq('user_id', userId)
+            .maybeSingle();
+            
+        if (memberError) {
+            console.error("Error al consultar pertenencia al grupo:", memberError);
+            return;
+        }
+        
+        hideLoader();
+        
+        if (memberRecord) {
+            // Already a member, directly open it
+            setActiveNav(btnNavLegendary, leagueDetailsView);
+            renderLeagueDetailsView(league);
+            return;
+        }
+        
+        // 3. Prompt user to accept the challenge
+        const accept = confirm(`Te han invitado al grupo "${league.name}". ¿Aceptas el desafío?`);
+        if (accept) {
+            showLoader();
+            await supabase.from('group_members').insert({
+                group_id: league.id,
+                user_id: userId,
+                status: 'active'
+            });
+            hideLoader();
+            alert(`¡Te has unido a la liga "${league.name}" con éxito!`);
+            
+            // Navigate to details view
+            setActiveNav(btnNavLegendary, leagueDetailsView);
+            renderLeagueDetailsView(league);
+        }
+    } catch (err) {
+        console.error("Error al procesar la invitación pendiente:", err);
+        alert("Hubo un error al intentar unirse a la liga: " + (err.message || err));
+    } finally {
+        hideLoader();
+    }
+}
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
