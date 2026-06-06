@@ -1204,18 +1204,18 @@ const handleExportLeagueRankingImage = async () => {
     const btnExportLeagueImage = document.getElementById("btn-export-league-image");
     const leagueRankingCard = document.getElementById("league-ranking-card");
     const leagueDetailsName = document.getElementById("league-details-name");
+    const paginationControls = document.getElementById("league-pagination-controls");
+    const btnOriginalText = btnExportLeagueImage ? btnExportLeagueImage.innerHTML : '';
     
     if (!leagueRankingCard) return;
     
     try {
-        const btnOriginalText = btnExportLeagueImage ? btnExportLeagueImage.innerHTML : '';
         if (btnExportLeagueImage) {
             btnExportLeagueImage.innerHTML = '<span class="spin-loader"></span>';
             btnExportLeagueImage.disabled = true;
         }
         
         // Hide pagination and export buttons during image generation
-        const paginationControls = document.getElementById("league-pagination-controls");
         if (paginationControls) paginationControls.style.setProperty("display", "none", "important");
         if (btnExportLeagueImage) btnExportLeagueImage.style.setProperty("display", "none", "important");
 
@@ -1235,15 +1235,13 @@ const handleExportLeagueRankingImage = async () => {
         const dataUrl = await toPng(leagueRankingCard, {
             backgroundColor: '#0f172a',
             pixelRatio: 2,
-            cacheBust: true
+            cacheBust: true,
+            // Skip cross-origin avatar images to avoid tainted canvas SecurityErrors
+            filter: (node) => !(node.tagName === 'IMG' && node.classList && node.classList.contains('avatar-img'))
         });
         
         console.error = originalConsoleError;
 
-        // Restore pagination and export buttons
-        if (paginationControls) paginationControls.style.removeProperty("display");
-        if (btnExportLeagueImage) btnExportLeagueImage.style.removeProperty("display");
-        
         const leagueNameText = leagueDetailsName ? leagueDetailsName.textContent.trim().replace(/\s+/g, '_') : 'Legendaria';
         const fileName = `Ranking_Liga_${leagueNameText}.png`;
         
@@ -1265,7 +1263,6 @@ const handleExportLeagueRankingImage = async () => {
                 }
             } catch (shareErr) {
                 console.log("Compartir cancelado o fallido:", shareErr);
-                // If they cancelled, count as shared to avoid forcing a download
                 if (shareErr.name === 'AbortError') {
                     shared = true;
                 }
@@ -1273,7 +1270,6 @@ const handleExportLeagueRankingImage = async () => {
         }
         
         if (!shared) {
-            // Fallback: download
             const link = document.createElement("a");
             link.download = fileName;
             link.href = dataUrl;
@@ -1283,7 +1279,10 @@ const handleExportLeagueRankingImage = async () => {
         console.error("Error al exportar imagen de la liga", err);
         alert("Hubo un error al crear la imagen del ranking.");
     } finally {
+        // Always restore button and pagination visibility
+        if (paginationControls) paginationControls.style.removeProperty("display");
         if (btnExportLeagueImage) {
+            btnExportLeagueImage.style.removeProperty("display");
             btnExportLeagueImage.innerHTML = btnOriginalText;
             btnExportLeagueImage.disabled = false;
         }
