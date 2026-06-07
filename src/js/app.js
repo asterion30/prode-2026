@@ -1423,7 +1423,7 @@ const btnSharePremio4 = document.getElementById("btn-share-premio-4");
 
 if (btnSharePremio1) {
     btnSharePremio1.addEventListener("click", () => {
-        handleSharePremioCard("/Premios/Birra.webp", "Birra.webp", "¡Te pago una birra porque vas ganando en el Prode Mundial 2026: https://sapate.net.ar/! 🍺🏆");
+        handleSharePremioCard("/Premios/Birra.webp", "Birra.webp", "¡Te pago una birra si  vas ganando en el Prode Mundial 2026! Ojito: https://sapate.net.ar/! 🍺🏆");
     });
 }
 if (btnSharePremio2) {
