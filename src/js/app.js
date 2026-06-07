@@ -2683,12 +2683,6 @@ async function sharePredictionImage(match, pred, userAlias) {
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    // ── Subtle grid lines ──
-    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-    for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-
     // ── Border ──
     roundRect(ctx, 10, 10, W - 20, H - 20, 24);
     ctx.strokeStyle = 'rgba(34,197,94,0.35)';
@@ -2784,18 +2778,15 @@ async function sharePredictionImage(match, pred, userAlias) {
     ctx.fillText(match.awayTeam, awayX + flagW / 2, flagY + flagH + 38);
 
     // ── Center prediction box ──
-    const boxW = 200, boxH = 120;
+    const boxW = 200, boxH = 110;
     const boxX = centerX - boxW / 2;
-    const boxY = flagY + 10;
+    const boxY = flagY;
 
     roundRect(ctx, boxX, boxY, boxW, boxH, 16);
     ctx.fillStyle = 'rgba(15,23,42,0.9)'; ctx.fill();
     ctx.strokeStyle = 'rgba(51,65,85,0.8)'; ctx.lineWidth = 2; ctx.stroke();
 
-    let predText = 'EMPATE';
     let predDetails = pred.result || 'E';
-    if (pred.result === 'L') predText = `GANA ${match.homeTeam.toUpperCase()}`;
-    if (pred.result === 'V') predText = `GANA ${match.awayTeam.toUpperCase()}`;
     if (pred.homeGoals !== undefined && pred.awayGoals !== undefined && pred.homeGoals !== '' && pred.awayGoals !== '') {
         predDetails = `${pred.homeGoals} - ${pred.awayGoals}`;
     }
@@ -2803,17 +2794,7 @@ async function sharePredictionImage(match, pred, userAlias) {
     ctx.fillStyle = '#22c55e';
     ctx.font = 'bold 44px system-ui, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(predDetails, centerX, boxY + 62);
-
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 14px system-ui, sans-serif';
-    ctx.fillText(predText, centerX, boxY + 96);
-
-    // ── VS labels ──
-    ctx.fillStyle = 'rgba(100,116,139,0.6)';
-    ctx.font = 'bold 28px system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('VS', centerX, flagY + flagH / 2 + 10);
+    ctx.fillText(predDetails, centerX, boxY + 70);
 
     // ── Footer ──
     ctx.fillStyle = 'rgba(15,23,42,0.9)';
