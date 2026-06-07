@@ -2639,136 +2639,240 @@ function populatePremiosMatches() {
 }
 
 async function sharePredictionImage(match, pred, userAlias) {
-    const dataURLtoBlob = (dataurl) => {
-        try {
-            const arr = dataurl.split(',');
-            const mime = arr[0].match(/:(.*?);/)[1];
-            const bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
-            }
-            return new Blob([u8arr], { type: mime });
-        } catch (e) {
-            console.error("Error converting dataUrl to Blob", e);
-            return null;
-        }
+    // Helper: load an image URL into an HTMLImageElement via Blob to avoid CORS taint
+    const loadImage = (url) => new Promise((resolve) => {
+        if (!url) { resolve(null); return; }
+        fetch(url, { mode: 'cors' })
+            .then(r => r.blob())
+            .then(blob => {
+                const objUrl = URL.createObjectURL(blob);
+                const img = new Image();
+                img.onload = () => { URL.revokeObjectURL(objUrl); resolve(img); };
+                img.onerror = () => resolve(null);
+                img.src = objUrl;
+            })
+            .catch(() => resolve(null));
+    });
+
+    // Helper: round-rect path
+    const roundRect = (ctx, x, y, w, h, r) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
     };
 
-    const container = document.createElement('div');
-    container.id = 'temp-share-prediction';
-    container.className = 'fixed top-[-9999px] left-[-9999px] w-[600px] h-[337px] bg-gradient-to-br from-slate-900 via-[#0f172a] to-slate-950 text-white p-6 border-2 border-brand-500/30 rounded-2xl flex flex-col justify-between font-sans shadow-2xl z-[-100]';
-    
-    const homeFlagUrl = match.homeFlag !== 'un' ? `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${match.homeFlag}.svg` : null;
-    const awayFlagUrl = match.awayFlag !== 'un' ? `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${match.awayFlag}.svg` : null;
-    
-    const homeFlagHtml = homeFlagUrl ? `<img src="${homeFlagUrl}" class="w-16 h-12 object-cover rounded-md border border-slate-700 shadow-md">` : '<div class="w-16 h-12 bg-slate-800 rounded-md border border-slate-700 flex items-center justify-center font-bold text-slate-500">?</div>';
-    const awayFlagHtml = awayFlagUrl ? `<img src="${awayFlagUrl}" class="w-16 h-12 object-cover rounded-md border border-slate-700 shadow-md">` : '<div class="w-16 h-12 bg-slate-800 rounded-md border border-slate-700 flex items-center justify-center font-bold text-slate-500">?</div>';
-    
-    let predText = "EMPATE";
-    let predDetails = "";
+    const W = 1200, H = 630;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // ── Background gradient ──
+    const bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#0f172a');
+    bg.addColorStop(0.5, '#1e293b');
+    bg.addColorStop(1, '#0f172a');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // ── Subtle grid lines ──
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+    // ── Border ──
+    roundRect(ctx, 10, 10, W - 20, H - 20, 24);
+    ctx.strokeStyle = 'rgba(34,197,94,0.35)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // ── Header strip ──
+    ctx.fillStyle = 'rgba(15,23,42,0.9)';
+    ctx.fillRect(0, 0, W, 72);
+    ctx.strokeStyle = 'rgba(34,197,94,0.15)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, 72); ctx.lineTo(W, 72); ctx.stroke();
+
+    // Load logo
+    const logoImg = await loadImage('/assets/cup.webp');
+    if (logoImg) ctx.drawImage(logoImg, 32, 16, 40, 40);
+
+    // Header text
+    ctx.fillStyle = '#22c55e';
+    ctx.font = 'bold 22px system-ui, sans-serif';
+    ctx.fillText('PRODE MUNDIAL 2026', 84, 46);
+
+    // Badge right
+    roundRect(ctx, W - 260, 20, 228, 36, 18);
+    ctx.fillStyle = 'rgba(34,197,94,0.12)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(34,197,94,0.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = '#4ade80';
+    ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PRONÓSTICO OFICIAL', W - 146, 43);
+
+    // ── Subtitle: user alias ──
+    ctx.fillStyle = 'rgba(148,163,184,0.8)';
+    ctx.font = 'bold 18px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Predicción de ${userAlias}`, W / 2, 126);
+
+    // Load flag images in parallel
+    const homeFlagUrl = match.homeFlag && match.homeFlag !== 'un'
+        ? `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${match.homeFlag}.svg`
+        : null;
+    const awayFlagUrl = match.awayFlag && match.awayFlag !== 'un'
+        ? `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${match.awayFlag}.svg`
+        : null;
+
+    const [homeFlag, awayFlag] = await Promise.all([loadImage(homeFlagUrl), loadImage(awayFlagUrl)]);
+
+    const flagW = 160, flagH = 110;
+    const flagY = 190;
+    const centerX = W / 2;
+
+    // ── Home team ──
+    const homeX = centerX - 340;
+    if (homeFlag) {
+        roundRect(ctx, homeX, flagY, flagW, flagH, 10);
+        ctx.save(); ctx.clip();
+        ctx.drawImage(homeFlag, homeX, flagY, flagW, flagH);
+        ctx.restore();
+        ctx.strokeStyle = 'rgba(100,116,139,0.5)'; ctx.lineWidth = 2; ctx.stroke();
+    } else {
+        roundRect(ctx, homeX, flagY, flagW, flagH, 10);
+        ctx.fillStyle = '#1e293b'; ctx.fill();
+        ctx.strokeStyle = '#334155'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 36px system-ui'; ctx.textAlign = 'center';
+        ctx.fillText('?', homeX + flagW / 2, flagY + flagH / 2 + 12);
+    }
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 22px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(match.homeTeam, homeX + flagW / 2, flagY + flagH + 38);
+
+    // ── Away team ──
+    const awayX = centerX + 180;
+    if (awayFlag) {
+        roundRect(ctx, awayX, flagY, flagW, flagH, 10);
+        ctx.save(); ctx.clip();
+        ctx.drawImage(awayFlag, awayX, flagY, flagW, flagH);
+        ctx.restore();
+        ctx.strokeStyle = 'rgba(100,116,139,0.5)'; ctx.lineWidth = 2; ctx.stroke();
+    } else {
+        roundRect(ctx, awayX, flagY, flagW, flagH, 10);
+        ctx.fillStyle = '#1e293b'; ctx.fill();
+        ctx.strokeStyle = '#334155'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 36px system-ui'; ctx.textAlign = 'center';
+        ctx.fillText('?', awayX + flagW / 2, flagY + flagH / 2 + 12);
+    }
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 22px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(match.awayTeam, awayX + flagW / 2, flagY + flagH + 38);
+
+    // ── Center prediction box ──
+    const boxW = 200, boxH = 120;
+    const boxX = centerX - boxW / 2;
+    const boxY = flagY + 10;
+
+    roundRect(ctx, boxX, boxY, boxW, boxH, 16);
+    ctx.fillStyle = 'rgba(15,23,42,0.9)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(51,65,85,0.8)'; ctx.lineWidth = 2; ctx.stroke();
+
+    let predText = 'EMPATE';
+    let predDetails = pred.result || 'E';
     if (pred.result === 'L') predText = `GANA ${match.homeTeam.toUpperCase()}`;
     if (pred.result === 'V') predText = `GANA ${match.awayTeam.toUpperCase()}`;
-    
     if (pred.homeGoals !== undefined && pred.awayGoals !== undefined && pred.homeGoals !== '' && pred.awayGoals !== '') {
         predDetails = `${pred.homeGoals} - ${pred.awayGoals}`;
-    } else {
-        predDetails = pred.result;
     }
-    
-    container.innerHTML = `
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-            <div class="flex items-center gap-2">
-                <img src="/assets/cup.webp" class="w-6 h-6 object-contain">
-                <span class="text-xs font-black tracking-widest text-brand-500 uppercase">Prode Mundial 2026</span>
-            </div>
-            <div class="bg-brand-500/10 text-brand-400 text-[10px] font-bold px-3 py-1 rounded-full border border-brand-500/20">
-                PRONÓSTICO OFICIAL
-            </div>
-        </div>
-        
-        <div class="my-auto flex flex-col items-center">
-            <div class="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-4">
-                Predicción de ${escapeHTML(userAlias)}
-            </div>
-            
-            <div class="flex items-center justify-center gap-8 w-full">
-                <!-- Home Team -->
-                <div class="flex flex-col items-center flex-1 text-center">
-                    <span class="text-xs font-extrabold text-white mb-2 max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap text-center">${match.homeTeam}</span>
-                    ${homeFlagHtml}
-                </div>
-                
-                <!-- Prediction Value -->
-                <div class="flex flex-col items-center justify-center bg-slate-900/80 px-6 py-3 rounded-2xl border border-slate-800 min-w-[120px]">
-                    <span class="text-2xl font-black text-brand-500 tracking-wider">${predDetails}</span>
-                    <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">${predText}</span>
-                </div>
-                
-                <!-- Away Team -->
-                <div class="flex flex-col items-center flex-1 text-center">
-                    <span class="text-xs font-extrabold text-white mb-2 max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap text-center">${match.awayTeam}</span>
-                    ${awayFlagHtml}
-                </div>
-            </div>
-        </div>
-        
-        <div class="border-t border-slate-900 pt-3 flex justify-between items-center text-[10px] text-slate-500">
-            <span>Únete a jugar en: <strong class="text-slate-400">sapate.net.ar</strong></span>
-            <span>¡Pronostica y gana!</span>
-        </div>
-    `;
-    
-    document.body.appendChild(container);
-    
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    try {
-        const { toPng } = await import('html-to-image');
-        const dataUrl = await toPng(container, {
-            backgroundColor: '#0f172a',
-            pixelRatio: 2,
-            cacheBust: true
-        });
-        
-        document.body.removeChild(container);
-        
-        const fileName = `Pronostico_${match.homeTeam.replace(/\s+/g, '_')}_vs_${match.awayTeam.replace(/\s+/g, '_')}.png`;
-        const blob = dataURLtoBlob(dataUrl);
-        if (!blob) throw new Error("Could not parse image blob");
-        const file = new File([blob], fileName, { type: 'image/png' });
-        
-        let shared = false;
-        if (navigator.share && navigator.canShare) {
-            try {
-                if (navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: `Pronóstico ${match.homeTeam} vs ${match.awayTeam}`,
-                        text: `Mi pronóstico para ${match.homeTeam} vs ${match.awayTeam} en el Prode Mundial 2026 🤞⚽️`
-                    });
-                    shared = true;
-                }
-            } catch (shareErr) {
-                console.log("Compartir cancelado o fallido:", shareErr);
-                if (shareErr.name === 'AbortError') {
-                    shared = true;
-                }
+
+    ctx.fillStyle = '#22c55e';
+    ctx.font = 'bold 44px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(predDetails, centerX, boxY + 62);
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'bold 14px system-ui, sans-serif';
+    ctx.fillText(predText, centerX, boxY + 96);
+
+    // ── VS labels ──
+    ctx.fillStyle = 'rgba(100,116,139,0.6)';
+    ctx.font = 'bold 28px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('VS', centerX, flagY + flagH / 2 + 10);
+
+    // ── Footer ──
+    ctx.fillStyle = 'rgba(15,23,42,0.9)';
+    ctx.fillRect(0, H - 56, W, 56);
+    ctx.strokeStyle = 'rgba(34,197,94,0.1)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, H - 56); ctx.lineTo(W, H - 56); ctx.stroke();
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '16px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Únete a jugar en:', 32, H - 22);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'bold 16px system-ui, sans-serif';
+    ctx.fillText('sapate.net.ar', 200, H - 22);
+
+    ctx.fillStyle = '#4ade80';
+    ctx.font = 'bold 16px system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('¡Pronostica y gana! 🏆', W - 32, H - 22);
+
+    // ── Export ──
+    const dataUrl = canvas.toDataURL('image/png');
+    const dataURLtoBlob = (du) => {
+        const arr = du.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) u8arr[n] = bstr.charCodeAt(n);
+        return new Blob([u8arr], { type: mime });
+    };
+
+    const fileName = `Pronostico_${match.homeTeam.replace(/\s+/g, '_')}_vs_${match.awayTeam.replace(/\s+/g, '_')}.png`;
+    const blob = dataURLtoBlob(dataUrl);
+    const file = new File([blob], fileName, { type: 'image/png' });
+
+    let shared = false;
+    if (navigator.share && navigator.canShare) {
+        try {
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: `Pronóstico ${match.homeTeam} vs ${match.awayTeam}`,
+                    text: `Mi pronóstico para ${match.homeTeam} vs ${match.awayTeam} en el Prode Mundial 2026 🤞⚽`
+                });
+                shared = true;
             }
+        } catch (shareErr) {
+            console.log('Compartir cancelado o fallido:', shareErr);
+            if (shareErr.name === 'AbortError') shared = true;
         }
-        
-        if (!shared) {
-            const link = document.createElement("a");
-            link.download = fileName;
-            link.href = dataUrl;
-            link.click();
-        }
-    } catch (err) {
-        console.error("Error generating share image", err);
-        alert("Hubo un error al generar la imagen de tu pronóstico.");
-        if (document.getElementById('temp-share-prediction')) {
-            document.body.removeChild(container);
-        }
+    }
+
+    if (!shared) {
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = dataUrl;
+        link.click();
     }
 }
+
