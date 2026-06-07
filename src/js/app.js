@@ -514,9 +514,19 @@ async function updateShortsPlayer() {
     // Show loading state
     shortsPlayer.src = "";
 
-    // Show/hide mobile tap overlay
+    // Mobile tap overlay: show it, then wire a one-time handler to dismiss it on tap
     const tapOverlay = document.getElementById("shorts-tap-overlay");
-    if (tapOverlay) tapOverlay.classList.toggle("hidden", !isMobileDevice);
+    if (tapOverlay) {
+        if (isMobileDevice) {
+            tapOverlay.classList.remove("hidden");
+            // One-time listener: hide overlay on first tap so the iframe becomes interactive
+            tapOverlay.addEventListener("click", () => {
+                tapOverlay.classList.add("hidden");
+            }, { once: true });
+        } else {
+            tapOverlay.classList.add("hidden");
+        }
+    }
 
     const playlist = await fetchShorts(currentSearchQuery);
     activeShortsPlaylist = playlist;
@@ -546,6 +556,9 @@ if (btnToggleStream && streamWrapper && streamIcon) {
             streamWrapper.classList.add("hidden");
             streamIcon.classList.replace("ph-caret-up", "ph-caret-down");
             if (shortsPlayer) shortsPlayer.src = "";
+            // Reset overlay for next open
+            const tapOverlay = document.getElementById("shorts-tap-overlay");
+            if (tapOverlay && isMobileDevice) tapOverlay.classList.remove("hidden");
         }
     });
 }
