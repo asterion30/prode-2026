@@ -1273,7 +1273,7 @@ const handleExportRankingImage = async () => {
                     await navigator.share({
                         files: [file],
                         title: 'Ranking Prode General',
-                        text: '¡Mirá cómo viene el ranking general del Prode!'
+                        text: '¡Mirá cómo viene el ranking general del Prode Mundial 2026: https://sapate.net.ar/!'
                     });
                     shared = true;
                 }
@@ -1365,7 +1365,7 @@ const handleExportLeagueRankingImage = async () => {
                     await navigator.share({
                         files: [file],
                         title: 'Ranking Liga Legendaria',
-                        text: '¡Mirá cómo va nuestra Liga Legendaria en el Prode!'
+                        text: '¡Mirá cómo va nuestra Liga Legendaria en el Prode Mundial 2026: https://sapate.net.ar/!'
                     });
                     shared = true;
                 }
@@ -1485,17 +1485,17 @@ const btnSharePremio4 = document.getElementById("btn-share-premio-4");
 
 if (btnSharePremio1) {
     btnSharePremio1.addEventListener("click", () => {
-        handleSharePremioCard("/Premios/Birra.webp", "Birra.webp", "¡Te pago una birra porque vas ganando en el Prode Mundial 2026! 🍺🏆");
+        handleSharePremioCard("/Premios/Birra.webp", "Birra.webp", "¡Te pago una birra porque vas ganando en el Prode Mundial 2026: https://sapate.net.ar/! 🍺🏆");
     });
 }
 if (btnSharePremio2) {
     btnSharePremio2.addEventListener("click", () => {
-        handleSharePremioCard("/Premios/Hambre.webp", "Hambre.webp", "¡Te pago un panchito o una hamburguesa porque te veo con hambre en la tabla del Prode! 🌭🍔🤣");
+        handleSharePremioCard("/Premios/Hambre.webp", "Hambre.webp", "¡Te pago un panchito o una hamburguesa porque te veo con hambre en la tabla del Prode Mundial 2026: https://sapate.net.ar/! 🌭🍔🤣");
     });
 }
 if (btnSharePremio3) {
     btnSharePremio3.addEventListener("click", () => {
-        handleSharePremioCard("/Premios/MeDebes.webp", "MeDebes.webp", "¡Pagame un asado si gano el Prode Mundial 2026! 🥩🔥🍷");
+        handleSharePremioCard("/Premios/MeDebes.webp", "MeDebes.webp", "¡Pagame un asado si gano el Prode Mundial 2026: https://sapate.net.ar/! 🥩🔥🍷");
     });
 }
 
@@ -1506,7 +1506,7 @@ if (btnSharePremio4) {
             alert("Para compartir esta tarjeta, debes seleccionar un partido de la lista obligatoriamente.");
             return;
         }
-        handleSharePremioCard("/Premios/TePago.webp", "TePago.webp", `¡Te pago un asado si le pegas al resultado de ${matchVal} en el Prode Mundial 2026! 🥩⚽️🤞`);
+        handleSharePremioCard("/Premios/TePago.webp", "TePago.webp", `¡Te pago un asado si le pegas al resultado de ${matchVal} en el Prode Mundial 2026: https://sapate.net.ar/! 🥩⚽️🤞`);
     });
 }
 
@@ -2933,7 +2933,7 @@ async function sharePredictionImage(match, pred, userAlias) {
                 await navigator.share({
                     files: [file],
                     title: `Pronóstico ${match.homeTeam} vs ${match.awayTeam}`,
-                    text: `Mi pronóstico para ${match.homeTeam} vs ${match.awayTeam} en el Prode Mundial 2026 🤞⚽`
+                    text: `Mi pronóstico para ${match.homeTeam} vs ${match.awayTeam} en el Prode Mundial 2026: https://sapate.net.ar/ 🤞⚽`
                 });
                 shared = true;
             }
