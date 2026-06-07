@@ -1437,6 +1437,13 @@ if (btnSharePremio3) {
     });
 }
 
+const btnInviteFriends = document.getElementById("btn-invite-friends");
+if (btnInviteFriends) {
+    btnInviteFriends.addEventListener("click", () => {
+        handleSharePremioCard("/Premios/Alentando.webp", "Alentando.webp", "¡Sumate al prode Mundial 2026! 🏆⚽️ https://sapate.net.ar/");
+    });
+}
+
 if (btnSharePremio4) {
     btnSharePremio4.addEventListener("click", () => {
         const matchVal = premiosMatchSelect ? premiosMatchSelect.value : "";

@@ -249,11 +249,14 @@
                                 </div>
                             </div>
                         </div>
-                         <div class="flex justify-between items-center mb-4">
+                         <div class="flex justify-between items-center mb-4 gap-2 flex-wrap sm:flex-nowrap">
                             <h2 class="text-xl font-bold">Fixture</h2>
-                            <div class="flex gap-2">
+                            <button id="btn-invite-friends" class="order-3 sm:order-none w-full sm:w-auto bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white px-4 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                <i class="ph-bold ph-share-network"></i> Invita a tus amigos
+                            </button>
+                            <div class="flex gap-2 items-center">
                                 <div id="countdown-timer" class="hidden bg-slate-900 border border-slate-700 px-2 py-1 rounded text-[10px] text-brand-500"></div>
-                                <a href="/salud/index.html" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold">Primeros Auxilios</a>
+                                <a href="/salud/index.html" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold whitespace-nowrap">Primeros Auxilios</a>
                             </div>
                          </div>
                          <div id="stage-tabs" class="flex gap-2 overflow-x-auto pb-2"></div>
