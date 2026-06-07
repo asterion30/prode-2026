@@ -5,14 +5,25 @@ export default async function handler(req, res) {
 
     // Parse query
     const urlParams = new URL(req.url, `http://${req.headers.host}`);
-    let query = urlParams.searchParams.get('q') || 'mundial 2026 shorts';
+    let query = urlParams.searchParams.get('q') || '';
     query = query.trim();
 
-    // Restrict query to World Cup content
-    const queryLower = query.toLowerCase();
-    const hasWorldCupKeyword = ['mundial', 'copa del mundo', 'world cup', 'worldcup', 'fifa', 'qatar', 'russia', 'brasil', 'sudafrica', '2026', '2022', '2018', '2014', '2010'].some(k => queryLower.includes(k));
-    if (!hasWorldCupKeyword) {
-        query = `${query} mundial`;
+    // Set a fun default query related to Tim Payne, Selección Argentina, or streamers of Argentine sports
+    if (!query) {
+        const DEFAULT_QUERIES = [
+            "Tim Payne seleccion argentina shorts",
+            "Davoo Xeneize seleccion argentina shorts",
+            "La Cobra seleccion argentina shorts",
+            "streamers futbol argentino shorts",
+            "anecdotas seleccion argentina shorts"
+        ];
+        query = DEFAULT_QUERIES[Math.floor(Math.random() * DEFAULT_QUERIES.length)];
+    } else {
+        const queryLower = query.toLowerCase();
+        const hasWorldCupKeyword = ['mundial', 'copa del mundo', 'world cup', 'worldcup', 'fifa', 'qatar', 'russia', 'brasil', 'sudafrica', '2026', '2022', '2018', '2014', '2010', 'seleccion', 'tim payne', 'davoo', 'cobra', 'futbol', 'goles'].some(k => queryLower.includes(k));
+        if (!hasWorldCupKeyword) {
+            query = `${query} futbol`;
+        }
     }
 
     const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
@@ -31,14 +42,63 @@ export default async function handler(req, res) {
 
         const html = await response.text();
         let ids = [];
+        let videos = [];
 
-        // Try parsing ytInitialData script block
+        // Parse ytInitialData script block to filter out FIFA channel content
         const match = html.match(/ytInitialData\s*=\s*({.+?});/);
         if (match) {
-            const jsonStr = match[1];
-            const videoIdMatches = [...jsonStr.matchAll(/"videoId"\s*:\s*"([a-zA-Z0-9_-]{11})"/g)];
-            ids = [...new Set(videoIdMatches.map(m => m[1]))];
+            try {
+                const data = JSON.parse(match[1]);
+                
+                // Recursive helper to extract all videoRenderer objects
+                const findVideoRenderers = (obj) => {
+                    let results = [];
+                    const traverse = (current) => {
+                        if (!current || typeof current !== 'object') return;
+                        if (current.videoRenderer) {
+                            results.push(current.videoRenderer);
+                        } else {
+                            for (const key in current) {
+                                if (current.hasOwnProperty(key)) {
+                                    traverse(current[key]);
+                                }
+                            }
+                        }
+                    };
+                    traverse(obj);
+                    return results;
+                };
+
+                const renderers = findVideoRenderers(data);
+                for (const r of renderers) {
+                    if (r && r.videoId) {
+                        const title = r.title?.runs?.[0]?.text || '';
+                        const channel = r.ownerText?.runs?.[0]?.text || r.shortBylineText?.runs?.[0]?.text || '';
+                        videos.push({
+                            id: r.videoId,
+                            title: title,
+                            channel: channel
+                        });
+                    }
+                }
+            } catch (e) {
+                console.warn("Failed to parse ytInitialData JSON:", e);
+            }
+        }
+
+        if (videos.length > 0) {
+            // Filter out videos from the official FIFA channel or containing FIFA in channel/title
+            const filteredVideos = videos.filter(v => {
+                const channelLower = v.channel.toLowerCase();
+                const titleLower = v.title.toLowerCase();
+                if (channelLower.includes('fifa') || titleLower.includes('fifa official') || titleLower.includes('official fifa')) {
+                    return false;
+                }
+                return true;
+            });
+            ids = filteredVideos.map(v => v.id);
         } else {
+            // Fallback to regex matches on raw HTML
             const videoIdMatches = [...html.matchAll(/"videoId"\s*:\s*"([a-zA-Z0-9_-]{11})"/g)];
             ids = [...new Set(videoIdMatches.map(m => m[1]))];
         }

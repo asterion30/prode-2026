@@ -472,7 +472,7 @@ const streamWrapper = document.getElementById("stream-wrapper");
 const streamIcon = document.getElementById("stream-icon");
 const btnSearchShorts = document.getElementById("btn-search-shorts");
 const shortsQueryInput = document.getElementById("shorts-query-input");
-const shortsPlayerContainer = document.getElementById("shorts-player-container");
+const shortsPlayer = document.getElementById("shorts-player");
 
 const FALLBACK_SHORTS = [
     "lR1DSAyoIDI",
@@ -487,40 +487,6 @@ const FALLBACK_SHORTS = [
 
 let activeShortsPlaylist = [...FALLBACK_SHORTS];
 let currentSearchQuery = "mundial 2026 shorts";
-let ytPlayerInstance = null;
-
-function loadYouTubeIframeAPI() {
-    return new Promise((resolve, reject) => {
-        if (window.YT && window.YT.Player) {
-            resolve();
-            return;
-        }
-        
-        let timeout = setTimeout(() => {
-            clearInterval(checkYT);
-            reject(new Error("YouTube API load timeout"));
-        }, 10000);
-
-        const checkYT = setInterval(() => {
-            if (window.YT && window.YT.Player) {
-                clearInterval(checkYT);
-                clearTimeout(timeout);
-                resolve();
-            }
-        }, 50);
-
-        if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
-            const tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
-            const firstScriptTag = document.getElementsByTagName('script')[0];
-            if (firstScriptTag && firstScriptTag.parentNode) {
-                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-            } else {
-                document.head.appendChild(tag);
-            }
-        }
-    });
-}
 
 async function fetchShorts(query) {
     try {
@@ -537,11 +503,12 @@ async function fetchShorts(query) {
 }
 
 async function updateShortsPlayer() {
-    if (!shortsPlayerContainer) return;
+    if (!shortsPlayer) return;
     const isVisible = !streamWrapper.classList.contains("hidden");
     if (!isVisible) return;
 
-    cleanYTPlayer();
+    // Show loading state
+    shortsPlayer.src = "";
 
     const playlist = await fetchShorts(currentSearchQuery);
     activeShortsPlaylist = playlist;
@@ -549,64 +516,7 @@ async function updateShortsPlayer() {
     if (activeShortsPlaylist.length > 0) {
         const firstId = activeShortsPlaylist[0];
         const restIds = activeShortsPlaylist.slice(1).join(",");
-        
-        try {
-            await loadYouTubeIframeAPI();
-        } catch (e) {
-            console.error(e);
-            return;
-        }
-
-        if (streamWrapper.classList.contains("hidden")) return;
-
-        shortsPlayerContainer.innerHTML = '<div id="shorts-player" class="w-full h-full"></div>';
-
-        ytPlayerInstance = new YT.Player('shorts-player', {
-            height: '100%',
-            width: '100%',
-            videoId: firstId,
-            playerVars: {
-                playlist: restIds,
-                loop: 1,
-                autoplay: 1,
-                mute: 1,
-                controls: 1,
-                modestbranding: 1,
-                rel: 0,
-                enablejsapi: 1,
-                playsinline: 1,
-                origin: window.location.origin
-            },
-            events: {
-                'onError': onPlayerError
-            }
-        });
-    }
-}
-
-function cleanYTPlayer() {
-    if (ytPlayerInstance) {
-        try {
-            if (typeof ytPlayerInstance.destroy === 'function') {
-                ytPlayerInstance.destroy();
-            }
-        } catch (e) {
-            console.warn("Failed to destroy YouTube player instance:", e);
-        }
-        ytPlayerInstance = null;
-    }
-    if (shortsPlayerContainer) {
-        shortsPlayerContainer.innerHTML = '<div id="shorts-player" class="w-full h-full"></div>';
-    }
-}
-
-function onPlayerError(event) {
-    console.warn("YouTube player error:", event.data);
-    if ([2, 5, 100, 101, 150].includes(event.data)) {
-        console.info("Restricted or unavailable video detected. Skipping to next video in playlist...");
-        if (ytPlayerInstance && typeof ytPlayerInstance.nextVideo === 'function') {
-            ytPlayerInstance.nextVideo();
-        }
+        shortsPlayer.src = `https://www.youtube-nocookie.com/embed/${firstId}?playlist=${restIds}&loop=1&autoplay=1&mute=1&controls=1&modestbranding=1&rel=0&playsinline=1`;
     }
 }
 
@@ -620,12 +530,12 @@ if (btnToggleStream && streamWrapper && streamIcon) {
         } else {
             streamWrapper.classList.add("hidden");
             streamIcon.classList.replace("ph-caret-up", "ph-caret-down");
-            cleanYTPlayer();
+            if (shortsPlayer) shortsPlayer.src = "";
         }
     });
 }
 
-if (btnSearchShorts && shortsQueryInput && shortsPlayerContainer) {
+if (btnSearchShorts && shortsQueryInput && shortsPlayer) {
     btnSearchShorts.addEventListener("click", async () => {
         const query = shortsQueryInput.value.trim();
         if (query) {
