@@ -2198,6 +2198,11 @@ async function renderLeagueDetailsView(league) {
     descEl.textContent = league.description || "Sin descripción.";
     codeEl.textContent = league.invite_code;
 
+    const leagueRankingTitle = document.getElementById("league-ranking-title");
+    if (leagueRankingTitle) {
+        leagueRankingTitle.textContent = league.name;
+    }
+
     const btnShareLeague = document.getElementById("btn-share-league");
     if (btnShareLeague) {
         btnShareLeague.classList.remove("hidden");
