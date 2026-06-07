@@ -490,21 +490,34 @@ let currentSearchQuery = "mundial 2026 shorts";
 let ytPlayerInstance = null;
 
 function loadYouTubeIframeAPI() {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         if (window.YT && window.YT.Player) {
             resolve();
             return;
         }
-        const previousCallback = window.onYouTubeIframeAPIReady;
-        window.onYouTubeIframeAPIReady = () => {
-            if (previousCallback) previousCallback();
-            resolve();
-        };
+        
+        let timeout = setTimeout(() => {
+            clearInterval(checkYT);
+            reject(new Error("YouTube API load timeout"));
+        }, 10000);
+
+        const checkYT = setInterval(() => {
+            if (window.YT && window.YT.Player) {
+                clearInterval(checkYT);
+                clearTimeout(timeout);
+                resolve();
+            }
+        }, 50);
+
         if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
             const tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
             const firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            if (firstScriptTag && firstScriptTag.parentNode) {
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            } else {
+                document.head.appendChild(tag);
+            }
         }
     });
 }
@@ -537,7 +550,12 @@ async function updateShortsPlayer() {
         const firstId = activeShortsPlaylist[0];
         const restIds = activeShortsPlaylist.slice(1).join(",");
         
-        await loadYouTubeIframeAPI();
+        try {
+            await loadYouTubeIframeAPI();
+        } catch (e) {
+            console.error(e);
+            return;
+        }
 
         if (streamWrapper.classList.contains("hidden")) return;
 
@@ -556,6 +574,7 @@ async function updateShortsPlayer() {
                 modestbranding: 1,
                 rel: 0,
                 enablejsapi: 1,
+                playsinline: 1,
                 origin: window.location.origin
             },
             events: {
