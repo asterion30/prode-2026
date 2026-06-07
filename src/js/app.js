@@ -487,23 +487,6 @@ const FALLBACK_SHORTS = [
 
 let activeShortsPlaylist = [...FALLBACK_SHORTS];
 let currentSearchQuery = "mundial 2026 shorts";
-let currentVideoIndex = 0;
-let ytPlayer = null;
-let ytApiReady = false;
-
-// Load YouTube IFrame API script once
-function loadYouTubeAPI() {
-    if (document.getElementById('yt-iframe-api')) return;
-    const tag = document.createElement('script');
-    tag.id = 'yt-iframe-api';
-    tag.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(tag);
-}
-
-// Called automatically by YouTube API when ready
-window.onYouTubeIframeAPIReady = function() {
-    ytApiReady = true;
-};
 
 async function fetchShorts(query) {
     try {
@@ -519,93 +502,23 @@ async function fetchShorts(query) {
     return FALLBACK_SHORTS;
 }
 
-function playVideoAtIndex(index) {
-    if (!activeShortsPlaylist || index >= activeShortsPlaylist.length) {
-        // Reset to beginning if we exhausted the list
-        currentVideoIndex = 0;
-        if (activeShortsPlaylist.length > 0) playVideoAtIndex(0);
-        return;
-    }
-    currentVideoIndex = index;
-    const videoId = activeShortsPlaylist[index];
-    if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-        ytPlayer.loadVideoById(videoId);
-    }
-}
-
-function createYTPlayer(videoId) {
-    // Replace iframe with a div for YT API to use
-    const container = document.getElementById('shorts-player-container');
-    if (!container) return;
-    container.innerHTML = '<div id="yt-player-div"></div>';
-
-    ytPlayer = new YT.Player('yt-player-div', {
-        videoId: videoId,
-        playerVars: {
-            autoplay: 1,
-            mute: 1,
-            controls: 1,
-            modestbranding: 1,
-            rel: 0,
-            loop: 0 // We handle looping manually to skip bad videos
-        },
-        width: '100%',
-        height: '100%',
-        events: {
-            onError: (event) => {
-                // Error codes 101 and 150 = embedding disabled by video owner
-                // Error code 5 = HTML5 player error
-                // Error code 2 = invalid videoId
-                const code = event.data;
-                console.warn(`Video ${activeShortsPlaylist[currentVideoIndex]} error code ${code}. Skipping...`);
-                // Skip to next video
-                playVideoAtIndex(currentVideoIndex + 1);
-            },
-            onStateChange: (event) => {
-                // When video ends (state = 0), play the next one
-                if (event.data === YT.PlayerState.ENDED) {
-                    playVideoAtIndex(currentVideoIndex + 1);
-                }
-            }
-        }
-    });
-}
-
 async function updateShortsPlayer() {
+    if (!shortsPlayer) return;
     const isVisible = !streamWrapper.classList.contains("hidden");
     if (!isVisible) return;
 
+    // Show loading state
+    shortsPlayer.src = "";
+
     const playlist = await fetchShorts(currentSearchQuery);
     activeShortsPlaylist = playlist;
-    currentVideoIndex = 0;
 
-    if (activeShortsPlaylist.length === 0) return;
-
-    // If YT API is ready, use it; otherwise wait for it
-    const tryCreate = () => {
-        if (ytApiReady && window.YT && window.YT.Player) {
-            createYTPlayer(activeShortsPlaylist[0]);
-        } else {
-            setTimeout(tryCreate, 300);
-        }
-    };
-
-    // Destroy previous player if any
-    if (ytPlayer && typeof ytPlayer.destroy === 'function') {
-        ytPlayer.destroy();
-        ytPlayer = null;
+    if (activeShortsPlaylist.length > 0) {
+        const firstId = activeShortsPlaylist[0];
+        const restIds = activeShortsPlaylist.slice(1).join(",");
+        // The API already pre-filtered non-embeddable videos via oEmbed
+        shortsPlayer.src = `https://www.youtube-nocookie.com/embed/${firstId}?playlist=${restIds}&loop=1&autoplay=1&mute=1&controls=1&modestbranding=1&rel=0`;
     }
-    loadYouTubeAPI();
-    tryCreate();
-}
-
-function destroyShortsPlayer() {
-    if (ytPlayer && typeof ytPlayer.destroy === 'function') {
-        ytPlayer.destroy();
-        ytPlayer = null;
-    }
-    const container = document.getElementById('shorts-player-container');
-    if (container) container.innerHTML = '<div id="yt-player-div"></div>';
 }
 
 if (btnToggleStream && streamWrapper && streamIcon) {
@@ -618,12 +531,12 @@ if (btnToggleStream && streamWrapper && streamIcon) {
         } else {
             streamWrapper.classList.add("hidden");
             streamIcon.classList.replace("ph-caret-up", "ph-caret-down");
-            destroyShortsPlayer();
+            if (shortsPlayer) shortsPlayer.src = "";
         }
     });
 }
 
-if (btnSearchShorts && shortsQueryInput) {
+if (btnSearchShorts && shortsQueryInput && shortsPlayer) {
     btnSearchShorts.addEventListener("click", async () => {
         const query = shortsQueryInput.value.trim();
         if (query) {
@@ -631,7 +544,7 @@ if (btnSearchShorts && shortsQueryInput) {
             await updateShortsPlayer();
         }
     });
-    
+
     shortsQueryInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
             btnSearchShorts.click();
