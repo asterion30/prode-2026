@@ -70,6 +70,10 @@ const btnNavLegendary = document.getElementById("nav-legendary");
 const especialesView = document.getElementById("especiales-view");
 const btnNavEspeciales = document.getElementById("nav-especiales");
 
+const btnToggleRankingGeneral = document.getElementById("btn-toggle-ranking-general");
+const legendaryRankingContainer = document.getElementById("legendary-ranking-container");
+const premiosMatchSelect = document.getElementById("premios-match-select");
+
 const btnCreateLeague = document.getElementById("btn-create-league");
 const btnJoinLeague = document.getElementById("btn-join-league");
 const modalCreateLeague = document.getElementById("modal-create-league");
@@ -376,6 +380,7 @@ function setupAppSubscriptions(uid) {
         matchesState = matches;
         renderMatches();
         renderPredictionsGrid();
+        populatePremiosMatches();
     });
 
     // Suscribirse a predicciones
@@ -824,6 +829,11 @@ function renderMatches() {
             <div class="mt-3 flex flex-col items-center justify-center gap-1">
                 <span id="status-${match.id}" class="text-[10px] text-brand-500 font-medium opacity-0 transition-opacity h-4">Guardado ✓</span>
                 <span class="text-[9px] text-slate-500 italic text-center leading-tight">Los resultados pueden modificarse hasta una hora antes del partido</span>
+                ${pred.result ? `
+                    <button id="btn-share-match-${match.id}" class="mt-2 bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 hover:text-brand-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border border-brand-500/20 flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="ph-bold ph-share-network text-sm"></i> Compartir Pronóstico
+                    </button>
+                ` : ''}
             </div>
         `;
         
@@ -905,6 +915,15 @@ function renderMatches() {
             document.getElementById(`away-goals-${match.id}`).addEventListener("input", enforceMax);
             document.getElementById(`home-goals-${match.id}`).addEventListener("input", handleGoalChange);
             document.getElementById(`away-goals-${match.id}`).addEventListener("input", handleGoalChange);
+        }
+
+        const shareBtn = document.getElementById(`btn-share-match-${match.id}`);
+        if (shareBtn) {
+            shareBtn.addEventListener("click", () => {
+                const currentUserObj = getCurrentUser();
+                const userAlias = currentUserObj.alias || 'Usuario';
+                sharePredictionImage(match, pred, userAlias);
+            });
         }
     });
 }
@@ -1112,14 +1131,13 @@ const dataURLtoBlob = (dataurl) => {
 };
 
 const handleExportRankingImage = async () => {
-    if (!rankingView) return;
+    if (!legendaryRankingContainer) return;
     
     // Check if the ranking is hidden, we need to show it temporarily
-    const wasHidden = rankingView.classList.contains("hidden");
+    const wasHidden = legendaryRankingContainer.classList.contains("hidden");
     
     if (wasHidden) {
-        rankingView.classList.remove("hidden");
-        matchesView.classList.add("hidden");
+        legendaryRankingContainer.classList.remove("hidden");
     }
     
     try {
@@ -1142,7 +1160,7 @@ const handleExportRankingImage = async () => {
         };
 
         const { toPng } = await import('html-to-image');
-        const dataUrl = await toPng(rankingView, {
+        const dataUrl = await toPng(legendaryRankingContainer, {
             backgroundColor: '#0f172a', // brand-dark
             pixelRatio: 2 // High quality
         });
@@ -1194,8 +1212,7 @@ const handleExportRankingImage = async () => {
         alert("Hubo un error al crear la imagen del ranking.");
     } finally {
         if (wasHidden) {
-            rankingView.classList.add("hidden");
-            matchesView.classList.remove("hidden");
+            legendaryRankingContainer.classList.add("hidden");
         }
     }
 };
@@ -1291,6 +1308,116 @@ const handleExportLeagueRankingImage = async () => {
 
 if (btnExportCsv) btnExportCsv.addEventListener("click", handleExportRankingImage);
 if (btnExportCsvMobile) btnExportCsvMobile.addEventListener("click", handleExportRankingImage);
+
+// Toggle Ranking General inside Legendary View
+if (btnToggleRankingGeneral && legendaryRankingContainer) {
+    btnToggleRankingGeneral.addEventListener("click", () => {
+        const isHidden = legendaryRankingContainer.classList.toggle("hidden");
+        if (isHidden) {
+            btnToggleRankingGeneral.classList.remove("bg-brand-500/10", "text-brand-500", "border-brand-500/20");
+            btnToggleRankingGeneral.classList.add("bg-slate-800", "text-slate-300", "border-slate-700");
+        } else {
+            btnToggleRankingGeneral.classList.add("bg-brand-500/10", "text-brand-500", "border-brand-500/20");
+            btnToggleRankingGeneral.classList.remove("bg-slate-800", "text-slate-300", "border-slate-700");
+        }
+    });
+}
+
+// Premios Card Sharing
+const handleShareText = (text) => {
+    if (navigator.share) {
+        navigator.share({
+            title: "Desafío Prode Mundial 2026",
+            text: text,
+            url: window.location.origin
+        }).catch(err => console.log("Error sharing:", err));
+    } else {
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text + " " + window.location.origin)}`;
+        window.open(whatsappUrl, "_blank");
+    }
+};
+
+const handleSharePremioCard = async (imagePath, fileName, text) => {
+    try {
+        const response = await fetch(imagePath);
+        if (!response.ok) throw new Error("Image fetch failed");
+        const blob = await response.blob();
+        const file = new File([blob], fileName, { type: 'image/webp' });
+        
+        let shared = false;
+        if (navigator.share && navigator.canShare) {
+            try {
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: "Desafío Prode Mundial 2026",
+                        text: text
+                    });
+                    shared = true;
+                }
+            } catch (shareErr) {
+                console.log("Compartir imagen falló o fue cancelado:", shareErr);
+                if (shareErr.name === 'AbortError') {
+                    shared = true;
+                }
+            }
+        }
+        
+        if (!shared) {
+            // Fallback: download the image and copy text
+            const link = document.createElement("a");
+            link.download = fileName;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            
+            // Wait a bit, then prompt user to copy text
+            setTimeout(() => {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text);
+                    alert("Se descargó la imagen del premio y se copió la chicana al portapapeles. ¡Ya puedes compartirla!");
+                } else {
+                    alert(`Se descargó la imagen. Chicana: "${text}"`);
+                }
+            }, 500);
+        }
+    } catch (err) {
+        console.error("Error al compartir el premio con imagen:", err);
+        // Fallback: text only
+        handleShareText(text);
+    }
+};
+
+const btnSharePremio1 = document.getElementById("btn-share-premio-1");
+const btnSharePremio2 = document.getElementById("btn-share-premio-2");
+const btnSharePremio3 = document.getElementById("btn-share-premio-3");
+const btnSharePremio4 = document.getElementById("btn-share-premio-4");
+
+if (btnSharePremio1) {
+    btnSharePremio1.addEventListener("click", () => {
+        handleSharePremioCard("/Premios/Birra.webp", "Birra.webp", "¡Te pago una birra porque vas ganando en el Prode Mundial 2026! 🍺🏆");
+    });
+}
+if (btnSharePremio2) {
+    btnSharePremio2.addEventListener("click", () => {
+        handleSharePremioCard("/Premios/Hambre.webp", "Hambre.webp", "¡Te pago un panchito o una hamburguesa porque te veo con hambre en la tabla del Prode! 🌭🍔🤣");
+    });
+}
+if (btnSharePremio3) {
+    btnSharePremio3.addEventListener("click", () => {
+        handleSharePremioCard("/Premios/MeDebes.webp", "MeDebes.webp", "¡Pagame un asado si gano el Prode Mundial 2026! 🥩🔥🍷");
+    });
+}
+
+if (btnSharePremio4) {
+    btnSharePremio4.addEventListener("click", () => {
+        const matchVal = premiosMatchSelect ? premiosMatchSelect.value : "";
+        if (!matchVal) {
+            alert("Para compartir esta tarjeta, debes seleccionar un partido de la lista obligatoriamente.");
+            return;
+        }
+        handleSharePremioCard("/Premios/TePago.webp", "TePago.webp", `¡Te pago un asado si le pegas al resultado de ${matchVal} en el Prode Mundial 2026! 🥩⚽️🤞`);
+    });
+}
 
 const btnExportLeagueImage = document.getElementById("btn-export-league-image");
 if (btnExportLeagueImage) btnExportLeagueImage.addEventListener("click", handleExportLeagueRankingImage);
@@ -2487,4 +2614,159 @@ async function updateEspecialesRanking() {
     renderSection(listFav, baseFav, "bg-amber-500");
     renderSection(listSor, baseSor, "bg-purple-500");
     renderSection(listDec, baseDec, "bg-red-500");
+}
+
+function populatePremiosMatches() {
+    if (!premiosMatchSelect) return;
+    const currentVal = premiosMatchSelect.value;
+    premiosMatchSelect.innerHTML = '<option value="">Seleccionar partido...</option>';
+    
+    const validMatches = matchesState.filter(m => m.homeTeam && m.awayTeam && !m.tbd);
+    validMatches.sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
+    
+    validMatches.forEach(m => {
+        const opt = document.createElement("option");
+        const matchName = `${m.homeTeam} vs ${m.awayTeam}`;
+        opt.value = matchName;
+        opt.textContent = matchName;
+        if (matchName === currentVal) {
+            opt.selected = true;
+        }
+        premiosMatchSelect.appendChild(opt);
+    });
+}
+
+async function sharePredictionImage(match, pred, userAlias) {
+    const dataURLtoBlob = (dataurl) => {
+        try {
+            const arr = dataurl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], { type: mime });
+        } catch (e) {
+            console.error("Error converting dataUrl to Blob", e);
+            return null;
+        }
+    };
+
+    const container = document.createElement('div');
+    container.id = 'temp-share-prediction';
+    container.className = 'fixed top-[-9999px] left-[-9999px] w-[600px] h-[337px] bg-gradient-to-br from-slate-900 via-[#0f172a] to-slate-950 text-white p-6 border-2 border-brand-500/30 rounded-2xl flex flex-col justify-between font-sans shadow-2xl z-[-100]';
+    
+    const homeFlagUrl = match.homeFlag !== 'un' ? `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${match.homeFlag}.svg` : null;
+    const awayFlagUrl = match.awayFlag !== 'un' ? `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${match.awayFlag}.svg` : null;
+    
+    const homeFlagHtml = homeFlagUrl ? `<img src="${homeFlagUrl}" class="w-16 h-12 object-cover rounded-md border border-slate-700 shadow-md">` : '<div class="w-16 h-12 bg-slate-800 rounded-md border border-slate-700 flex items-center justify-center font-bold text-slate-500">?</div>';
+    const awayFlagHtml = awayFlagUrl ? `<img src="${awayFlagUrl}" class="w-16 h-12 object-cover rounded-md border border-slate-700 shadow-md">` : '<div class="w-16 h-12 bg-slate-800 rounded-md border border-slate-700 flex items-center justify-center font-bold text-slate-500">?</div>';
+    
+    let predText = "EMPATE";
+    let predDetails = "";
+    if (pred.result === 'L') predText = `GANA ${match.homeTeam.toUpperCase()}`;
+    if (pred.result === 'V') predText = `GANA ${match.awayTeam.toUpperCase()}`;
+    
+    if (pred.homeGoals !== undefined && pred.awayGoals !== undefined && pred.homeGoals !== '' && pred.awayGoals !== '') {
+        predDetails = `${pred.homeGoals} - ${pred.awayGoals}`;
+    } else {
+        predDetails = pred.result;
+    }
+    
+    container.innerHTML = `
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+                <img src="/assets/cup.webp" class="w-6 h-6 object-contain">
+                <span class="text-xs font-black tracking-widest text-brand-500 uppercase">Prode Mundial 2026</span>
+            </div>
+            <div class="bg-brand-500/10 text-brand-400 text-[10px] font-bold px-3 py-1 rounded-full border border-brand-500/20">
+                PRONÓSTICO OFICIAL
+            </div>
+        </div>
+        
+        <div class="my-auto flex flex-col items-center">
+            <div class="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-4">
+                Predicción de ${escapeHTML(userAlias)}
+            </div>
+            
+            <div class="flex items-center justify-center gap-8 w-full">
+                <!-- Home Team -->
+                <div class="flex flex-col items-center flex-1 text-center">
+                    <span class="text-xs font-extrabold text-white mb-2 max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap text-center">${match.homeTeam}</span>
+                    ${homeFlagHtml}
+                </div>
+                
+                <!-- Prediction Value -->
+                <div class="flex flex-col items-center justify-center bg-slate-900/80 px-6 py-3 rounded-2xl border border-slate-800 min-w-[120px]">
+                    <span class="text-2xl font-black text-brand-500 tracking-wider">${predDetails}</span>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">${predText}</span>
+                </div>
+                
+                <!-- Away Team -->
+                <div class="flex flex-col items-center flex-1 text-center">
+                    <span class="text-xs font-extrabold text-white mb-2 max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap text-center">${match.awayTeam}</span>
+                    ${awayFlagHtml}
+                </div>
+            </div>
+        </div>
+        
+        <div class="border-t border-slate-900 pt-3 flex justify-between items-center text-[10px] text-slate-500">
+            <span>Únete a jugar en: <strong class="text-slate-400">sapate.net.ar</strong></span>
+            <span>¡Pronostica y gana!</span>
+        </div>
+    `;
+    
+    document.body.appendChild(container);
+    
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    try {
+        const { toPng } = await import('html-to-image');
+        const dataUrl = await toPng(container, {
+            backgroundColor: '#0f172a',
+            pixelRatio: 2,
+            cacheBust: true
+        });
+        
+        document.body.removeChild(container);
+        
+        const fileName = `Pronostico_${match.homeTeam.replace(/\s+/g, '_')}_vs_${match.awayTeam.replace(/\s+/g, '_')}.png`;
+        const blob = dataURLtoBlob(dataUrl);
+        if (!blob) throw new Error("Could not parse image blob");
+        const file = new File([blob], fileName, { type: 'image/png' });
+        
+        let shared = false;
+        if (navigator.share && navigator.canShare) {
+            try {
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: `Pronóstico ${match.homeTeam} vs ${match.awayTeam}`,
+                        text: `Mi pronóstico para ${match.homeTeam} vs ${match.awayTeam} en el Prode Mundial 2026 🤞⚽️`
+                    });
+                    shared = true;
+                }
+            } catch (shareErr) {
+                console.log("Compartir cancelado o fallido:", shareErr);
+                if (shareErr.name === 'AbortError') {
+                    shared = true;
+                }
+            }
+        }
+        
+        if (!shared) {
+            const link = document.createElement("a");
+            link.download = fileName;
+            link.href = dataUrl;
+            link.click();
+        }
+    } catch (err) {
+        console.error("Error generating share image", err);
+        alert("Hubo un error al generar la imagen de tu pronóstico.");
+        if (document.getElementById('temp-share-prediction')) {
+            document.body.removeChild(container);
+        }
+    }
 }
