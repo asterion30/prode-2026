@@ -8,31 +8,50 @@ export default async function handler(req, res) {
     let query = urlParams.searchParams.get('q') || '';
     query = query.trim();
 
-    // Set a fun default query related to Tim Payne, Selección Argentina, or streamers of Argentine sports
+    // Curated default queries — focused on Argentine football streamers & Tim Payne
     if (!query) {
         const DEFAULT_QUERIES = [
-            "Tim Payne seleccion argentina shorts",
-            "Davoo Xeneize seleccion argentina shorts",
-            "La Cobra seleccion argentina shorts",
-            "streamers futbol argentino shorts",
-            "anecdotas seleccion argentina shorts"
+            "Tim Payne seleccion argentina",
+            "Davoo Xeneize argentina goles",
+            "La Cobra futbol argentino",
+            "streamers futbol argentino",
+            "mejores goles seleccion argentina"
         ];
         query = DEFAULT_QUERIES[Math.floor(Math.random() * DEFAULT_QUERIES.length)];
     } else {
         const queryLower = query.toLowerCase();
-        const hasWorldCupKeyword = ['mundial', 'copa del mundo', 'world cup', 'worldcup', 'fifa', 'qatar', 'russia', 'brasil', 'sudafrica', '2026', '2022', '2018', '2014', '2010', 'seleccion', 'tim payne', 'davoo', 'cobra', 'futbol', 'goles'].some(k => queryLower.includes(k));
-        if (!hasWorldCupKeyword) {
+        const hasFootballKeyword = ['mundial', 'copa', 'world cup', 'fifa', 'seleccion', 'argentina',
+            'tim payne', 'davoo', 'cobra', 'futbol', 'goles', 'shorts', 'messi', 'almada'].some(k => queryLower.includes(k));
+        if (!hasFootballKeyword) {
             query = `${query} futbol`;
         }
     }
+
+    // Blocked channels / keywords — never return their content
+    const BLOCKED_CHANNELS = [
+        'fifa', 'fifatv', 'fifa tv',
+        'uefa', 'uefatv',
+        'conmebol', 'conmeboltv',
+        'fox sports', 'espn latinoamerica', 'espn argentina',
+        'directv sports', 'tyc sports', 'telefe deportes',
+        'beinsports', 'bein sports',
+        'paramount+', 'paramount plus',
+        'sports official', 'official channel'
+    ];
+
+    const BLOCKED_TITLE_KEYWORDS = [
+        'official fifa', 'fifa official', 'fifa world cup official',
+        'copyright', '©'
+    ];
 
     const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
 
     try {
         const response = await fetch(searchUrl, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
-                'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                'Accept-Language': 'es-AR,es;q=0.9,en;q=0.8',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
             }
         });
 
@@ -44,12 +63,12 @@ export default async function handler(req, res) {
         let ids = [];
         let videos = [];
 
-        // Parse ytInitialData script block to filter out FIFA channel content
-        const match = html.match(/ytInitialData\s*=\s*({.+?});/);
+        // Parse ytInitialData script block
+        const match = html.match(/ytInitialData\s*=\s*({.+?});\s*<\/script>/);
         if (match) {
             try {
                 const data = JSON.parse(match[1]);
-                
+
                 // Recursive helper to extract all videoRenderer objects
                 const findVideoRenderers = (obj) => {
                     let results = [];
@@ -59,7 +78,7 @@ export default async function handler(req, res) {
                             results.push(current.videoRenderer);
                         } else {
                             for (const key in current) {
-                                if (current.hasOwnProperty(key)) {
+                                if (Object.prototype.hasOwnProperty.call(current, key)) {
                                     traverse(current[key]);
                                 }
                             }
@@ -87,11 +106,17 @@ export default async function handler(req, res) {
         }
 
         if (videos.length > 0) {
-            // Filter out videos from the official FIFA channel or containing FIFA in channel/title
+            // Filter out blocked channels & title keywords
             const filteredVideos = videos.filter(v => {
                 const channelLower = v.channel.toLowerCase();
                 const titleLower = v.title.toLowerCase();
-                if (channelLower.includes('fifa') || titleLower.includes('fifa official') || titleLower.includes('official fifa')) {
+
+                // Block by channel name
+                if (BLOCKED_CHANNELS.some(blocked => channelLower.includes(blocked))) {
+                    return false;
+                }
+                // Block by title keywords
+                if (BLOCKED_TITLE_KEYWORDS.some(kw => titleLower.includes(kw))) {
                     return false;
                 }
                 return true;
@@ -140,7 +165,11 @@ async function filterEmbeddable(ids, maxResults = 12) {
                     const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`;
                     const r = await fetch(oembedUrl, { method: 'GET' });
                     // 200 = embeddable, anything else (401, 403) = blocked
-                    return r.ok ? id : null;
+                    if (!r.ok) return null;
+                    // Double-check: parse response and skip if provider_name is suspicious
+                    const json = await r.json().catch(() => null);
+                    if (!json) return null;
+                    return id;
                 } catch {
                     return null;
                 }

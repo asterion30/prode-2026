@@ -486,7 +486,11 @@ const FALLBACK_SHORTS = [
 ];
 
 let activeShortsPlaylist = [...FALLBACK_SHORTS];
-let currentSearchQuery = "mundial 2026 shorts";
+let currentSearchQuery = "Tim Payne seleccion argentina";
+
+/** Detect mobile/tablet to adjust autoplay behaviour */
+const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
 
 async function fetchShorts(query) {
     try {
@@ -510,13 +514,24 @@ async function updateShortsPlayer() {
     // Show loading state
     shortsPlayer.src = "";
 
+    // Show/hide mobile tap overlay
+    const tapOverlay = document.getElementById("shorts-tap-overlay");
+    if (tapOverlay) tapOverlay.classList.toggle("hidden", !isMobileDevice);
+
     const playlist = await fetchShorts(currentSearchQuery);
     activeShortsPlaylist = playlist;
 
     if (activeShortsPlaylist.length > 0) {
         const firstId = activeShortsPlaylist[0];
         const restIds = activeShortsPlaylist.slice(1).join(",");
-        shortsPlayer.src = `https://www.youtube-nocookie.com/embed/${firstId}?playlist=${restIds}&loop=1&autoplay=1&mute=1&controls=1&modestbranding=1&rel=0&playsinline=1`;
+
+        if (isMobileDevice) {
+            // Mobile: no autoplay (browsers block it in iframes). User taps to play.
+            shortsPlayer.src = `https://www.youtube-nocookie.com/embed/${firstId}?playlist=${restIds}&loop=1&autoplay=0&controls=1&modestbranding=1&rel=0&playsinline=1`;
+        } else {
+            // Desktop: autoplay muted
+            shortsPlayer.src = `https://www.youtube-nocookie.com/embed/${firstId}?playlist=${restIds}&loop=1&autoplay=1&mute=1&controls=1&modestbranding=1&rel=0&playsinline=1`;
+        }
     }
 }
 
