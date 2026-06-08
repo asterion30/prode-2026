@@ -563,135 +563,15 @@
                          </div>
  
                          <!-- Grilla de Tarjetas de Premios -->
-                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                              <!-- Tarjeta 1: Birra -->
-                              <div class="bg-gradient-to-br from-amber-500/10 via-brand-dark to-slate-950 p-6 rounded-2xl border border-amber-500/20 flex flex-col justify-between space-y-4 hover:border-amber-500/40 transition-all group duration-300">
-                                  <div class="flex items-start justify-between">
-                                      <div class="space-y-1">
-                                          <span class="text-[10px] bg-amber-500/20 text-amber-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Premio Líder</span>
-                                          <h3 class="text-lg font-bold text-white mt-1 group-hover:text-amber-400 transition-colors">Te pago una birra</h3>
-                                          <p class="text-xs text-slate-400 leading-relaxed">"Te pago una birra porque vas ganando"</p>
-                                      </div>
-                                      <div class="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform duration-300">
-                                          <i class="ph-bold ph-beer-bottle text-2xl"></i>
-                                      </div>
-                                  </div>
-                                  <button id="btn-share-premio-1" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs">
-                                      <i class="ph-bold ph-share-network text-sm"></i> Compartir Tarjeta
-                                  </button>
-                              </div>
-
-                              <!-- Tarjeta 2: Panchito/Hamburguesa -->
-                              <div class="bg-gradient-to-br from-orange-500/10 via-brand-dark to-slate-950 p-6 rounded-2xl border border-orange-500/20 flex flex-col justify-between space-y-4 hover:border-orange-500/40 transition-all group duration-300">
-                                  <div class="flex items-start justify-between">
-                                      <div class="space-y-1">
-                                          <span class="text-[10px] bg-orange-500/20 text-orange-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Chicana de Tabla</span>
-                                          <h3 class="text-lg font-bold text-white mt-1 group-hover:text-orange-400 transition-colors">Te veo con hambre</h3>
-                                          <p class="text-xs text-slate-400 leading-relaxed">"Te pago un panchito o una hamburguesa porque te veo con hambre"</p>
-                                      </div>
-                                      <div class="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-500 group-hover:scale-110 transition-transform duration-300">
-                                          <i class="ph-bold ph-hamburger text-2xl"></i>
-                                      </div>
-                                  </div>
-                                  <button id="btn-share-premio-2" class="w-full py-2.5 bg-orange-500 hover:bg-orange-600 active:scale-95 text-slate-950 font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs">
-                                      <i class="ph-bold ph-share-network text-sm"></i> Compartir Tarjeta
-                                  </button>
-                              </div>
-
-                              <!-- Tarjeta 3: Asado 1 -->
-                              <div class="bg-gradient-to-br from-red-500/10 via-brand-dark to-slate-950 p-6 rounded-2xl border border-red-500/20 flex flex-col justify-between space-y-4 hover:border-red-500/40 transition-all group duration-300">
-                                  <div class="flex items-start justify-between">
-                                      <div class="space-y-1">
-                                          <span class="text-[10px] bg-red-500/20 text-red-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Desafío de Campeón</span>
-                                          <h3 class="text-lg font-bold text-white mt-1 group-hover:text-red-400 transition-colors">Pagame un asado</h3>
-                                          <p class="text-xs text-slate-400 leading-relaxed">"Pagame un asado si yo gano"</p>
-                                      </div>
-                                      <div class="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform duration-300">
-                                          <i class="ph-bold ph-fire-simple text-2xl"></i>
-                                      </div>
-                                  </div>
-                                  <button id="btn-share-premio-3" class="w-full py-2.5 bg-red-500 hover:bg-red-600 active:scale-95 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs">
-                                      <i class="ph-bold ph-share-network text-sm"></i> Compartir Tarjeta
-                                  </button>
-                              </div>
-
-                              <!-- Tarjeta 4: Asado Resultado -->
-                              <div class="bg-gradient-to-br from-purple-500/10 via-brand-dark to-slate-950 p-6 rounded-2xl border border-purple-500/20 flex flex-col justify-between space-y-4 hover:border-purple-500/40 transition-all group duration-300">
-                                  <div class="flex flex-col space-y-3">
-                                      <div class="flex items-start justify-between">
-                                          <div class="space-y-1 flex-1 pr-2">
-                                              <span class="text-[10px] bg-purple-500/20 text-purple-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Desafío de Partido</span>
-                                              <h3 class="text-lg font-bold text-white mt-1 group-hover:text-purple-400 transition-colors">Un resultado, un asado</h3>
-                                              <p class="text-xs text-slate-400 leading-relaxed">"Te pago un asado si le pegas a un resultado"</p>
-                                          </div>
-                                          <div class="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-500 group-hover:scale-110 transition-transform duration-300">
-                                              <i class="ph-bold ph-soccer-ball text-2xl"></i>
-                                          </div>
-                                      </div>
-                                      
-                                      <!-- Selector de Partido -->
-                                      <div class="space-y-1">
-                                          <label for="premios-match-select" class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Elegir Partido</label>
-                                          <select id="premios-match-select" class="w-full bg-slate-900 border border-slate-800 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-purple-500 outline-none">
-                                              <option value="">Cargando partidos...</option>
-                                          </select>
-                                      </div>
-                                  </div>
-                                  <button id="btn-share-premio-4" class="w-full py-2.5 bg-purple-500 hover:bg-purple-600 active:scale-95 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs">
-                                      <i class="ph-bold ph-share-network text-sm"></i> Compartir Tarjeta
-                                  </button>
-                              </div>
-
-                              <!-- Tarjeta 5: Empate -->
-                              <div class="bg-gradient-to-br from-blue-500/10 via-brand-dark to-slate-950 p-6 rounded-2xl border border-blue-500/20 flex flex-col justify-between space-y-4 hover:border-blue-500/40 transition-all group duration-300">
-                                  <div class="flex items-start justify-between">
-                                      <div class="space-y-1">
-                                          <span class="text-[10px] bg-blue-500/20 text-blue-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Desafío de Tablas</span>
-                                          <h3 class="text-lg font-bold text-white mt-1 group-hover:text-blue-400 transition-colors">El pacto del empate</h3>
-                                          <p class="text-xs text-slate-400 leading-relaxed">"Ofrecé una gaseosa si hay empate"</p>
-                                      </div>
-                                      <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform duration-300">
-                                          <i class="ph-bold ph-drop text-2xl"></i>
-                                      </div>
-                                  </div>
-                                  <button id="btn-share-premio-5" class="w-full py-2.5 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs">
-                                      <i class="ph-bold ph-share-network text-sm"></i> Compartir Tarjeta
-                                  </button>
-                              </div>
-
-                              <!-- Tarjeta 6: Penales -->
-                              <div class="bg-gradient-to-br from-rose-500/10 via-brand-dark to-slate-950 p-6 rounded-2xl border border-rose-500/20 flex flex-col justify-between space-y-4 hover:border-rose-500/40 transition-all group duration-300">
-                                  <div class="flex items-start justify-between">
-                                      <div class="space-y-1">
-                                          <span class="text-[10px] bg-rose-500/20 text-rose-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">¡¡PENALES!!</span>
-                                          <h3 class="text-lg font-bold text-white mt-1 group-hover:text-rose-400 transition-colors">Si sobrevivo, papitas</h3>
-                                          <p class="text-xs text-slate-400 leading-relaxed">"Si sobrevivo quiero unas papitas"</p>
-                                      </div>
-                                      <div class="w-12 h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform duration-300">
-                                          <i class="ph-bold ph-cookie text-2xl"></i>
-                                      </div>
-                                  </div>
-                                  <button id="btn-share-premio-6" class="w-full py-2.5 bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs">
-                                      <i class="ph-bold ph-share-network text-sm"></i> Compartir Tarjeta
-                                  </button>
-                              </div>
-
-                              <!-- Tarjeta 7: Remontada -->
-                              <div class="bg-gradient-to-br from-emerald-500/10 via-brand-dark to-slate-950 p-6 rounded-2xl border border-emerald-500/20 flex flex-col justify-between space-y-4 hover:border-emerald-500/40 transition-all group duration-300">
-                                  <div class="flex items-start justify-between">
-                                      <div class="space-y-1">
-                                          <span class="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Remontado Barriletes</span>
-                                          <h3 class="text-lg font-bold text-white mt-1 group-hover:text-emerald-400 transition-colors">Siempre hay tiempo</h3>
-                                          <p class="text-xs text-slate-400 leading-relaxed">"Siempre hay tiempo para unos mates"</p>
-                                      </div>
-                                      <div class="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform duration-300">
-                                          <i class="ph-bold ph-hourglass text-2xl"></i>
-                                      </div>
-                                  </div>
-                                  <button id="btn-share-premio-7" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs">
-                                      <i class="ph-bold ph-share-network text-sm"></i> Compartir Tarjeta
-                                  </button>
-                              </div>
+                         <div id="premios-container" class="space-y-6">
+                             <div id="premios-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[300px]">
+                                 <!-- Se carga dinámicamente desde JS -->
+                             </div>
+                             
+                             <!-- Observer para scroll infinito -->
+                             <div id="premios-observer" class="flex justify-center items-center py-4 w-full h-12">
+                                 <span class="spin-loader text-brand-500 text-lg hidden"></span>
+                             </div>
                          </div>
                     </div>
 

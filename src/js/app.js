@@ -380,7 +380,7 @@ function setupAppSubscriptions(uid) {
         matchesState = matches;
         renderMatches();
         renderPredictionsGrid();
-        populatePremiosMatches();
+        initPremios();
     });
 
     // Suscribirse a predicciones
@@ -1416,61 +1416,462 @@ const handleSharePremioCard = async (imagePath, fileName, text, successAlert = "
     }
 };
 
-const btnSharePremio1 = document.getElementById("btn-share-premio-1");
-const btnSharePremio2 = document.getElementById("btn-share-premio-2");
-const btnSharePremio3 = document.getElementById("btn-share-premio-3");
-const btnSharePremio4 = document.getElementById("btn-share-premio-4");
-const btnSharePremio5 = document.getElementById("btn-share-premio-5");
-const btnSharePremio6 = document.getElementById("btn-share-premio-6");
-const btnSharePremio7 = document.getElementById("btn-share-premio-7");
+// Dynamic Premios Cards Definition
+const premiosCards = [
+  {
+    id: "birra",
+    title: "Te pago una birra",
+    description: "\"Te pago una birra porque vas ganando\"",
+    badge: "Premio Líder",
+    icon: "ph-beer-bottle",
+    image: "/Premios/Birra.webp",
+    bgColor: "from-amber-500/10",
+    borderColor: "border-amber-500/20",
+    hoverBorderColor: "hover:border-amber-500/40",
+    btnColor: "bg-amber-500 hover:bg-amber-600 text-slate-950",
+    text: "¡Te pago una birra si vas ganando en el Prode Mundial 2026! Ojito: https://sapate.net.ar/! 🍺🏆"
+  },
+  {
+    id: "hambre",
+    title: "Te veo con hambre",
+    description: "\"Te pago un panchito o una hamburguesa porque te veo con hambre\"",
+    badge: "Chicana de Tabla",
+    icon: "ph-hamburger",
+    image: "/Premios/Hambre.webp",
+    bgColor: "from-orange-500/10",
+    borderColor: "border-orange-500/20",
+    hoverBorderColor: "hover:border-orange-500/40",
+    btnColor: "bg-orange-500 hover:bg-orange-600 text-slate-950",
+    text: "¡Te pago un panchito o una hamburguesa porque te veo con hambre en la tabla del Prode Mundial 2026: https://sapate.net.ar/! 🌭🍔🤣"
+  },
+  {
+    id: "medebes",
+    title: "Pagame un asado",
+    description: "\"Pagame un asado si yo gano\"",
+    badge: "Desafío de Campeón",
+    icon: "ph-fire-simple",
+    image: "/Premios/MeDebes.webp",
+    bgColor: "from-red-500/10",
+    borderColor: "border-red-500/20",
+    hoverBorderColor: "hover:border-red-500/40",
+    btnColor: "bg-red-500 hover:bg-red-600 text-white",
+    text: "¡Pagame un asado si gano el Prode Mundial 2026: https://sapate.net.ar/! 🥩🔥🍷"
+  },
+  {
+    id: "tepago",
+    title: "Un resultado, un asado",
+    description: "\"Te pago un asado si le pegas a un resultado\"",
+    badge: "Desafío de Partido",
+    icon: "ph-soccer-ball",
+    image: "/Premios/TePago.webp",
+    bgColor: "from-purple-500/10",
+    borderColor: "border-purple-500/20",
+    hoverBorderColor: "hover:border-purple-500/40",
+    btnColor: "bg-purple-500 hover:bg-purple-600 text-white",
+    hasMatchSelect: true
+  },
+  {
+    id: "empate",
+    title: "El pacto del empate",
+    description: "\"Ofrecé una gaseosa si hay empate\"",
+    badge: "Desafío de Tablas",
+    icon: "ph-drop",
+    image: "/Premios/Empate.webp",
+    bgColor: "from-blue-500/10",
+    borderColor: "border-blue-500/20",
+    hoverBorderColor: "hover:border-blue-500/40",
+    btnColor: "bg-blue-500 hover:bg-blue-600 text-white",
+    text: "¡Ofrecé una gaseosa si hay empate en el Prode Mundial 2026! 🥤🤝 https://sapate.net.ar/"
+  },
+  {
+    id: "penales",
+    title: "Si sobrevivo, papitas",
+    description: "\"Si sobrevivo quiero unas papitas\"",
+    badge: "¡¡PENALES!!",
+    icon: "ph-cookie",
+    image: "/Premios/Penales.webp",
+    bgColor: "from-rose-500/10",
+    borderColor: "border-rose-500/20",
+    hoverBorderColor: "hover:border-rose-500/40",
+    btnColor: "bg-rose-500 hover:bg-rose-600 text-white",
+    text: "¡Si sobrevivo a los penales en el Prode Mundial 2026, quiero unas papitas! 🥔🍟 https://sapate.net.ar/"
+  },
+  {
+    id: "remontada",
+    title: "A darlo vuelta!",
+    description: "\"Si en 90 o 120 no se puede tal vez penales quieren\"",
+    badge: "Remontada",
+    icon: "ph-hourglass",
+    image: "/Premios/Remontada.webp",
+    bgColor: "from-emerald-500/10",
+    borderColor: "border-emerald-500/20",
+    hoverBorderColor: "hover:border-emerald-500/40",
+    btnColor: "bg-emerald-500 hover:bg-emerald-600 text-slate-950",
+    text: "¡A darlo vuelta! Si en 90 o 120 no se puede, tal vez penales quieren en el Prode Mundial 2026: https://sapate.net.ar/! ⏳⚽️🔥"
+  },
+  {
+    id: "recordatorio",
+    title: "Recordatorio",
+    description: "\"hacele acordar que empieza el partido\"",
+    badge: "Despertate",
+    icon: "ph-alarm",
+    image: "/Premios/Despertate.webp",
+    bgColor: "from-yellow-500/10",
+    borderColor: "border-yellow-500/20",
+    hoverBorderColor: "hover:border-yellow-500/40",
+    btnColor: "bg-yellow-500 hover:bg-yellow-600 text-slate-950",
+    text: "¡Che, despertate que ya empieza el partido del Mundial! ⏰⚽️ https://sapate.net.ar/"
+  },
+  {
+    id: "alfajorcito",
+    title: "Alfajorcito",
+    description: "\"Un alfajor si hay un gol de Ultimo Minuto\"",
+    badge: "Último Minuto",
+    icon: "ph-cookie",
+    image: "/Premios/GolDeUltimominuto.webp",
+    bgColor: "from-pink-500/10",
+    borderColor: "border-pink-500/20",
+    hoverBorderColor: "hover:border-pink-500/40",
+    btnColor: "bg-pink-500 hover:bg-pink-600 text-white",
+    text: "¡Apostamos un alfajorcito a que hay un gol de último minuto en el Prode Mundial 2026! 🍫⚽️🔥 https://sapate.net.ar/"
+  },
+  {
+    id: "alentando",
+    title: "Alentando",
+    description: "\"Alienta a tu equipo favorito\"",
+    badge: "Hinchada",
+    icon: "ph-megaphone",
+    image: "/Premios/HayQueCantar.webp",
+    bgColor: "from-cyan-500/10",
+    borderColor: "border-cyan-500/20",
+    hoverBorderColor: "hover:border-cyan-500/40",
+    btnColor: "bg-cyan-500 hover:bg-cyan-600 text-slate-950",
+    hasTeamSelect: true
+  },
+  {
+    id: "remanija",
+    title: "Re manija",
+    description: "\"El que abandona no tiene premio\"",
+    badge: "Sin Abandonar",
+    icon: "ph-lightning",
+    image: "/Premios/HayqueSaltar.webp",
+    bgColor: "from-violet-500/10",
+    borderColor: "border-violet-500/20",
+    hoverBorderColor: "hover:border-violet-500/40",
+    btnColor: "bg-violet-500 hover:bg-violet-600 text-white",
+    text: "¡Estoy re manija con el Mundial! El que abandona no tiene premio, ¡a saltar! 🤪⚽️ https://sapate.net.ar/"
+  },
+  {
+    id: "sonmalos",
+    title: "Son malos!",
+    description: "\"Selecciona al peor equipo\"",
+    badge: "Chicana de Perros",
+    icon: "ph-thumbs-down",
+    image: "/Premios/Perros.webp",
+    bgColor: "from-stone-500/10",
+    borderColor: "border-stone-500/20",
+    hoverBorderColor: "hover:border-stone-500/40",
+    btnColor: "bg-stone-500 hover:bg-stone-600 text-white",
+    hasCountrySelect: true
+  },
+  {
+    id: "acalmarnos",
+    title: "A calmarnos",
+    description: "\"Mandale esta imagen para calamarlo en el entre tiempo\"",
+    badge: "Entretiempo",
+    icon: "ph-mask-happy",
+    image: "/Premios/MedioTiempo.webp",
+    bgColor: "from-teal-500/10",
+    borderColor: "border-teal-500/20",
+    hoverBorderColor: "hover:border-teal-500/40",
+    btnColor: "bg-teal-500 hover:bg-teal-600 text-slate-950",
+    text: "¡A calmarnos un poco en este entretiempo! Tomate un respiro: https://sapate.net.ar/ 🧘‍♂️⚽️"
+  },
+  {
+    id: "laprevia",
+    title: "La Previa",
+    description: "\"Ya arranca pero primero hay morfar\"",
+    badge: "Antes del Partido",
+    icon: "ph-cooking-pot",
+    image: "/Premios/Previa.webp",
+    bgColor: "from-amber-600/10",
+    borderColor: "border-amber-600/20",
+    hoverBorderColor: "hover:border-amber-600/40",
+    btnColor: "bg-amber-600 hover:bg-amber-700 text-white",
+    text: "¡Se armó la previa del partido! Primero hay que morfar algo rico: https://sapate.net.ar/ 🍔🍕🍻"
+  },
+  {
+    id: "penalazo",
+    title: "Penalazo",
+    description: "\"Unas empanadas si hay un penal\"",
+    badge: "Desafío de VAR",
+    icon: "ph-television",
+    image: "/Premios/Var.webp",
+    bgColor: "from-rose-600/10",
+    borderColor: "border-rose-600/20",
+    hoverBorderColor: "hover:border-rose-600/40",
+    btnColor: "bg-rose-600 hover:bg-rose-700 text-white",
+    hasMatchSelect: true
+  },
+  {
+    id: "alargue",
+    title: "Alargue",
+    description: "\"Unas fernecito si hay alargue\"",
+    badge: "Tiempo Extra",
+    icon: "ph-timer",
+    image: "/Premios/HayAlargue.webp",
+    bgColor: "from-indigo-500/10",
+    borderColor: "border-indigo-500/20",
+    hoverBorderColor: "hover:border-indigo-500/40",
+    btnColor: "bg-indigo-500 hover:bg-indigo-600 text-white",
+    hasMatchSelect: true
+  }
+];
 
-if (btnSharePremio1) {
-    btnSharePremio1.addEventListener("click", () => {
-        handleSharePremioCard("/Premios/Birra.webp", "Birra.webp", "¡Te pago una birra si  vas ganando en el Prode Mundial 2026! Ojito: https://sapate.net.ar/! 🍺🏆");
-    });
+let shuffledPremiosCards = [];
+let loadedPremiosCount = 0;
+const BATCH_SIZE = 3;
+let premiosObserverInstance = null;
+
+function getUniqueTeams() {
+    const teams = new Set();
+    if (Array.isArray(matchesState)) {
+        matchesState.forEach(m => {
+            if (m.homeTeam) teams.add(m.homeTeam);
+            if (m.awayTeam) teams.add(m.awayTeam);
+        });
+    }
+    return Array.from(teams)
+        .filter(t => {
+            const lower = t.toLowerCase();
+            return !lower.includes("grupo") &&
+                   !lower.includes("ganador") &&
+                   !lower.includes("perdedor") &&
+                   !lower.includes("partido") &&
+                   !lower.includes("1º") &&
+                   !lower.includes("2º") &&
+                   !/\d/.test(t);
+        })
+        .sort((a, b) => a.localeCompare(b));
 }
-if (btnSharePremio2) {
-    btnSharePremio2.addEventListener("click", () => {
-        handleSharePremioCard("/Premios/Hambre.webp", "Hambre.webp", "¡Te pago un panchito o una hamburguesa porque te veo con hambre en la tabla del Prode Mundial 2026: https://sapate.net.ar/! 🌭🍔🤣");
-    });
+
+function initPremios() {
+    if (shuffledPremiosCards.length === 0) {
+        // Shuffle Fisher-Yates
+        shuffledPremiosCards = [...premiosCards];
+        for (let i = shuffledPremiosCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledPremiosCards[i], shuffledPremiosCards[j]] = [shuffledPremiosCards[j], shuffledPremiosCards[i]];
+        }
+    }
+    
+    // Reset state
+    const premiosGrid = document.getElementById("premios-grid");
+    if (premiosGrid) premiosGrid.innerHTML = "";
+    loadedPremiosCount = 0;
+    
+    // Load first batch
+    renderMorePremios();
+    
+    // Setup scroll observer
+    setupPremiosObserver();
 }
-if (btnSharePremio3) {
-    btnSharePremio3.addEventListener("click", () => {
-        handleSharePremioCard("/Premios/MeDebes.webp", "MeDebes.webp", "¡Pagame un asado si gano el Prode Mundial 2026: https://sapate.net.ar/! 🥩🔥🍷");
+
+function setupPremiosObserver() {
+    const observerEl = document.getElementById("premios-observer");
+    if (!observerEl) return;
+
+    if (premiosObserverInstance) {
+        premiosObserverInstance.disconnect();
+    }
+
+    const loaderEl = observerEl.querySelector(".spin-loader");
+
+    premiosObserverInstance = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && loadedPremiosCount < shuffledPremiosCards.length) {
+            if (loaderEl) loaderEl.classList.remove("hidden");
+            
+            setTimeout(() => {
+                renderMorePremios();
+                if (loaderEl) loaderEl.classList.add("hidden");
+                checkAndLoadMore(); // Re-check after rendering next batch
+            }, 100);
+        }
+    }, {
+        rootMargin: "150px", // Trigger slightly before it comes into view
+        threshold: 0.01
     });
+
+    premiosObserverInstance.observe(observerEl);
+    
+    // Check initially in case screen is large enough that the observer is already visible
+    checkAndLoadMore();
+}
+
+function checkAndLoadMore() {
+    const observerEl = document.getElementById("premios-observer");
+    if (!observerEl) return;
+    
+    const rect = observerEl.getBoundingClientRect();
+    const inView = rect.top < window.innerHeight; // Observer is visible in viewport
+    
+    if (inView && loadedPremiosCount < shuffledPremiosCards.length) {
+        renderMorePremios();
+        // Check again after a tiny delay to allow DOM render
+        setTimeout(checkAndLoadMore, 50);
+    }
+}
+
+function renderMorePremios() {
+    const premiosGrid = document.getElementById("premios-grid");
+    if (!premiosGrid) return;
+    
+    const nextBatch = shuffledPremiosCards.slice(loadedPremiosCount, loadedPremiosCount + BATCH_SIZE);
+    loadedPremiosCount += nextBatch.length;
+    
+    nextBatch.forEach(card => {
+        const cardEl = document.createElement("div");
+        cardEl.className = `bg-gradient-to-br ${card.bgColor} via-brand-dark to-slate-950 p-6 rounded-2xl border ${card.borderColor} flex flex-col justify-between space-y-4 ${card.hoverBorderColor} transition-all group duration-300 glitch-hover fade-in`;
+        
+        let selectHtml = "";
+        if (card.hasMatchSelect) {
+            selectHtml = `
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Elegir Partido</label>
+                    <select class="premios-match-select w-full bg-slate-900 border border-slate-800 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-500 outline-none">
+                        <option value="">Cargando partidos...</option>
+                    </select>
+                </div>
+            `;
+        } else if (card.hasTeamSelect) {
+            selectHtml = `
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Elegir Equipo</label>
+                    <select class="premios-team-select w-full bg-slate-900 border border-slate-800 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-500 outline-none">
+                        <option value="">Cargando equipos...</option>
+                    </select>
+                </div>
+            `;
+        } else if (card.hasCountrySelect) {
+            selectHtml = `
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Elegir País</label>
+                    <select class="premios-country-select w-full bg-slate-900 border border-slate-800 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-500 outline-none">
+                        <option value="">Cargando países...</option>
+                    </select>
+                </div>
+            `;
+        }
+        
+        cardEl.innerHTML = `
+            <div class="flex flex-col space-y-3">
+                <div class="flex items-start justify-between">
+                    <div class="space-y-1 flex-1 pr-2">
+                        <span class="text-[10px] bg-brand-500/20 text-brand-500 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">${card.badge}</span>
+                        <h3 class="text-lg font-bold text-white mt-1 group-hover:text-brand-500 transition-colors glitch-card-title">${card.title}</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">${card.description}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-brand-500 group-hover:scale-110 transition-transform duration-300 glitch-card-icon">
+                        <i class="ph-bold ${card.icon} text-2xl"></i>
+                    </div>
+                </div>
+                ${selectHtml}
+            </div>
+            <button class="btn-share-card w-full py-2.5 ${card.btnColor} font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs">
+                <i class="ph-bold ph-share-network text-sm"></i> Compartir Tarjeta
+            </button>
+        `;
+        
+        premiosGrid.appendChild(cardEl);
+        
+        // Populate selects
+        if (card.hasMatchSelect) {
+            const select = cardEl.querySelector(".premios-match-select");
+            if (select && Array.isArray(matchesState)) {
+                const validMatches = matchesState.filter(m => m.homeTeam && m.awayTeam && !m.tbd);
+                validMatches.sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
+                select.innerHTML = '<option value="">Seleccionar partido...</option>';
+                validMatches.forEach(m => {
+                    const opt = document.createElement("option");
+                    const name = `${m.homeTeam} vs ${m.awayTeam}`;
+                    opt.value = name;
+                    opt.textContent = name;
+                    select.appendChild(opt);
+                });
+            }
+        } else if (card.hasTeamSelect || card.hasCountrySelect) {
+            const select = cardEl.querySelector(card.hasTeamSelect ? ".premios-team-select" : ".premios-country-select");
+            if (select) {
+                const teams = getUniqueTeams();
+                select.innerHTML = `<option value="">Seleccionar ${card.hasTeamSelect ? 'equipo' : 'país'}...</option>`;
+                teams.forEach(t => {
+                    const opt = document.createElement("option");
+                    opt.value = t;
+                    opt.textContent = t;
+                    select.appendChild(opt);
+                });
+            }
+        }
+        
+        // Add sharing click handler
+        const shareBtn = cardEl.querySelector(".btn-share-card");
+        if (shareBtn) {
+            shareBtn.addEventListener("click", () => {
+                let shareText = card.text || "";
+                if (card.hasMatchSelect) {
+                    const select = cardEl.querySelector(".premios-match-select");
+                    const matchVal = select ? select.value : "";
+                    if (!matchVal) {
+                        alert("Para compartir esta tarjeta, debes seleccionar un partido de la lista obligatoriamente.");
+                        return;
+                    }
+                    if (card.id === "penalazo") {
+                        shareText = `¡Penalazo! Si cobran penal en ${matchVal}, me debés unas empanadas: https://sapate.net.ar/! 🥟⚽️🤞`;
+                    } else if (card.id === "alargue") {
+                        shareText = `¡Hay alargue! Si el partido de ${matchVal} va a tiempo extra, te pago un fernecito: https://sapate.net.ar/! 🥃⚽️🔥`;
+                    } else {
+                        shareText = `¡Te pago un asado si le pegas al resultado de ${matchVal} en el Prode Mundial 2026: https://sapate.net.ar/! 🥩⚽️🤞`;
+                    }
+                } else if (card.hasTeamSelect) {
+                    const select = cardEl.querySelector(".premios-team-select");
+                    const teamVal = select ? select.value : "";
+                    if (!teamVal) {
+                        alert("Para compartir esta tarjeta, debes seleccionar un equipo de la lista obligatoriamente.");
+                        return;
+                    }
+                    shareText = `¡Alentando con el alma! ¡Vamos ${teamVal} carajo! 📣🇦🇷⚽️ https://sapate.net.ar/`;
+                } else if (card.hasCountrySelect) {
+                    const select = cardEl.querySelector(".premios-country-select");
+                    const countryVal = select ? select.value : "";
+                    if (!countryVal) {
+                        alert("Para compartir esta tarjeta, debes seleccionar un país de la lista obligatoriamente.");
+                        return;
+                    }
+                    shareText = `¡Qué perros que son! El peor equipo del Mundial sin dudas es ${countryVal}... 🐕⚽️🤦‍♂️ https://sapate.net.ar/`;
+                }
+                
+                const fileName = `${card.id}.webp`;
+                handleSharePremioCard(card.image, fileName, shareText);
+            });
+        }
+    });
+    
+    // Hide/show observer
+    const observerEl = document.getElementById("premios-observer");
+    if (observerEl) {
+        if (loadedPremiosCount >= shuffledPremiosCards.length) {
+            observerEl.style.display = "none";
+        } else {
+            observerEl.style.display = "flex";
+        }
+    }
 }
 
 const btnInviteFriends = document.getElementById("btn-invite-friends");
 if (btnInviteFriends) {
     btnInviteFriends.addEventListener("click", () => {
         handleSharePremioCard("/Premios/Alentando.webp", "Alentando.webp", "¡Sumate al prode Mundial 2026! 🏆⚽️ https://sapate.net.ar/");
-    });
-}
-
-if (btnSharePremio4) {
-    btnSharePremio4.addEventListener("click", () => {
-        const matchVal = premiosMatchSelect ? premiosMatchSelect.value : "";
-        if (!matchVal) {
-            alert("Para compartir esta tarjeta, debes seleccionar un partido de la lista obligatoriamente.");
-            return;
-        }
-        handleSharePremioCard("/Premios/TePago.webp", "TePago.webp", `¡Te pago un asado si le pegas al resultado de ${matchVal} en el Prode Mundial 2026: https://sapate.net.ar/! 🥩⚽️🤞`);
-    });
-}
-
-if (btnSharePremio5) {
-    btnSharePremio5.addEventListener("click", () => {
-        handleSharePremioCard("/Premios/Empate.webp", "Empate.webp", "¡Ofrecé una gaseosa si hay empate en el Prode Mundial 2026! 🥤🤝 https://sapate.net.ar/");
-    });
-}
-if (btnSharePremio6) {
-    btnSharePremio6.addEventListener("click", () => {
-        handleSharePremioCard("/Premios/Penales.webp", "Penales.webp", "¡Si sobrevivo a los penales en el Prode Mundial 2026, quiero unas papitas! 🥔🍟 https://sapate.net.ar/");
-    });
-}
-if (btnSharePremio7) {
-    btnSharePremio7.addEventListener("click", () => {
-        handleSharePremioCard("/Premios/Remontada.webp", "Remontada.webp", "¡Siempre hay tiempo para unos mates y una remontada en el Prode Mundial 2026! 🧉⚽️ https://sapate.net.ar/");
     });
 }
 
@@ -2665,25 +3066,6 @@ async function updateEspecialesRanking() {
     renderSection(listDec, baseDec, "bg-red-500");
 }
 
-function populatePremiosMatches() {
-    if (!premiosMatchSelect) return;
-    const currentVal = premiosMatchSelect.value;
-    premiosMatchSelect.innerHTML = '<option value="">Seleccionar partido...</option>';
-    
-    const validMatches = matchesState.filter(m => m.homeTeam && m.awayTeam && !m.tbd);
-    validMatches.sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
-    
-    validMatches.forEach(m => {
-        const opt = document.createElement("option");
-        const matchName = `${m.homeTeam} vs ${m.awayTeam}`;
-        opt.value = matchName;
-        opt.textContent = matchName;
-        if (matchName === currentVal) {
-            opt.selected = true;
-        }
-        premiosMatchSelect.appendChild(opt);
-    });
-}
 
 async function sharePredictionImage(match, pred, userAlias) {
     // Helper: load an image URL into an HTMLImageElement via Blob to avoid CORS taint
