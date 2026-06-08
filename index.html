@@ -264,19 +264,24 @@
                     </div>
 
                     <div id="grupos-view" class="hidden space-y-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <h2 class="text-xl font-bold">Tabla de Posiciones</h2>
+                        <button id="btn-toggle-groups" class="w-full flex justify-between items-center mb-2 p-3 bg-slate-900/30 hover:bg-slate-800/40 rounded-xl border border-slate-800/40 hover:border-slate-700/60 transition-all cursor-pointer text-left focus:outline-none">
+                            <span class="flex items-center gap-2">
+                                <i id="icon-toggle-groups" class="ph-bold ph-caret-right text-brand-500 text-lg transition-transform duration-300"></i>
+                                <span class="text-lg font-bold text-white tracking-tight">Tabla de Posiciones</span>
+                            </span>
                             <span class="text-xs text-slate-500 italic">Se actualiza con los resultados cargados</span>
-                        </div>
+                        </button>
 
-                        <!-- Selector de grupo -->
-                        <div id="group-selector" class="flex gap-2 flex-wrap pb-1">
-                            <!-- Botones de grupo generados por JS -->
-                        </div>
+                        <div id="groups-collapse-container" class="hidden space-y-4">
+                            <!-- Selector de grupo -->
+                            <div id="group-selector" class="flex gap-2 flex-wrap pb-1">
+                                <!-- Botones de grupo generados por JS -->
+                            </div>
 
-                        <!-- Tabla del grupo seleccionado -->
-                        <div id="group-table-container">
-                            <!-- Contenido generado por JS -->
+                            <!-- Tabla del grupo seleccionado -->
+                            <div id="group-table-container">
+                                <!-- Contenido generado por JS -->
+                            </div>
                         </div>
 
                         <!-- Detalle de Puntuación -->
@@ -290,7 +295,7 @@
                                 <div class="bg-slate-950/30 p-3 rounded-xl border border-slate-800/40 space-y-1">
                                     <div class="flex items-center justify-between">
                                         <span class="font-bold text-slate-300">Acertar el Resultado (L / E / V)</span>
-                                        <span class="bg-brand-500/10 text-brand-400 font-bold px-2 py-0.5 rounded text-[10px]">+1 Punto</span>
+                                        <span class="bg-green-500/10 text-green-400 font-bold px-2.5 py-0.5 rounded text-[10px] border border-green-500/20 glow-pulse-green shadow-[0_0_8px_rgba(34,197,94,0.1)]">+1 Punto</span>
                                     </div>
                                     <p class="text-slate-500 text-[11px] leading-relaxed">
                                         Sumás 1 punto si acertás qué equipo gana el partido (Local/Visitante) o si el encuentro termina en un Empate.
@@ -300,7 +305,7 @@
                                 <div class="bg-slate-950/30 p-3 rounded-xl border border-slate-800/40 space-y-1">
                                     <div class="flex items-center justify-between">
                                         <span class="font-bold text-slate-300">Acertar el Marcador Exacto</span>
-                                        <span class="bg-brand-500/10 text-brand-400 font-bold px-2 py-0.5 rounded text-[10px]">+2 Puntos Extra</span>
+                                        <span class="bg-purple-500/10 text-purple-400 font-bold px-2.5 py-0.5 rounded text-[10px] border border-purple-500/20 glow-pulse-purple shadow-[0_0_8px_rgba(168,85,247,0.1)]">+2 Puntos Extra</span>
                                     </div>
                                     <p class="text-slate-500 text-[11px] leading-relaxed">
                                         Sumás 2 puntos extra (haciendo un total de <strong>3 puntos</strong> en ese partido) si acertás la cantidad exacta de goles de ambos equipos.

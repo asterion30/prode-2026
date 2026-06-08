@@ -61,6 +61,9 @@ const btnNavMatches = document.getElementById("nav-matches");
 const btnNavRanking = document.getElementById("nav-ranking");
 const btnNavGrupos  = document.getElementById("nav-grupos");
 const btnNavUsers = document.getElementById("nav-users");
+const btnToggleGroups = document.getElementById("btn-toggle-groups");
+const groupsCollapseContainer = document.getElementById("groups-collapse-container");
+const iconToggleGroups = document.getElementById("icon-toggle-groups");
 
 // Leagues DOM Elements
 const legendaryView = document.getElementById("legendary-view");
@@ -429,7 +432,26 @@ btnNavRanking.addEventListener('click', () => setActiveNav(btnNavRanking, rankin
 if (btnNavGrupos) {
     btnNavGrupos.addEventListener('click', () => {
         setActiveNav(btnNavGrupos, gruposView);
+        // Reset groups view to collapsed by default so the scoring rules are seen first
+        if (groupsCollapseContainer && iconToggleGroups) {
+            groupsCollapseContainer.classList.add("hidden");
+            iconToggleGroups.classList.remove("rotate-90");
+        }
         renderGroupsView();
+    });
+}
+
+// Handler for expanding and collapsing the positions tables
+if (btnToggleGroups && groupsCollapseContainer && iconToggleGroups) {
+    btnToggleGroups.addEventListener("click", () => {
+        const isHidden = groupsCollapseContainer.classList.contains("hidden");
+        if (isHidden) {
+            groupsCollapseContainer.classList.remove("hidden");
+            iconToggleGroups.classList.add("rotate-90");
+        } else {
+            groupsCollapseContainer.classList.add("hidden");
+            iconToggleGroups.classList.remove("rotate-90");
+        }
     });
 }
 
