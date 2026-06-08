@@ -1420,6 +1420,9 @@ const btnSharePremio1 = document.getElementById("btn-share-premio-1");
 const btnSharePremio2 = document.getElementById("btn-share-premio-2");
 const btnSharePremio3 = document.getElementById("btn-share-premio-3");
 const btnSharePremio4 = document.getElementById("btn-share-premio-4");
+const btnSharePremio5 = document.getElementById("btn-share-premio-5");
+const btnSharePremio6 = document.getElementById("btn-share-premio-6");
+const btnSharePremio7 = document.getElementById("btn-share-premio-7");
 
 if (btnSharePremio1) {
     btnSharePremio1.addEventListener("click", () => {
@@ -1452,6 +1455,22 @@ if (btnSharePremio4) {
             return;
         }
         handleSharePremioCard("/Premios/TePago.webp", "TePago.webp", `¡Te pago un asado si le pegas al resultado de ${matchVal} en el Prode Mundial 2026: https://sapate.net.ar/! 🥩⚽️🤞`);
+    });
+}
+
+if (btnSharePremio5) {
+    btnSharePremio5.addEventListener("click", () => {
+        handleSharePremioCard("/Premios/Empate.webp", "Empate.webp", "¡Ofrecé una gaseosa si hay empate en el Prode Mundial 2026! 🥤🤝 https://sapate.net.ar/");
+    });
+}
+if (btnSharePremio6) {
+    btnSharePremio6.addEventListener("click", () => {
+        handleSharePremioCard("/Premios/Penales.webp", "Penales.webp", "¡Si sobrevivo a los penales en el Prode Mundial 2026, quiero unas papitas! 🥔🍟 https://sapate.net.ar/");
+    });
+}
+if (btnSharePremio7) {
+    btnSharePremio7.addEventListener("click", () => {
+        handleSharePremioCard("/Premios/Remontada.webp", "Remontada.webp", "¡Siempre hay tiempo para unos mates y una remontada en el Prode Mundial 2026! 🧉⚽️ https://sapate.net.ar/");
     });
 }
 
