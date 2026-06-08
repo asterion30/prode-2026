@@ -1366,7 +1366,7 @@ const handleShareText = (text) => {
     }
 };
 
-const handleSharePremioCard = async (imagePath, fileName, text) => {
+const handleSharePremioCard = async (imagePath, fileName, text, successAlert = "Se descargó la imagen del premio y se copió la chicana al portapapeles. ¡Ya puedes compartirla!") => {
     try {
         const response = await fetch(imagePath);
         if (!response.ok) throw new Error("Image fetch failed");
@@ -1403,9 +1403,9 @@ const handleSharePremioCard = async (imagePath, fileName, text) => {
             setTimeout(() => {
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(text);
-                    alert("Se descargó la imagen del premio y se copió la chicana al portapapeles. ¡Ya puedes compartirla!");
+                    alert(successAlert);
                 } else {
-                    alert(`Se descargó la imagen. Chicana: "${text}"`);
+                    alert(`Se descargó la imagen. Texto: "${text}"`);
                 }
             }, 500);
         }
@@ -2172,20 +2172,12 @@ async function renderLeagueDetailsView(league) {
         btnShareLeague.classList.remove("hidden");
         btnShareLeague.onclick = async () => {
             const shareText = `¡Únete a mi Liga Legendaria "${league.name}" en Prode Mundial 2026!\n\nIngresa a este enlace para aceptar el desafío:\n${window.location.origin}/?invite=${league.invite_code}`;
-            
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'Invitación a Liga Legendaria',
-                        text: shareText
-                    });
-                } catch (err) {
-                    console.log("Compartir cancelado o no soportado.", err);
-                }
-            } else {
-                // Fallback a cliente de correo nativo si Web Share no está disponible
-                window.location.href = `mailto:?subject=${encodeURIComponent("Invitación a Liga Legendaria")}&body=${encodeURIComponent(shareText)}`;
-            }
+            handleSharePremioCard(
+                "/Premios/Liga.webp", 
+                "Liga.webp", 
+                shareText, 
+                "Se descargó la imagen de la liga y se copió el link de invitación al portapapeles. ¡Ya puedes compartirla!"
+            );
         };
     }
 
@@ -2442,22 +2434,19 @@ async function handlePendingInvite(userId) {
             return;
         }
         
-        // 3. Prompt user to accept the challenge
-        const accept = confirm(`Te han invitado al grupo "${league.name}". ¿Aceptas el desafío?`);
-        if (accept) {
-            showLoader();
-            await supabase.from('group_members').insert({
-                group_id: league.id,
-                user_id: userId,
-                status: 'active'
-            });
-            hideLoader();
-            alert(`¡Te has unido a la liga "${league.name}" con éxito!`);
-            
-            // Navigate to details view
-            setActiveNav(btnNavLegendary, leagueDetailsView);
-            renderLeagueDetailsView(league);
-        }
+        // 3. Automatically join user to the group (bypass confirm prompt)
+        showLoader();
+        await supabase.from('group_members').insert({
+            group_id: league.id,
+            user_id: userId,
+            status: 'active'
+        });
+        hideLoader();
+        alert(`¡Te has unido a la liga "${league.name}" con éxito!`);
+        
+        // Navigate to details view
+        setActiveNav(btnNavLegendary, leagueDetailsView);
+        renderLeagueDetailsView(league);
     } catch (err) {
         console.error("Error al procesar la invitación pendiente:", err);
         alert("Hubo un error al intentar unirse a la liga: " + (err.message || err));
