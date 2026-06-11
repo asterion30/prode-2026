@@ -20,8 +20,9 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Manual Winner State
-  const [manualWinnerInput, setManualWinnerInput] = useState('');
+  // Manual Winner State (per-prize inputs mapping prize.id -> string)
+  const [manualWinnerInputs, setManualWinnerInputs] = useState({});
+  const [activeDrawPrizeId, setActiveDrawPrizeId] = useState(null);
 
   // Visitor state
   const [selectedNumbers, setSelectedNumbers] = useState([]);
@@ -263,8 +264,8 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
     window.open(waUrl, '_blank');
   };
 
-  // Run the local digital raffle draw
-  const handleStartDraw = () => {
+  // Run the local digital raffle draw for a specific prize
+  const handleStartDraw = (prizeId) => {
     // Only numbers marked as Paid (2) participate
     const paidNumbers = [];
     const tickets = (raffle.ticket_type === 'custom' && raffle.custom_tickets) 
@@ -291,6 +292,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
       return;
     }
 
+    setActiveDrawPrizeId(prizeId);
     setShowDrawModal(true);
     setDrawing(true);
     setWinnerNumber(null);
@@ -308,8 +310,12 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
         const finalWinnerIndex = Math.floor(Math.random() * paidNumbers.length);
         const winner = paidNumbers[finalWinnerIndex];
 
+        const updatedPrizes = raffle.prizes.map(p => 
+          p.id === prizeId ? { ...p, winning_number: winner } : p
+        );
+
         // Save winner to database so it persists
-        updateRaffleWinner(raffle.id, winner, user).then(updated => {
+        updateRaffleWinner(raffle.id, updatedPrizes, user).then(updated => {
           setRaffle(updated);
           setWinnerNumber(winner);
           setDrawing(false);
@@ -328,18 +334,37 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
     }, 100);
   };
 
-  const handleSaveManualWinner = async (e) => {
+  const handleSaveManualWinner = async (e, prizeId) => {
     e.preventDefault();
-    const num = parseInt(manualWinnerInput, 10);
-    if (isNaN(num) || num < 1 || num > raffle.total_numbers) {
-      alert(`El número ganador debe estar entre 1 y ${raffle.total_numbers}.`);
+    const inputVal = manualWinnerInputs[prizeId] || '';
+    let isValidTicket = false;
+    let ticketStr = inputVal.trim();
+
+    if (raffle.ticket_type === 'custom') {
+      isValidTicket = raffle.custom_tickets && raffle.custom_tickets.includes(ticketStr);
+    } else {
+      const num = parseInt(ticketStr, 10);
+      isValidTicket = !isNaN(num) && num >= 1 && num <= raffle.total_numbers;
+      if (isValidTicket) {
+        ticketStr = String(num);
+      }
+    }
+
+    if (!isValidTicket) {
+      alert(raffle.ticket_type === 'custom'
+        ? `El identificador ganador debe ser uno de los configurados en la rifa.`
+        : `El número ganador debe estar entre 1 y ${raffle.total_numbers}.`
+      );
       return;
     }
 
     try {
-      const updated = await updateRaffleWinner(raffle.id, num, user);
+      const updatedPrizes = raffle.prizes.map(p => 
+        p.id === prizeId ? { ...p, winning_number: ticketStr } : p
+      );
+      const updated = await updateRaffleWinner(raffle.id, updatedPrizes, user);
       setRaffle(updated);
-      setManualWinnerInput('');
+      setManualWinnerInputs(prev => ({ ...prev, [prizeId]: '' }));
       confetti({
         particleCount: 100,
         spread: 70,
@@ -350,10 +375,14 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
     }
   };
 
-  const handleResetWinner = async () => {
-    if (!window.confirm('¿Estás seguro de que quieres anular el número ganador registrado?')) return;
+  const handleResetWinner = async (prizeId) => {
+    const prize = raffle.prizes.find(p => p.id === prizeId);
+    if (!window.confirm(`¿Estás seguro de que quieres anular el ganador registrado para "${prize.name}"?`)) return;
     try {
-      const updated = await updateRaffleWinner(raffle.id, null, user);
+      const updatedPrizes = raffle.prizes.map(p => 
+        p.id === prizeId ? { ...p, winning_number: null } : p
+      );
+      const updated = await updateRaffleWinner(raffle.id, updatedPrizes, user);
       setRaffle(updated);
     } catch (err) {
       alert(err.message || 'Error al anular el ganador.');
@@ -604,9 +633,11 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
       </div>
 
       {/* Winner Announcement Banner */}
-      {raffle.winning_number && (() => {
-        const winnerInfo = raffle.numbers_state[raffle.winning_number];
-        const winnerName = typeof winnerInfo === 'object' ? winnerInfo?.name : '';
+      {(() => {
+        // Check if any prize has a winning number, or if the main raffle.winning_number is set
+        const hasWinners = raffle.winning_number || (raffle.prizes && raffle.prizes.some(p => p.winning_number));
+        if (!hasWinners) return null;
+
         return (
           <div className="glass-card" style={{
             background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.25) 100%)',
@@ -616,16 +647,51 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
             animation: 'fadeIn 0.3s ease-out'
           }}>
             <Trophy style={{ color: 'var(--color-warning)', margin: '0 auto 0.5rem', display: 'block' }} size={32} />
-            <h2 style={{ color: 'white', fontSize: '1.4rem', marginBottom: '0.25rem' }}>¡Sorteo Realizado!</h2>
-            <p style={{ color: 'white', fontSize: '1.1rem', fontWeight: '800' }}>
-              {raffle.ticket_type === 'custom' ? 'Identificador Ganador' : 'Número Ganador'}: <span style={{ color: 'var(--color-warning)', fontSize: '1.8rem' }}>{raffle.ticket_type === 'custom' ? raffle.winning_number : raffle.winning_number.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')}</span>
-            </p>
-            {winnerName && (
-              <p style={{ color: 'white', fontSize: '1.2rem', fontWeight: '700', marginTop: '0.5rem' }}>
-                🎉 Ganador/a: <span style={{ color: 'var(--color-bright)', fontSize: '1.4rem', textShadow: '0 0 10px rgba(56, 189, 248, 0.5)' }}>{winnerName}</span> 🎉
-              </p>
-            )}
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', marginTop: '0.4rem' }}>
+            <h2 style={{ color: 'white', fontSize: '1.4rem', marginBottom: '0.75rem' }}>¡Sorteo Realizado!</h2>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: '500px', margin: '0 auto', textAlign: 'left' }}>
+              {raffle.prizes.map((prize, idx) => {
+                // Determine winning number for this prize
+                // For legacy compatibility, if the first prize doesn't have a winning_number but raffle.winning_number is set, use raffle.winning_number
+                let winNum = prize.winning_number;
+                if (!winNum && idx === 0 && raffle.winning_number) {
+                  winNum = raffle.winning_number;
+                }
+
+                const winnerInfo = winNum ? raffle.numbers_state[winNum] : null;
+                const winnerName = typeof winnerInfo === 'object' ? winnerInfo?.name : '';
+
+                return (
+                  <div key={prize.id} style={{
+                    background: 'rgba(0, 0, 0, 0.2)',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(251, 191, 36, 0.15)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.25rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <strong style={{ color: 'white', fontSize: '0.85rem' }}>🏆 {prize.name}</strong>
+                      {winNum ? (
+                        <span className="badge badge-warning" style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem' }}>
+                          {raffle.ticket_type === 'custom' ? 'ID: ' : 'N°: '}{raffle.ticket_type === 'custom' ? winNum : winNum.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')}
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Pendiente de sorteo</span>
+                      )}
+                    </div>
+                    {winNum && (
+                      <div style={{ fontSize: '0.9rem', color: 'var(--color-bright)', fontWeight: '700', marginTop: '0.25rem' }}>
+                        👤 Ganador/a: <span style={{ color: 'white' }}>{winnerName || 'Sin registrar (libre)'}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', marginTop: '1rem' }}>
               El sorteo se realizó por: <strong>{raffle.draw_method}</strong> {raffle.draw_type === 'external' ? `(${raffle.draw_moment})` : ''}.
             </p>
           </div>
@@ -685,35 +751,54 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
             Premios en juego:
           </span>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {raffle.prizes.map((prize) => (
-              <div key={prize.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'white', fontWeight: '500' }}>
-                <span style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <span>🏆</span>
-                  <span>{prize.name}</span>
-                </span>
-                {prize.image && (
-                  <button
-                    onClick={() => setExpandedPrizeImage({ src: prize.image, name: prize.name })}
-                    className="btn"
-                    style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '6px',
-                      padding: '0.2rem 0.4rem',
-                      fontSize: '0.7rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.25rem',
-                      cursor: 'pointer',
-                      color: 'var(--color-bright)'
-                    }}
-                  >
-                    <img src={prize.image} alt="Premio mini" style={{ width: '18px', height: '18px', objectFit: 'cover', borderRadius: '3px' }} />
-                    Ver Foto
-                  </button>
-                )}
-              </div>
-            ))}
+            {raffle.prizes.map((prize, idx) => {
+              // Support legacy compatibility
+              let winNum = prize.winning_number;
+              if (!winNum && idx === 0 && raffle.winning_number) {
+                winNum = raffle.winning_number;
+              }
+
+              const winnerInfo = winNum ? raffle.numbers_state[winNum] : null;
+              const winnerName = typeof winnerInfo === 'object' ? winnerInfo?.name : '';
+
+              return (
+                <div key={prize.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', borderBottom: idx < raffle.prizes.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', paddingBottom: idx < raffle.prizes.length - 1 ? '0.5rem' : '0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'white', fontWeight: '500' }}>
+                    <span style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', textAlign: 'left' }}>
+                      <span>🏆</span>
+                      <span>{prize.name}</span>
+                    </span>
+                    {prize.image && (
+                      <button
+                        onClick={() => setExpandedPrizeImage({ src: prize.image, name: prize.name })}
+                        className="btn"
+                        style={{
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '6px',
+                          padding: '0.2rem 0.4rem',
+                          fontSize: '0.7rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          cursor: 'pointer',
+                          color: 'var(--color-bright)',
+                          flexShrink: 0
+                        }}
+                      >
+                        <img src={prize.image} alt="Premio mini" style={{ width: '18px', height: '18px', objectFit: 'cover', borderRadius: '3px' }} />
+                        Ver Foto
+                      </button>
+                    )}
+                  </div>
+                  {winNum && (
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-warning)', paddingLeft: '1.45rem', textAlign: 'left' }}>
+                      🎉 Ganador/a: <strong>{winnerName || 'Sin registrar (libre)'}</strong> (N° {raffle.ticket_type === 'custom' ? winNum : winNum.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')})
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
         {isAdmin && (
@@ -1043,81 +1128,128 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
                 Sorteador Digital Integrado
               </h3>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', lineHeight: '1.4' }}>
-                Al ser una rifa configurada con Sorteador Interno, el sistema seleccionará un ganador aleatoriamente entre los números registrados como **PAGADOS**.
+                Seleccioná qué premio sortear. El sistema elegirá un ganador aleatoriamente entre los números registrados como **PAGADOS**.
               </p>
-              {raffle.winning_number ? (
-                <div>
-                  <p style={{ color: 'var(--color-success)', fontWeight: '700', fontSize: '0.95rem' }}>
-                    Sorteo completado. Ganador: {raffle.ticket_type === 'custom' ? raffle.winning_number : raffle.winning_number.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')}
-                  </p>
-                  <button
-                    onClick={handleStartDraw}
-                    className="btn btn-secondary"
-                    style={{ width: '100%', marginTop: '0.5rem', fontSize: '0.8rem' }}
-                  >
-                    Sortear de Nuevo (Reiniciar)
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={handleStartDraw}
-                  className="btn"
-                  style={{
-                    background: 'linear-gradient(135deg, var(--color-warning) 0%, #d97706 100%)',
-                    color: 'white',
-                    fontWeight: '700',
-                    boxShadow: '0 4px 15px rgba(245, 158, 11, 0.3)'
-                  }}
-                >
-                  <Trophy size={16} style={{ marginRight: '0.25rem' }} />
-                  Iniciar Sorteo de Rifa
-                </button>
-              )}
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', textAlign: 'left' }}>
+                {raffle.prizes.map((prize, idx) => {
+                  let winNum = prize.winning_number;
+                  if (!winNum && idx === 0 && raffle.winning_number) {
+                    winNum = raffle.winning_number;
+                  }
+
+                  const winnerInfo = winNum ? raffle.numbers_state[winNum] : null;
+                  const winnerName = typeof winnerInfo === 'object' ? winnerInfo?.name : '';
+
+                  return (
+                    <div key={prize.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <strong style={{ color: 'white', fontSize: '0.85rem' }}>🏆 {prize.name}</strong>
+                      
+                      {winNum ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <p style={{ color: 'var(--color-success)', fontWeight: '700', fontSize: '0.8rem', margin: 0 }}>
+                            Sorteado: {raffle.ticket_type === 'custom' ? winNum : winNum.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')}
+                            {winnerName && ` - ${winnerName}`}
+                          </p>
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                            <button
+                              onClick={() => handleStartDraw(prize.id)}
+                              className="btn btn-secondary"
+                              style={{ flex: 1, padding: '0.35rem', fontSize: '0.75rem', minHeight: 'auto' }}
+                            >
+                              Sortear de Nuevo
+                            </button>
+                            <button
+                              onClick={() => handleResetWinner(prize.id)}
+                              className="btn btn-danger"
+                              style={{ flex: 1, padding: '0.35rem', fontSize: '0.75rem', minHeight: 'auto', background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                            >
+                              Anular Ganador
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleStartDraw(prize.id)}
+                          className="btn"
+                          style={{
+                            background: 'linear-gradient(135deg, var(--color-warning) 0%, #d97706 100%)',
+                            color: 'white',
+                            fontWeight: '700',
+                            fontSize: '0.8rem',
+                            padding: '0.45rem 1rem',
+                            boxShadow: '0 4px 10px rgba(245, 158, 11, 0.15)'
+                          }}
+                        >
+                          <Trophy size={12} style={{ marginRight: '0.25rem' }} />
+                          Iniciar Sorteo
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ) : (
             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', border: '1.5px solid var(--color-warning)' }}>
               <h3 style={{ fontSize: '1.1rem', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
                 <Trophy style={{ color: 'var(--color-warning)' }} size={20} />
-                Registrar Ganador del Sorteo Externo
+                Registrar Ganadores del Sorteo Externo
               </h3>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', lineHeight: '1.4' }}>
-                El sorteo se realiza por el medio externo: **{raffle.draw_method}** ({raffle.draw_moment}). Registrá el número ganador aquí para publicarlo a los visitantes.
+                El sorteo se realiza por el medio externo: **{raffle.draw_method}** ({raffle.draw_moment}). Registrá el billete ganador de cada premio aquí.
               </p>
 
-              {raffle.winning_number ? (
-                <div>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '8px', marginBottom: '0.75rem', textAlign: 'center' }}>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>GANADOR REGISTRADO:</span>
-                    <span style={{ display: 'block', fontSize: '1.8rem', fontWeight: '900', color: 'var(--color-warning)' }}>
-                      {raffle.winning_number.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')}
-                    </span>
-                  </div>
-                  <button
-                    onClick={handleResetWinner}
-                    className="btn btn-danger"
-                    style={{ width: '100%', fontSize: '0.8rem' }}
-                  >
-                    Anular Ganador
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSaveManualWinner} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <input
-                    type="number"
-                    placeholder="N° Ganador"
-                    value={manualWinnerInput}
-                    onChange={(e) => setManualWinnerInput(e.target.value)}
-                    className="form-control"
-                    style={{ flex: 1, padding: '0.6rem 0.85rem' }}
-                    min="1"
-                    max={raffle.total_numbers}
-                    required
-                  />
-                  <button type="submit" className="btn btn-primary" style={{ padding: '0.65rem 1.25rem', fontSize: '0.85rem' }}>
-                    Guardar
-                  </button>
-                </form>
-              )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', textAlign: 'left' }}>
+                {raffle.prizes.map((prize, idx) => {
+                  let winNum = prize.winning_number;
+                  if (!winNum && idx === 0 && raffle.winning_number) {
+                    winNum = raffle.winning_number;
+                  }
+
+                  const winnerInfo = winNum ? raffle.numbers_state[winNum] : null;
+                  const winnerName = typeof winnerInfo === 'object' ? winnerInfo?.name : '';
+
+                  return (
+                    <div key={prize.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <strong style={{ color: 'white', fontSize: '0.85rem' }}>🏆 {prize.name}</strong>
+
+                      {winNum ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <p style={{ color: 'var(--color-success)', fontWeight: '700', fontSize: '0.8rem', margin: 0 }}>
+                            Registrado: {raffle.ticket_type === 'custom' ? winNum : winNum.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')}
+                            {winnerName && ` - ${winnerName}`}
+                          </p>
+                          <button
+                            onClick={() => handleResetWinner(prize.id)}
+                            className="btn btn-danger"
+                            style={{ width: '100%', marginTop: '0.25rem', padding: '0.35rem', fontSize: '0.75rem', minHeight: 'auto', background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                          >
+                            Anular Ganador
+                          </button>
+                        </div>
+                      ) : (
+                        <form onSubmit={(e) => handleSaveManualWinner(e, prize.id)} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', margin: 0 }}>
+                          <input
+                            type={raffle.ticket_type === 'custom' ? 'text' : 'number'}
+                            placeholder={raffle.ticket_type === 'custom' ? 'ID Ganador' : 'N° Ganador'}
+                            value={manualWinnerInputs[prize.id] || ''}
+                            onChange={(e) => setManualWinnerInputs(prev => ({ ...prev, [prize.id]: e.target.value }))}
+                            className="form-control"
+                            style={{ flex: 1, padding: '0.4rem 0.6rem', fontSize: '0.8rem', minHeight: 'auto', height: '32px' }}
+                            min={raffle.ticket_type === 'custom' ? undefined : "1"}
+                            max={raffle.ticket_type === 'custom' ? undefined : raffle.total_numbers}
+                            required
+                          />
+                          <button type="submit" className="btn btn-primary" style={{ padding: '0 0.75rem', fontSize: '0.8rem', height: '32px', minHeight: 'auto' }}>
+                            Guardar
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
@@ -1158,112 +1290,120 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
       )}
 
       {/* Sorteador Digital Roulette Modal */}
-      {showDrawModal && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: '400px', textAlign: 'center', padding: '2.5rem 1.5rem' }}>
-            
-            {drawing ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-                <Trophy size={48} className="text-warning" style={{ color: 'var(--color-warning)', animation: 'bounce 1s infinite' }} />
-                <h3>Sorteando Ganador...</h3>
-                <div style={{
-                  fontSize: (rollingNumber && rollingNumber.toString().length > 4) ? '2.5rem' : '4.5rem',
-                  fontWeight: '900',
-                  color: 'white',
-                  fontFamily: 'var(--font-title)',
-                  background: 'rgba(37,99,235,0.15)',
-                  border: '2px solid var(--color-bright)',
-                  borderRadius: '24px',
-                  width: (rollingNumber && rollingNumber.toString().length > 4) ? 'auto' : '120px',
-                  minWidth: '120px',
-                  height: '120px',
-                  padding: (rollingNumber && rollingNumber.toString().length > 4) ? '0 1rem' : '0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 0 30px rgba(56,189,248,0.4)',
-                  boxSizing: 'border-box'
-                }}>
-                  {rollingNumber ? (raffle.ticket_type === 'custom' ? rollingNumber : rollingNumber.toString().padStart(2, '0')) : '--'}
+      {showDrawModal && (() => {
+        const activeDrawPrize = raffle.prizes?.find(p => p.id === activeDrawPrizeId);
+        return (
+          <div className="modal-overlay">
+            <div className="modal-content" style={{ maxWidth: '400px', textAlign: 'center', padding: '2.5rem 1.5rem' }}>
+              
+              {drawing ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+                  <Trophy size={48} className="text-warning" style={{ color: 'var(--color-warning)', animation: 'bounce 1s infinite' }} />
+                  <h3>Sorteando: {activeDrawPrize?.name || 'Ganador'}...</h3>
+                  <div style={{
+                    fontSize: (rollingNumber && rollingNumber.toString().length > 4) ? '2.5rem' : '4.5rem',
+                    fontWeight: '900',
+                    color: 'white',
+                    fontFamily: 'var(--font-title)',
+                    background: 'rgba(37,99,235,0.15)',
+                    border: '2px solid var(--color-bright)',
+                    borderRadius: '24px',
+                    width: (rollingNumber && rollingNumber.toString().length > 4) ? 'auto' : '120px',
+                    minWidth: '120px',
+                    height: '120px',
+                    padding: (rollingNumber && rollingNumber.toString().length > 4) ? '0 1rem' : '0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 0 30px rgba(56,189,248,0.4)',
+                    boxSizing: 'border-box'
+                  }}>
+                    {rollingNumber ? (raffle.ticket_type === 'custom' ? rollingNumber : rollingNumber.toString().padStart(2, '0')) : '--'}
+                  </div>
+                  <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                    Eligiendo de forma aleatoria entre todos los números pagados
+                  </p>
                 </div>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
-                  Eligiendo de forma aleatoria entre todos los números pagados
-                </p>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}>
-                <Trophy size={56} style={{ color: '#fbbf24', filter: 'drop-shadow(0 0 10px rgba(251,191,36,0.5))' }} />
-                <h2 style={{ color: 'white', fontSize: '1.5rem' }}>¡Tenemos un Ganador!</h2>
-                
-                <div style={{
-                  fontSize: (winnerNumber && winnerNumber.toString().length > 4) ? '2.8rem' : '5rem',
-                  fontWeight: '900',
-                  color: 'white',
-                  fontFamily: 'var(--font-title)',
-                  background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
-                  borderRadius: '24px',
-                  width: (winnerNumber && winnerNumber.toString().length > 4) ? 'auto' : '140px',
-                  minWidth: '140px',
-                  height: '140px',
-                  padding: (winnerNumber && winnerNumber.toString().length > 4) ? '0 1.25rem' : '0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 0 40px rgba(251,191,36,0.6)',
-                  animation: 'scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both',
-                  boxSizing: 'border-box'
-                }}>
-                  {winnerNumber ? (raffle.ticket_type === 'custom' ? winnerNumber : winnerNumber.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')) : '--'}
-                </div>
-                
-                <p style={{ color: 'white', fontWeight: '600', fontSize: '0.95rem' }}>
-                  {raffle.ticket_type === 'custom' ? 'El identificador sorteado es' : 'El número sorteado es el'} {winnerNumber ? (raffle.ticket_type === 'custom' ? winnerNumber : winnerNumber.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')) : ''} 🎉
-                </p>
-
-                {winnerNumber && (() => {
-                  const info = raffle.numbers_state[winnerNumber];
-                  const name = typeof info === 'object' ? info?.name : '';
-                  if (name) {
-                    return (
-                      <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
-                        <p style={{ color: 'var(--color-bright)', fontWeight: '800', fontSize: '1.3rem', textShadow: '0 0 10px rgba(56, 189, 248, 0.5)' }}>
-                          {name}
-                        </p>
-                        <p style={{ color: 'white', fontSize: '0.85rem', marginTop: '0.25rem' }}>
-                          ¡Felicitaciones al ganador/a! 🥳
-                        </p>
-                      </div>
-                    );
-                  }
-                  return (
-                    <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', maxWidth: '280px' }}>
-                      Verificá en la grilla a quién corresponde este casillero y contactalo para hacer la entrega del premio.
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}>
+                  <Trophy size={56} style={{ color: '#fbbf24', filter: 'drop-shadow(0 0 10px rgba(251,191,36,0.5))' }} />
+                  <h2 style={{ color: 'white', fontSize: '1.5rem' }}>¡Tenemos un Ganador!</h2>
+                  {activeDrawPrize && (
+                    <p style={{ color: 'var(--color-bright)', fontSize: '0.9rem', fontWeight: '600', margin: 0 }}>
+                      Premio: {activeDrawPrize.name}
                     </p>
-                  );
-                })()}
-
-                <div style={{ display: 'flex', gap: '0.5rem', width: '100%', marginTop: '0.75rem' }}>
-                  <button
-                    onClick={handleStartDraw}
-                    className="btn btn-secondary"
-                    style={{ flex: 1, fontSize: '0.85rem', gap: '0.25rem' }}
-                  >
-                    <RefreshCw size={14} />
-                    Sortear de Nuevo
-                  </button>
-                  <button
-                    onClick={() => setShowDrawModal(false)}
-                    className="btn btn-primary"
-                    style={{ flex: 1, fontSize: '0.85rem' }}
-                  >
-                    Cerrar
-                  </button>
+                  )}
+                  
+                  <div style={{
+                    fontSize: (winnerNumber && winnerNumber.toString().length > 4) ? '2.8rem' : '5rem',
+                    fontWeight: '900',
+                    color: 'white',
+                    fontFamily: 'var(--font-title)',
+                    background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
+                    borderRadius: '24px',
+                    width: (winnerNumber && winnerNumber.toString().length > 4) ? 'auto' : '140px',
+                    minWidth: '140px',
+                    height: '140px',
+                    padding: (winnerNumber && winnerNumber.toString().length > 4) ? '0 1.25rem' : '0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 0 40px rgba(251,191,36,0.6)',
+                    animation: 'scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both',
+                    boxSizing: 'border-box'
+                  }}>
+                    {winnerNumber ? (raffle.ticket_type === 'custom' ? winnerNumber : winnerNumber.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')) : '--'}
+                  </div>
+                  
+                  <p style={{ color: 'white', fontWeight: '600', fontSize: '0.95rem' }}>
+                    {raffle.ticket_type === 'custom' ? 'El identificador sorteado es' : 'El número sorteado es el'} {winnerNumber ? (raffle.ticket_type === 'custom' ? winnerNumber : winnerNumber.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')) : ''} 🎉
+                  </p>
+  
+                  {winnerNumber && (() => {
+                    const info = raffle.numbers_state[winnerNumber];
+                    const name = typeof info === 'object' ? info?.name : '';
+                    if (name) {
+                      return (
+                        <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+                          <p style={{ color: 'var(--color-bright)', fontWeight: '800', fontSize: '1.3rem', textShadow: '0 0 10px rgba(56, 189, 248, 0.5)' }}>
+                            {name}
+                          </p>
+                          <p style={{ color: 'white', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                            ¡Felicitaciones al ganador/a! 🥳
+                          </p>
+                        </div>
+                      );
+                    }
+                    return (
+                      <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', maxWidth: '280px' }}>
+                        Verificá en la grilla a quién corresponde este casillero y contactalo para hacer la entrega del premio.
+                      </p>
+                    );
+                  })()}
+  
+                  <div style={{ display: 'flex', gap: '0.5rem', width: '100%', marginTop: '0.75rem' }}>
+                    <button
+                      onClick={() => handleStartDraw(activeDrawPrizeId)}
+                      className="btn btn-secondary"
+                      style={{ flex: 1, fontSize: '0.85rem', gap: '0.25rem' }}
+                    >
+                      <RefreshCw size={14} />
+                      Sortear de Nuevo
+                    </button>
+                    <button
+                      onClick={() => setShowDrawModal(false)}
+                      className="btn btn-primary"
+                      style={{ flex: 1, fontSize: '0.85rem' }}
+                    >
+                      Cerrar
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Visitor claim name modal for internal free raffles */}
       {activeClaimNumber !== null && (

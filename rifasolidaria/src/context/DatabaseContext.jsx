@@ -188,14 +188,20 @@ export const DatabaseProvider = ({ children }) => {
     }
   };
 
-  const updateRaffleWinner = async (raffleId, winningNumber, user) => {
+  const updateRaffleWinner = async (raffleId, updatedPrizes, user) => {
     if (!user) throw new Error('Debe iniciar sesión para registrar el ganador.');
+
+    // For backwards compatibility, set the main winning_number to the first prize's winning number if any
+    const firstPrizeWinningNumber = updatedPrizes && updatedPrizes.length > 0 ? updatedPrizes[0].winning_number : null;
 
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('raffles')
-        .update({ winning_number: winningNumber })
+        .update({ 
+          prizes: updatedPrizes,
+          winning_number: firstPrizeWinningNumber || null
+        })
         .eq('id', raffleId)
         .select()
         .single();
