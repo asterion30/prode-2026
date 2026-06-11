@@ -51,11 +51,16 @@ export const Dashboard = ({ onNavigate }) => {
     }
 
     const fetchUserRaffles = async () => {
-      setLoading(true);
-      const all = await getAllRaffles();
-      const filtered = all.filter(r => r.creator_id === user.id);
-      setUserRaffles(filtered);
-      setLoading(false);
+      try {
+        setLoading(true);
+        const all = await getAllRaffles();
+        const filtered = all.filter(r => r.creator_id === user.id);
+        setUserRaffles(filtered);
+      } catch (err) {
+        console.error("Error fetching user raffles:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchUserRaffles();
