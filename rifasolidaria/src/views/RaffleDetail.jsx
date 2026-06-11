@@ -753,7 +753,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
                 }
 
                 const winnerInfo = winNum ? raffle.numbers_state[winNum] : null;
-                const winnerName = typeof winnerInfo === 'object' ? winnerInfo?.name : '';
+                const winnerName = (typeof winnerInfo === 'object' && winnerInfo?.name) ? winnerInfo.name : (raffle.ticket_type === 'custom' ? winNum : 'Sin registrar (libre)');
 
                 return (
                   <div key={prize.id} style={{
@@ -777,7 +777,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
                     </div>
                     {winNum && (
                       <div style={{ fontSize: '0.9rem', color: 'var(--color-bright)', fontWeight: '700', marginTop: '0.25rem' }}>
-                        👤 Ganador/a: <span style={{ color: 'white' }}>{winnerName || 'Sin registrar (libre)'}</span>
+                        👤 Ganador/a: <span style={{ color: 'white' }}>{winnerName}</span>
                       </div>
                     )}
                   </div>
@@ -853,7 +853,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
               }
 
               const winnerInfo = winNum ? raffle.numbers_state[winNum] : null;
-              const winnerName = typeof winnerInfo === 'object' ? winnerInfo?.name : '';
+              const winnerName = (typeof winnerInfo === 'object' && winnerInfo?.name) ? winnerInfo.name : (raffle.ticket_type === 'custom' ? winNum : 'Sin registrar (libre)');
 
               return (
                 <div key={prize.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', borderBottom: idx < raffle.prizes.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', paddingBottom: idx < raffle.prizes.length - 1 ? '0.5rem' : '0' }}>
@@ -887,7 +887,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
                   </div>
                   {winNum && (
                     <div style={{ fontSize: '0.75rem', color: 'var(--color-warning)', paddingLeft: '1.45rem', textAlign: 'left' }}>
-                      🎉 Ganador/a: <strong>{winnerName || 'Sin registrar (libre)'}</strong> (N° {raffle.ticket_type === 'custom' ? winNum : winNum.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')})
+                      🎉 Ganador/a: <strong>{winnerName}</strong> (N° {raffle.ticket_type === 'custom' ? winNum : winNum.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')})
                     </div>
                   )}
                 </div>
@@ -1512,7 +1512,8 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
   
                   {winnerNumber && (() => {
                     const info = raffle.numbers_state[winnerNumber];
-                    const name = typeof info === 'object' ? info?.name : '';
+                    const rawName = typeof info === 'object' ? info?.name : '';
+                    const name = rawName || (raffle.ticket_type === 'custom' ? winnerNumber : '');
                     if (name) {
                       return (
                         <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
