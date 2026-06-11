@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = "https://emmglwrqufduvzzlwyfy.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Ep2BTk52wttSoDLcW4LYYw_L1V8kKSa";
 
-export const isMock = !SUPABASE_URL || !SUPABASE_ANON_KEY;
+export const isMock = import.meta.env.DEV && (!SUPABASE_URL || !SUPABASE_ANON_KEY);
 export let supabase = null;
 
 if (!isMock) {

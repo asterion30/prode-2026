@@ -12,7 +12,7 @@ export function initAuth(onUserChange) {
     const hasMockParam = urlParams.get('mock') === 'true';
     const stored = localStorage.getItem(MOCK_STORAGE_KEY);
 
-    if (isMock || hasMockParam || stored) {
+    if (import.meta.env.DEV && (isMock || hasMockParam || stored)) {
         if (stored) {
             const user = JSON.parse(stored);
             currentUser = { id: user.uid };
