@@ -50,20 +50,24 @@ export const Dashboard = ({ onNavigate }) => {
       return;
     }
 
-    const fetchUserRaffles = async () => {
+    const fetchInitial = async () => {
       try {
         setLoading(true);
-        const all = await getAllRaffles();
-        const filtered = all.filter(r => r.creator_id === user.id);
-        setUserRaffles(filtered);
+        await getAllRaffles();
       } catch (err) {
         console.error("Error fetching user raffles:", err);
       } finally {
         setLoading(false);
       }
     };
+    fetchInitial();
+  }, [user]);
 
-    fetchUserRaffles();
+  useEffect(() => {
+    if (user && raffles) {
+      const filtered = raffles.filter(r => r.creator_id === user.id);
+      setUserRaffles(filtered);
+    }
   }, [user, raffles]);
 
   if (!user) return null;

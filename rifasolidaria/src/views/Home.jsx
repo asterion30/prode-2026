@@ -6,15 +6,10 @@ import { Shield, Sparkles, Heart, HelpCircle, ArrowRight, Star } from 'lucide-re
 export const Home = ({ onNavigate }) => {
   const { user, loginWithGoogle } = useAuth();
   const { raffles, getAllRaffles } = useDatabase();
-  const [localRaffles, setLocalRaffles] = useState([]);
 
   useEffect(() => {
-    const fetchRaffles = async () => {
-      const data = await getAllRaffles();
-      setLocalRaffles(data);
-    };
-    fetchRaffles();
-  }, [raffles]);
+    getAllRaffles().catch(err => console.error("Error fetching raffles:", err));
+  }, []);
 
   // Generate stars background positions
   const [stars, setStars] = useState([]);
@@ -126,7 +121,7 @@ export const Home = ({ onNavigate }) => {
           </h3>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            {localRaffles.map((raffle) => (
+            {raffles.map((raffle) => (
               <div
                 key={raffle.id}
                 onClick={() => onNavigate('detail', raffle.id)}
