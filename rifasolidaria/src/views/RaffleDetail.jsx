@@ -242,10 +242,66 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
     }
   };
 
-  const handleCopyShare = () => {
-    navigator.clipboard.writeText(shareMessage);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleShareRaffleCard = async () => {
+    const imagePath = '/Premios/Rifando.webp';
+    const fileName = `Rifando_${raffle.id}.webp`;
+    const text = shareMessage;
+
+    try {
+      const response = await fetch(imagePath);
+      if (!response.ok) throw new Error("Image fetch failed");
+      const blob = await response.blob();
+      const file = new File([blob], fileName, { type: 'image/webp' });
+      
+      let shared = false;
+      if (navigator.share && navigator.canShare) {
+        try {
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `Rifa Solidaria - ${raffle.title}`,
+              text: text
+            });
+            shared = true;
+          }
+        } catch (shareErr) {
+          console.log("Compartir imagen falló o fue cancelado:", shareErr);
+          if (shareErr.name === 'AbortError') {
+            shared = true;
+          }
+        }
+      }
+      
+      if (!shared) {
+        // Fallback: download
+        const link = document.createElement("a");
+        link.download = fileName;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        
+        setTimeout(() => {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(text);
+            alert("Se descargó la imagen de la rifa y se copió el mensaje de invitación al portapapeles. ¡Ya podés compartirla!");
+          } else {
+            alert(`Se descargó la imagen. Mensaje: "${text}"`);
+          }
+        }, 500);
+      }
+    } catch (err) {
+      console.error("Error al compartir la rifa con imagen:", err);
+      if (navigator.share) {
+        navigator.share({
+          title: `Rifa Solidaria - ${raffle.title}`,
+          text: text
+        }).catch(e => console.log(e));
+      } else {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text);
+          alert("Mensaje y enlace de la rifa copiados al portapapeles.");
+        }
+      }
+    }
   };
 
   const handleWhatsAppSend = () => {
@@ -1262,27 +1318,84 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
             <ImageExporter raffle={raffle} />
           </div>
 
-          {/* Share Link & Custom Message creator */}
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', textAlign: 'left' }}>
-            <h3 style={{ fontSize: '1rem', color: 'white' }}>Compartir Rifa</h3>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
-              Copia este mensaje listo para enviar con el enlace de tu rifa:
+          {/* Share Link & Custom Message creator (Chicana card style) */}
+          <div className="glass-card" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+            textAlign: 'left',
+            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(10, 15, 45, 0.4) 100%)',
+            border: '1px solid rgba(56, 189, 248, 0.15)',
+            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)'
+          }}>
+            <h3 style={{ fontSize: '1rem', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Share2 size={18} style={{ color: 'var(--color-bright)' }} />
+              Compartir Rifa
+            </h3>
+            
+            {/* Image Preview */}
+            <div style={{
+              width: '100%',
+              borderRadius: '12px',
+              border: '1.5px solid rgba(255,255,255,0.08)',
+              overflow: 'hidden',
+              background: '#04081c',
+              aspectRatio: '16 / 9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative'
+            }}>
+              <img 
+                src="/Premios/Rifando.webp" 
+                alt="Rifando" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              />
+              <div style={{
+                position: 'absolute',
+                bottom: '0',
+                left: '0',
+                right: '0',
+                background: 'linear-gradient(0deg, rgba(4, 8, 28, 0.9) 0%, rgba(4, 8, 28, 0) 100%)',
+                padding: '0.75rem',
+                color: 'white',
+                fontSize: '0.75rem',
+                fontWeight: '600'
+              }}>
+                🎟️ ¡Se sortea la rifa de {raffle.title}!
+              </div>
+            </div>
+
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', margin: 0 }}>
+              Mensaje a compartir junto a la imagen:
             </p>
             <textarea
               value={shareMessage}
               onChange={(e) => setShareMessage(e.target.value)}
               className="form-control"
-              rows="5"
+              rows="4"
               style={{ fontSize: '0.8rem', background: 'rgba(10, 15, 45, 0.8)', resize: 'none' }}
             ></textarea>
             
             <button
-              onClick={handleCopyShare}
-              className="btn btn-secondary"
-              style={{ gap: '0.5rem', width: '100%', fontSize: '0.85rem' }}
+              onClick={handleShareRaffleCard}
+              className="btn btn-primary"
+              style={{
+                gap: '0.5rem',
+                width: '100%',
+                fontSize: '0.9rem',
+                fontWeight: '700',
+                background: 'linear-gradient(135deg, var(--color-bright) 0%, var(--color-accent) 100%)',
+                color: 'white',
+                border: 'none',
+                boxShadow: '0 4px 15px rgba(56, 189, 248, 0.25)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
             >
               <Share2 size={16} />
-              {copied ? '¡Copiado con éxito!' : 'Copiar Mensaje y Enlace'}
+              Compartir Rifa
             </button>
           </div>
 
