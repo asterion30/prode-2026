@@ -12,6 +12,22 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
+const getWinnerDisplayName = (winnerInfo, winNum, ticketType) => {
+  if (!winnerInfo) {
+    return ticketType === 'custom' ? winNum : 'Sin registrar (libre)';
+  }
+  if (typeof winnerInfo === 'object') {
+    if (winnerInfo.name && winnerInfo.name.trim() !== '') {
+      return winnerInfo.name.trim();
+    }
+    return ticketType === 'custom' ? winNum : 'Sin registrar (libre)';
+  }
+  if (typeof winnerInfo === 'string' && winnerInfo.trim() !== '') {
+    return winnerInfo.trim();
+  }
+  return ticketType === 'custom' ? winNum : 'Sin registrar (libre)';
+};
+
 export const RaffleDetail = ({ raffleId, onNavigate }) => {
   const { user } = useAuth();
   const { getRaffleById, updateRaffleNumbers, updateRaffleWinner, updateRaffle, registerParticipantNumber, reportRaffle, deleteRaffle } = useDatabase();
@@ -408,8 +424,21 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
           p.id === prizeId ? { ...p, winning_number: winner } : p
         );
 
+        let updatedNumbers = { ...raffle.numbers_state };
+        if (raffle.ticket_type === 'custom') {
+          const info = updatedNumbers[winner] || {};
+          const currentName = typeof info === 'object' ? info?.name : '';
+          if (!currentName || currentName.trim() === '') {
+            updatedNumbers[winner] = {
+              status: 2,
+              name: winner,
+              paid_at: info.paid_at || new Date().toISOString()
+            };
+          }
+        }
+
         // Save winner to database so it persists
-        updateRaffleWinner(raffle.id, updatedPrizes, user).then(updated => {
+        updateRaffleWinner(raffle.id, updatedPrizes, user, raffle.ticket_type === 'custom' ? updatedNumbers : null).then(updated => {
           setRaffle(updated);
           setWinnerNumber(winner);
           setDrawing(false);
@@ -456,7 +485,21 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
       const updatedPrizes = raffle.prizes.map(p => 
         p.id === prizeId ? { ...p, winning_number: ticketStr } : p
       );
-      const updated = await updateRaffleWinner(raffle.id, updatedPrizes, user);
+
+      let updatedNumbers = { ...raffle.numbers_state };
+      if (raffle.ticket_type === 'custom') {
+        const info = updatedNumbers[ticketStr] || {};
+        const currentName = typeof info === 'object' ? info?.name : '';
+        if (!currentName || currentName.trim() === '') {
+          updatedNumbers[ticketStr] = {
+            status: 2,
+            name: ticketStr,
+            paid_at: info.paid_at || new Date().toISOString()
+          };
+        }
+      }
+
+      const updated = await updateRaffleWinner(raffle.id, updatedPrizes, user, raffle.ticket_type === 'custom' ? updatedNumbers : null);
       setRaffle(updated);
       setManualWinnerInputs(prev => ({ ...prev, [prizeId]: '' }));
       confetti({
@@ -753,7 +796,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
                 }
 
                 const winnerInfo = winNum ? raffle.numbers_state[winNum] : null;
-                const winnerName = (typeof winnerInfo === 'object' && winnerInfo?.name) ? winnerInfo.name : (raffle.ticket_type === 'custom' ? winNum : 'Sin registrar (libre)');
+                const winnerName = getWinnerDisplayName(winnerInfo, winNum, raffle.ticket_type);
 
                 return (
                   <div key={prize.id} style={{
@@ -853,7 +896,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
               }
 
               const winnerInfo = winNum ? raffle.numbers_state[winNum] : null;
-              const winnerName = (typeof winnerInfo === 'object' && winnerInfo?.name) ? winnerInfo.name : (raffle.ticket_type === 'custom' ? winNum : 'Sin registrar (libre)');
+              const winnerName = getWinnerDisplayName(winnerInfo, winNum, raffle.ticket_type);
 
               return (
                 <div key={prize.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', borderBottom: idx < raffle.prizes.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', paddingBottom: idx < raffle.prizes.length - 1 ? '0.5rem' : '0' }}>
@@ -1233,7 +1276,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
                   }
 
                   const winnerInfo = winNum ? raffle.numbers_state[winNum] : null;
-                  const winnerName = typeof winnerInfo === 'object' ? winnerInfo?.name : '';
+                  const winnerName = getWinnerDisplayName(winnerInfo, winNum, raffle.ticket_type);
 
                   return (
                     <div key={prize.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -1243,7 +1286,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                           <p style={{ color: 'var(--color-success)', fontWeight: '700', fontSize: '0.8rem', margin: 0 }}>
                             Sorteado: {raffle.ticket_type === 'custom' ? winNum : winNum.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')}
-                            {winnerName && ` - ${winnerName}`}
+                            {winnerName && winnerName !== winNum && ` - ${winnerName}`}
                           </p>
                           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
                             <button
@@ -1302,7 +1345,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
                   }
 
                   const winnerInfo = winNum ? raffle.numbers_state[winNum] : null;
-                  const winnerName = typeof winnerInfo === 'object' ? winnerInfo?.name : '';
+                  const winnerName = getWinnerDisplayName(winnerInfo, winNum, raffle.ticket_type);
 
                   return (
                     <div key={prize.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -1312,7 +1355,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                           <p style={{ color: 'var(--color-success)', fontWeight: '700', fontSize: '0.8rem', margin: 0 }}>
                             Registrado: {raffle.ticket_type === 'custom' ? winNum : winNum.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')}
-                            {winnerName && ` - ${winnerName}`}
+                            {winnerName && winnerName !== winNum && ` - ${winnerName}`}
                           </p>
                           <button
                             onClick={() => handleResetWinner(prize.id)}
@@ -1512,14 +1555,17 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
   
                   {winnerNumber && (() => {
                     const info = raffle.numbers_state[winnerNumber];
-                    const rawName = typeof info === 'object' ? info?.name : '';
-                    const name = rawName || (raffle.ticket_type === 'custom' ? winnerNumber : '');
-                    if (name) {
+                    const name = getWinnerDisplayName(info, winnerNumber, raffle.ticket_type);
+                    
+                    if (name && name !== 'Sin registrar (libre)') {
+                      const isNumberItself = name === winnerNumber;
                       return (
                         <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
-                          <p style={{ color: 'var(--color-bright)', fontWeight: '800', fontSize: '1.3rem', textShadow: '0 0 10px rgba(56, 189, 248, 0.5)' }}>
-                            {name}
-                          </p>
+                          {!isNumberItself && (
+                            <p style={{ color: 'var(--color-bright)', fontWeight: '800', fontSize: '1.3rem', textShadow: '0 0 10px rgba(56, 189, 248, 0.5)' }}>
+                              {name}
+                            </p>
+                          )}
                           <p style={{ color: 'white', fontSize: '0.85rem', marginTop: '0.25rem' }}>
                             ¡Felicitaciones al ganador/a! 🥳
                           </p>
