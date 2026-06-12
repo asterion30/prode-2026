@@ -591,10 +591,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
       return;
     }
 
-    if (!editBeneficiary.trim()) {
-      setEditError('El beneficiario no puede estar vacío.');
-      return;
-    }
+
 
     if (raffle.draw_type === 'external') {
       if (!editPaymentAlias.trim()) {
@@ -1787,14 +1784,13 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
               </div>
 
               <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.75rem' }}>Causa o Beneficiario</label>
+                <label className="form-label" style={{ fontSize: '0.75rem' }}>Causa o Beneficiario (Opcional)</label>
                 <input
                   type="text"
                   value={editBeneficiary}
                   onChange={(e) => setEditBeneficiary(e.target.value)}
                   className="form-control"
                   style={{ fontSize: '0.85rem', padding: '0.5rem 0.75rem' }}
-                  required
                 />
               </div>
 
