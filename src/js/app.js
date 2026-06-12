@@ -497,6 +497,7 @@ const btnToggleStream = document.getElementById("btn-toggle-stream");
 const streamWrapper = document.getElementById("stream-wrapper");
 const streamIcon = document.getElementById("stream-icon");
 const btnSearchShorts = document.getElementById("btn-search-shorts");
+const btnRandomShorts = document.getElementById("btn-random-shorts");
 const shortsQueryInput = document.getElementById("shorts-query-input");
 const shortsPlayer = document.getElementById("shorts-player");
 
@@ -511,8 +512,22 @@ const FALLBACK_SHORTS = [
     "GNXqaC-8vBc"
 ];
 
+// Curated default search queries representing different Argentinian streamers and World Cup topics
+const SHORTS_QUERIES = [
+    "Tim Payne seleccion argentina",
+    "Davoo Xeneize argentina goles",
+    "La Cobra futbol argentino",
+    "Los Displicentes seleccion argentina",
+    "streamers futbol argentino",
+    "mejores goles seleccion argentina",
+    "Lionel Messi argentina shorts",
+    "Scaloneta argentina shorts",
+    "reacciones streamers futbol argentino"
+];
+
 let activeShortsPlaylist = [...FALLBACK_SHORTS];
-let currentSearchQuery = "Tim Payne seleccion argentina";
+// Pick a random default query on initial page load
+let currentSearchQuery = SHORTS_QUERIES[Math.floor(Math.random() * SHORTS_QUERIES.length)];
 
 /** Detect mobile/tablet to adjust autoplay behaviour */
 const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
@@ -555,7 +570,8 @@ async function updateShortsPlayer() {
     }
 
     const playlist = await fetchShorts(currentSearchQuery);
-    activeShortsPlaylist = playlist;
+    // Shuffle the playlist to provide variety even if the API result is cached
+    activeShortsPlaylist = [...playlist].sort(() => Math.random() - 0.5);
 
     if (activeShortsPlaylist.length > 0) {
         const firstId = activeShortsPlaylist[0];
@@ -597,6 +613,23 @@ if (btnSearchShorts && shortsQueryInput && shortsPlayer) {
             await updateShortsPlayer();
         }
     });
+
+    if (btnRandomShorts) {
+        btnRandomShorts.addEventListener("click", async () => {
+            // Pick a random query different from the current one to ensure a topic shift
+            let newQuery = currentSearchQuery;
+            if (SHORTS_QUERIES.length > 1) {
+                while (newQuery === currentSearchQuery) {
+                    newQuery = SHORTS_QUERIES[Math.floor(Math.random() * SHORTS_QUERIES.length)];
+                }
+            } else if (SHORTS_QUERIES.length > 0) {
+                newQuery = SHORTS_QUERIES[0];
+            }
+            currentSearchQuery = newQuery;
+            shortsQueryInput.value = ""; // Clear input to indicate random playlist search is active
+            await updateShortsPlayer();
+        });
+    }
 
     shortsQueryInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
