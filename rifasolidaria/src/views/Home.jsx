@@ -1,15 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useDatabase } from '../context/DatabaseContext';
-import { Shield, Sparkles, Heart, HelpCircle, ArrowRight, Star } from 'lucide-react';
+import { Shield, Sparkles, Heart, HelpCircle, ArrowRight } from 'lucide-react';
 
 export const Home = ({ onNavigate }) => {
   const { user, loginWithGoogle } = useAuth();
-  const { raffles, getAllRaffles } = useDatabase();
-
-  useEffect(() => {
-    getAllRaffles().catch(err => console.error("Error fetching raffles:", err));
-  }, []);
 
   // Generate stars background positions
   const [stars, setStars] = useState([]);
@@ -113,42 +107,7 @@ export const Home = ({ onNavigate }) => {
           )}
         </div>
 
-        {/* Explore Active Raffles */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <h3 style={{ fontSize: '1.1rem', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            <Star size={16} className="text-success" style={{ color: 'var(--color-bright)', fill: 'currentColor' }} />
-            Explorar Ejemplos Activos
-          </h3>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            {raffles.map((raffle) => (
-              <div
-                key={raffle.id}
-                onClick={() => onNavigate('detail', raffle.id)}
-                className="glass-card"
-                style={{
-                  padding: '1.2rem',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  borderLeft: '4px solid var(--color-accent)'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '0.4rem' }}>
-                  <h4 style={{ color: 'white', fontSize: '1.1rem' }}>{raffle.title}</h4>
-                  <span className="badge badge-info">${raffle.ticket_value} c/u</span>
-                </div>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '0.6rem' }}>
-                  {raffle.subtitle}
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                  <span>Causa: <strong>{raffle.beneficiary}</strong></span>
-                  <span>•</span>
-                  <span>Sortea: <strong>{new Date(raffle.draw_date).toLocaleDateString('es-AR')}</strong></span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
         {/* Security & Concept Description */}
         <div style={{
