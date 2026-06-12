@@ -284,8 +284,25 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
     window.open(waUrl, '_blank');
   };
 
-  const handleWhatsAppSend = () => {
+  const handleWhatsAppSend = async () => {
     if (selectedNumbers.length === 0) return;
+    
+    const imagePath = '/Premios/elije.webp';
+    const fileName = `Elegido_${raffle.id}.webp`;
+
+    try {
+      // 1. Download the image to the device gallery/downloads folder first
+      const response = await fetch(imagePath);
+      if (response.ok) {
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.download = fileName;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+      }
+    } catch (err) {
+      console.error("Error al descargar la imagen de la rifa:", err);
+    }
     
     const numsStr = selectedNumbers.map(n => n.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')).join(', ');
     const totalCost = selectedNumbers.length * raffle.ticket_value;
