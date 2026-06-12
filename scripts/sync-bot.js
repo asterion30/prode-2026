@@ -3,6 +3,87 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const SYNC_SECRET = process.env.SYNC_SECRET;
 
+const TEAM_TRANSLATIONS = {
+    "méxico": ["mexico"],
+    "sudáfrica": ["south africa"],
+    "república de corea": ["korea republic", "south korea", "korea"],
+    "república checa": ["czech republic", "czechia"],
+    "canadá": ["canada"],
+    "bosnia y herzegovina": ["bosnia", "bosnia & herzegovina", "bosnia-herzegovina"],
+    "catar": ["qatar"],
+    "suiza": ["switzerland"],
+    "brasil": ["brazil"],
+    "marruecos": ["morocco"],
+    "haití": ["haiti"],
+    "escocia": ["scotland"],
+    "australia": ["australia"],
+    "turquía": ["turkey"],
+    "alemania": ["germany"],
+    "curazao": ["curacao", "curaçao"],
+    "países bajos": ["netherlands"],
+    "japón": ["japan"],
+    "costa de marfil": ["ivory coast"],
+    "ecuador": ["ecuador"],
+    "suecia": ["sweden"],
+    "túnez": ["tunisia"],
+    "españa": ["spain"],
+    "cabo verde": ["cape verde"],
+    "bélgica": ["belgium"],
+    "egipto": ["egypt"],
+    "arabia saudí": ["saudi arabia"],
+    "uruguay": ["uruguay"],
+    "ri de irán": ["iran", "ir iran"],
+    "nueva zelanda": ["new zealand"],
+    "francia": ["france"],
+    "senegal": ["senegal"],
+    "irak": ["iraq"],
+    "noruega": ["norway"],
+    "argentina": ["argentina"],
+    "argelia": ["algeria"],
+    "austria": ["austria"],
+    "jordania": ["jordan"],
+    "portugal": ["portugal"],
+    "rd congo": ["dr congo", "congo dr", "congo"],
+    "inglaterra": ["england"],
+    "croacia": ["croatia"],
+    "ghana": ["ghana"],
+    "panamá": ["panama"],
+    "uzbekistán": ["uzbekistan"],
+    "colombia": ["colombia"],
+    "estados unidos": ["usa", "united states"],
+    "paraguay": ["paraguay"]
+};
+
+function normalizeText(text) {
+    if (!text) return "";
+    return text.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+}
+
+function matchTeam(apiName, dbName) {
+    const apiClean = normalizeText(apiName);
+    const dbClean = normalizeText(dbName);
+    
+    // 1. Coincidencia directa o limpia
+    if (dbClean === apiClean || dbClean.includes(apiClean) || apiClean.includes(dbClean)) {
+        return true;
+    }
+    
+    // 2. Coincidencia a través del diccionario de traducciones
+    const dbLower = dbName.toLowerCase().trim();
+    const translations = TEAM_TRANSLATIONS[dbLower];
+    if (translations) {
+        return translations.some(t => {
+            const cleanT = normalizeText(t);
+            return apiClean === cleanT || apiClean.includes(cleanT) || cleanT.includes(apiClean);
+        });
+    }
+    
+    return false;
+}
+
 async function sync() {
     console.log("⚽ Iniciando Bot de Sincronización Prode 2026...");
     if (!API_SPORTS_KEY || !SUPABASE_URL || !SYNC_SECRET) {
@@ -48,11 +129,11 @@ async function sync() {
     // 4. Emparejar los equipos de la API con los nombres que tenemos nosotros e inyectar Goles
     let updatesCount = 0;
     for (let f of finishedFixtures) {
-        const homeNameAPI = f.teams.home.name.toLowerCase();
+        const homeNameAPI = f.teams.home.name;
         
-        // Emparejamos si el nombre del equipo local nuestro se parece al de la API
+        // Emparejamos usando la lógica de traducción y normalización
         const matched = myPendingMatches.find(m => 
-            m.home_team.toLowerCase().includes(homeNameAPI) || homeNameAPI.includes(m.home_team.toLowerCase())
+            matchTeam(homeNameAPI, m.home_team)
         );
         
         if (matched) {
@@ -76,6 +157,8 @@ async function sync() {
                 })
             });
             updatesCount++;
+        } else {
+            console.log(`⚠️ No se pudo emparejar el partido de la API: ${f.teams.home.name} vs ${f.teams.away.name}`);
         }
     }
     

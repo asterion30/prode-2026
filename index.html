@@ -581,47 +581,89 @@
                          </div>
                     </div>
 
-                    <div id="users-view" class="hidden space-y-4">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <h2 class="text-xl font-bold">Usuarios Registrados</h2>
-                            <div class="flex items-center gap-4 w-full sm:w-auto overflow-hidden">
-                                <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer hover:text-slate-200 transition-colors whitespace-nowrap">
-                                    <input type="checkbox" id="check-show-inactive" class="w-4 h-4 rounded border-slate-700 bg-slate-800 text-brand-600 focus:ring-brand-500">
-                                    Mostrar inactivos
-                                </label>
-                                <button id="btn-export-users-csv" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold py-2 px-4 rounded-xl transition-all shadow-lg flex items-center gap-2">
-                                    <i class="ph-bold ph-download-simple"></i>
-                                    Exportar CSV
-                                </button>
+                    <div id="users-view" class="hidden space-y-6">
+                        <!-- PANEL: GESTIÓN DE RESULTADOS (MANUAL) -->
+                        <div class="bg-slate-800/40 p-5 rounded-2xl border border-slate-700/50 space-y-4">
+                            <div class="flex items-center gap-2 border-b border-slate-700/50 pb-2">
+                                <i class="ph-bold ph-gear text-brand-500 text-lg"></i>
+                                <h3 class="font-bold text-white text-sm uppercase tracking-wider">Control de Resultados (Manual)</h3>
+                            </div>
+                            <p class="text-xs text-slate-400">Si falla la sincronización automática, podés actualizar los resultados aquí. Esto recalculará los puntajes al instante.</p>
+                            
+                            <div id="admin-matches-list" class="space-y-3">
+                                <!-- Cargado dinámicamente por JS (Partidos de hoy) -->
+                            </div>
+                            
+                            <!-- Búsqueda/Edición de cualquier partido -->
+                            <div class="border-t border-slate-700/50 pt-4 mt-4 space-y-3">
+                                <label for="select-admin-all-matches" class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Buscar otro partido del torneo</label>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <select id="select-admin-all-matches" class="flex-1 bg-slate-900 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-500 outline-none">
+                                        <option value="">Cargando partidos...</option>
+                                    </select>
+                                    <button id="btn-admin-load-selected-match" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all cursor-pointer">
+                                        Cargar Partido
+                                    </button>
+                                </div>
+                                <div id="admin-selected-match-editor" class="hidden mt-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                                    <!-- Se inyecta al cargar un partido -->
+                                </div>
                             </div>
                         </div>
-                        <div class="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700/50">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm">
-                                    <thead class="bg-slate-800 text-slate-300">
-                                        <tr>
-                                            <th class="px-3 py-3 text-center w-10">#</th>
-                                            <th class="px-3 py-3">Nombre</th>
-                                            <th class="px-3 py-3">Apellido</th>
-                                            <th class="px-3 py-3">Legajo</th>
-                                            <th class="px-3 py-3 hidden md:table-cell">Email</th>
-                                            <th class="px-3 py-3 hidden sm:table-cell">Registro</th>
-                                            <th class="px-3 py-3 text-center">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="users-table-list" class="divide-y divide-slate-700/50"></tbody>
-                                </table>
-                            </div>
-                            <!-- Pagination Controls -->
-                            <div class="flex justify-between items-center px-4 py-3 bg-slate-800/30 border-t border-slate-700/50">
-                                <span id="users-pagination-info" class="text-xs text-slate-500">Cargando...</span>
-                                <div class="flex gap-2">
-                                    <button id="btn-users-prev" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs font-bold transition-all flex items-center gap-1">
-                                        <i class="ph-bold ph-caret-left"></i> Anterior
-                                    </button>
-                                    <button id="btn-users-next" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs font-bold transition-all flex items-center gap-1">
-                                        Siguiente <i class="ph-bold ph-caret-right"></i>
-                                    </button>
+
+                        <!-- PANEL: LISTADO DE USUARIOS (COLAPSIBLE) -->
+                        <div class="space-y-4">
+                            <button id="btn-toggle-users" class="w-full flex justify-between items-center p-3 bg-slate-900/30 hover:bg-slate-800/40 rounded-xl border border-slate-800/40 hover:border-slate-700/60 transition-all cursor-pointer text-left focus:outline-none">
+                                <span class="flex items-center gap-2">
+                                    <i id="icon-toggle-users" class="ph-bold ph-caret-right text-brand-500 text-lg transition-transform duration-300"></i>
+                                    <span class="text-lg font-bold text-white tracking-tight">Listado de Usuarios Registrados</span>
+                                </span>
+                                <span class="text-xs text-slate-500 italic">Haz clic para expandir y cargar usuarios</span>
+                            </button>
+                            
+                            <div id="users-collapse-container" class="hidden space-y-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <h2 class="text-xl font-bold">Usuarios Registrados</h2>
+                                    <div class="flex items-center gap-4 w-full sm:w-auto overflow-hidden">
+                                        <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer hover:text-slate-200 transition-colors whitespace-nowrap">
+                                            <input type="checkbox" id="check-show-inactive" class="w-4 h-4 rounded border-slate-700 bg-slate-800 text-brand-600 focus:ring-brand-500">
+                                            Mostrar inactivos
+                                        </label>
+                                        <button id="btn-export-users-csv" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold py-2 px-4 rounded-xl transition-all shadow-lg flex items-center gap-2">
+                                            <i class="ph-bold ph-download-simple"></i>
+                                            Exportar CSV
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700/50">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="bg-slate-800 text-slate-300">
+                                                <tr>
+                                                    <th class="px-3 py-3 text-center w-10">#</th>
+                                                    <th class="px-3 py-3">Nombre</th>
+                                                    <th class="px-3 py-3">Apellido</th>
+                                                    <th class="px-3 py-3">Legajo</th>
+                                                    <th class="px-3 py-3 hidden md:table-cell">Email</th>
+                                                    <th class="px-3 py-3 hidden sm:table-cell">Registro</th>
+                                                    <th class="px-3 py-3 text-center">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="users-table-list" class="divide-y divide-slate-700/50"></tbody>
+                                        </table>
+                                    </div>
+                                    <!-- Pagination Controls -->
+                                    <div class="flex justify-between items-center px-4 py-3 bg-slate-800/30 border-t border-slate-700/50">
+                                        <span id="users-pagination-info" class="text-xs text-slate-500">Cargando...</span>
+                                        <div class="flex gap-2">
+                                            <button id="btn-users-prev" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs font-bold transition-all flex items-center gap-1">
+                                                <i class="ph-bold ph-caret-left"></i> Anterior
+                                            </button>
+                                            <button id="btn-users-next" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs font-bold transition-all flex items-center gap-1">
+                                                Siguiente <i class="ph-bold ph-caret-right"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

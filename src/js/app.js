@@ -257,7 +257,7 @@ initAuth((user, alias, score, avatarUrl) => {
             extraAdmins.includes(aliasLower) ||
             extraAdmins.includes(emailLower);
 
-        IS_ADMIN = IS_SUPER_ADMIN || isDelegatedAdmin;
+        IS_ADMIN = IS_SUPER_ADMIN; // Solo asterion30 / asterion30@gmail.com está autorizado a cambiar
         // ────────────────────────────────────────────────────────────────────
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -384,6 +384,10 @@ function setupAppSubscriptions(uid) {
         renderMatches();
         renderPredictionsGrid();
         initPremios();
+        if (IS_ADMIN) {
+            renderAdminMatches();
+            populateAdminMatchesSelect();
+        }
     });
 
     // Suscribirse a predicciones
@@ -470,9 +474,9 @@ if (btnBackToLeagues) {
 }
 
 if (btnNavUsers) {
-    btnNavUsers.addEventListener('click', async () => {
+    btnNavUsers.addEventListener('click', () => {
         setActiveNav(btnNavUsers, usersView);
-        await loadUsersGrid();
+        initAdminView();
     });
 }
 
@@ -892,6 +896,16 @@ function renderMatches() {
         
         if (!isLocked) {
             const handleBet = async (res) => {
+                // Validar de nuevo el cierre del partido antes de guardar (evita guardar si la página quedó abierta)
+                const currentNow = new Date();
+                const currentDiffMs = matchDate - currentNow;
+                const currentHoursLeft = currentDiffMs / (1000 * 60 * 60);
+                if (match.status === 'finished' || currentHoursLeft <= 1) {
+                    alert("Este partido ya está cerrado para nuevos pronósticos (cierra 1 hora antes de iniciar). Se recargará la página.");
+                    location.reload();
+                    return;
+                }
+
                 const hGInput = document.getElementById(`home-goals-${match.id}`);
                 const aGInput = document.getElementById(`away-goals-${match.id}`);
                 let hG = hGInput.value;
@@ -1638,7 +1652,7 @@ const premiosCards = [
   {
     id: "alargue",
     title: "Alargue",
-    description: "\"Unas fernecito si hay alargue\"",
+    description: "\"Un Fernecito si hay alargue\"",
     badge: "Tiempo Extra",
     icon: "ph-timer",
     image: "/Premios/HayAlargue.webp",
@@ -1811,7 +1825,10 @@ function renderMorePremios() {
         if (card.hasMatchSelect) {
             const select = cardEl.querySelector(".premios-match-select");
             if (select && Array.isArray(matchesState)) {
-                const validMatches = matchesState.filter(m => m.homeTeam && m.awayTeam && !m.tbd);
+                let validMatches = matchesState.filter(m => m.homeTeam && m.awayTeam && !m.tbd);
+                if (card.id === "alargue") {
+                    validMatches = validMatches.filter(m => m.stage !== "groups");
+                }
                 validMatches.sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
                 select.innerHTML = '<option value="">Seleccionar partido...</option>';
                 validMatches.forEach(m => {
@@ -3307,4 +3324,275 @@ async function sharePredictionImage(match, pred, userAlias) {
         link.click();
     }
 }
+
+// =============================================
+// ADMINISTRATIVE VIEWS & MANUAL MATCH OVERRIDES
+// =============================================
+
+function translateStage(stageId) {
+    const found = STAGES.find(s => s.id === stageId);
+    return found ? found.name : stageId;
+}
+
+window.initAdminView = function() {
+    // Colapsar listado de usuarios por defecto
+    const usersCollapseContainer = document.getElementById("users-collapse-container");
+    if (usersCollapseContainer) {
+        usersCollapseContainer.classList.add("hidden");
+    }
+    const iconToggleUsers = document.getElementById("icon-toggle-users");
+    if (iconToggleUsers) {
+        iconToggleUsers.classList.remove("rotate-90");
+    }
+
+    // Ocultar editor de partidos seleccionado
+    const editor = document.getElementById("admin-selected-match-editor");
+    if (editor) {
+        editor.classList.add("hidden");
+    }
+    const select = document.getElementById("select-admin-all-matches");
+    if (select) {
+        select.value = "";
+    }
+
+    // Renderizar los partidos de la fecha actual
+    renderAdminMatches();
+
+    // Rellenar selector de todos los partidos
+    populateAdminMatchesSelect();
+};
+
+window.renderAdminMatches = function() {
+    const container = document.getElementById("admin-matches-list");
+    if (!container) return;
+
+    if (!Array.isArray(matchesState) || matchesState.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 italic">No hay partidos cargados.</p>`;
+        return;
+    }
+
+    const now = new Date();
+    const todayStr = now.toLocaleDateString('es-AR');
+
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayStr = yesterday.toLocaleDateString('es-AR');
+
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    const tomorrowStr = tomorrow.toLocaleDateString('es-AR');
+
+    // Filtrar partidos de ayer, hoy y mañana
+    const currentMatches = matchesState.filter(m => {
+        if (!m.matchDate) return false;
+        const mDate = new Date(m.matchDate);
+        const mDateStr = mDate.toLocaleDateString('es-AR');
+        return mDateStr === todayStr || mDateStr === yesterdayStr || mDateStr === tomorrowStr;
+    });
+
+    if (currentMatches.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic">No hay partidos programados para ayer, hoy o mañana.</p>`;
+        return;
+    }
+
+    // Ordenar cronológicamente
+    currentMatches.sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
+
+    container.innerHTML = "";
+    currentMatches.forEach(m => {
+        const timeStr = new Date(m.matchDate).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        const dateStr = new Date(m.matchDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+
+        const div = document.createElement("div");
+        div.className = "flex flex-col md:flex-row items-start md:items-center justify-between gap-3 p-3 bg-slate-900/40 rounded-xl border border-slate-800/80 text-xs";
+
+        div.innerHTML = `
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+                <span class="px-2 py-0.5 bg-slate-800 text-slate-400 rounded-md font-mono text-[10px]">${dateStr} ${timeStr}</span>
+                <span class="font-bold text-white truncate">${m.homeTeam} vs ${m.awayTeam}</span>
+                <span class="text-[10px] bg-slate-800 text-slate-500 px-1.5 rounded uppercase tracking-wider">${translateStage(m.stage)}</span>
+            </div>
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                <div class="flex items-center gap-1">
+                    <input type="number" min="0" placeholder="-" id="admin-home-${m.id}" class="w-12 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg text-center py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none" value="${m.homeGoals !== null && m.homeGoals !== undefined ? m.homeGoals : ''}">
+                    <span class="text-slate-500 font-bold">-</span>
+                    <input type="number" min="0" placeholder="-" id="admin-away-${m.id}" class="w-12 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg text-center py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none" value="${m.awayGoals !== null && m.awayGoals !== undefined ? m.awayGoals : ''}">
+                </div>
+                <select id="admin-status-${m.id}" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none">
+                    <option value="pending" ${m.status === 'pending' ? 'selected' : ''}>Pendiente</option>
+                    <option value="finished" ${m.status === 'finished' ? 'selected' : ''}>Finalizado</option>
+                </select>
+                <button class="btn-save-admin-match bg-brand-600 hover:bg-brand-500 text-white font-bold py-1 px-3 rounded-lg text-xs transition-all cursor-pointer flex items-center gap-1" data-match-id="${m.id}">
+                    <i class="ph-bold ph-floppy-disk"></i> Guardar
+                </button>
+            </div>
+        `;
+
+        container.appendChild(div);
+    });
+
+    // Event listeners para guardar cambios
+    container.querySelectorAll(".btn-save-admin-match").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const matchId = btn.dataset.matchId;
+            const homeInput = document.getElementById(`admin-home-${matchId}`);
+            const awayInput = document.getElementById(`admin-away-${matchId}`);
+            const statusSelect = document.getElementById(`admin-status-${matchId}`);
+
+            if (!homeInput || !awayInput || !statusSelect) return;
+
+            const homeGoals = homeInput.value.trim();
+            const awayGoals = awayInput.value.trim();
+            const status = statusSelect.value;
+
+            await saveManualMatchResult(matchId, homeGoals, awayGoals, status);
+        });
+    });
+};
+
+window.populateAdminMatchesSelect = function() {
+    const select = document.getElementById("select-admin-all-matches");
+    if (!select) return;
+
+    if (!Array.isArray(matchesState) || matchesState.length === 0) {
+        select.innerHTML = `<option value="">Cargando partidos...</option>`;
+        return;
+    }
+
+    const sortedMatches = [...matchesState];
+    sortedMatches.sort((a, b) => {
+        const nameA = `${a.homeTeam} vs ${a.awayTeam}`;
+        const nameB = `${b.homeTeam} vs ${b.awayTeam}`;
+        return nameA.localeCompare(nameB);
+    });
+
+    select.innerHTML = `<option value="">Seleccionar un partido para editar...</option>`;
+    sortedMatches.forEach(m => {
+        const option = document.createElement("option");
+        option.value = m.id;
+        option.textContent = `${m.homeTeam} vs ${m.awayTeam} (${translateStage(m.stage)})`;
+        select.appendChild(option);
+    });
+};
+
+async function saveManualMatchResult(matchId, homeGoals, awayGoals, status) {
+    if (status === 'finished') {
+        if (homeGoals === '' || awayGoals === '') {
+            alert('Para finalizar un partido, debés ingresar los goles de ambos equipos.');
+            return;
+        }
+    }
+
+    showLoader();
+    try {
+        const { error } = await supabase.rpc('admin_update_match_manual', {
+            p_match_id: matchId,
+            p_home_goals: homeGoals,
+            p_away_goals: awayGoals,
+            p_status: status
+        });
+
+        if (error) throw error;
+
+        alert('Partido actualizado correctamente. Se han recalculado los puntajes.');
+
+        // Ocultar editor si el partido actualizado era el seleccionado
+        const editor = document.getElementById("admin-selected-match-editor");
+        if (editor) {
+            const saveBtn = document.getElementById("btn-selected-save-match");
+            if (saveBtn && saveBtn.dataset.matchId === matchId) {
+                editor.classList.add("hidden");
+                const select = document.getElementById("select-admin-all-matches");
+                if (select) select.value = "";
+            }
+        }
+    } catch (err) {
+        console.error("Error al actualizar partido manualmente:", err);
+        alert('Error al actualizar el partido: ' + err.message);
+    } finally {
+        hideLoader();
+    }
+}
+
+// Configuración de listeners globales de administración
+const btnToggleUsers = document.getElementById("btn-toggle-users");
+const usersCollapseContainer = document.getElementById("users-collapse-container");
+const iconToggleUsers = document.getElementById("icon-toggle-users");
+
+if (btnToggleUsers && usersCollapseContainer && iconToggleUsers) {
+    btnToggleUsers.addEventListener("click", async () => {
+        const isHidden = usersCollapseContainer.classList.contains("hidden");
+        if (isHidden) {
+            usersCollapseContainer.classList.remove("hidden");
+            iconToggleUsers.classList.add("rotate-90");
+            await loadUsersGrid();
+        } else {
+            usersCollapseContainer.classList.add("hidden");
+            iconToggleUsers.classList.remove("rotate-90");
+        }
+    });
+}
+
+const btnAdminLoadSelectedMatch = document.getElementById("btn-admin-load-selected-match");
+const selectAdminAllMatches = document.getElementById("select-admin-all-matches");
+const adminSelectedMatchEditor = document.getElementById("admin-selected-match-editor");
+
+if (btnAdminLoadSelectedMatch && selectAdminAllMatches && adminSelectedMatchEditor) {
+    btnAdminLoadSelectedMatch.addEventListener("click", () => {
+        const matchId = selectAdminAllMatches.value;
+        if (!matchId) {
+            alert("Por favor, selecciona un partido de la lista.");
+            return;
+        }
+
+        const match = matchesState.find(m => m.id === matchId);
+        if (!match) {
+            alert("No se encontró el partido.");
+            return;
+        }
+
+        adminSelectedMatchEditor.classList.remove("hidden");
+        adminSelectedMatchEditor.innerHTML = `
+            <div class="flex flex-col sm:flex-row items-center justify-between w-full gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-white">${match.homeTeam} vs ${match.awayTeam}</span>
+                    <span class="text-[10px] text-slate-500 font-mono">(${translateStage(match.stage)})</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1">
+                        <input type="number" min="0" placeholder="-" id="selected-home-${match.id}" class="w-12 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg text-center py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none" value="${match.homeGoals !== null && match.homeGoals !== undefined ? match.homeGoals : ''}">
+                        <span class="text-slate-500 font-bold">-</span>
+                        <input type="number" min="0" placeholder="-" id="selected-away-${match.id}" class="w-12 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg text-center py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none" value="${match.awayGoals !== null && match.awayGoals !== undefined ? match.awayGoals : ''}">
+                    </div>
+                    <select id="selected-status-${match.id}" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none">
+                        <option value="pending" ${match.status === 'pending' ? 'selected' : ''}>Pendiente</option>
+                        <option value="finished" ${match.status === 'finished' ? 'selected' : ''}>Finalizado</option>
+                    </select>
+                    <button id="btn-selected-save-match" class="bg-brand-600 hover:bg-brand-500 text-white font-bold py-1 px-3 rounded-lg text-xs transition-all cursor-pointer flex items-center gap-1" data-match-id="${match.id}">
+                        <i class="ph-bold ph-floppy-disk"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        `;
+
+        const saveBtn = document.getElementById("btn-selected-save-match");
+        if (saveBtn) {
+            saveBtn.addEventListener("click", async () => {
+                const matchId = saveBtn.dataset.matchId;
+                const homeInput = document.getElementById(`selected-home-${matchId}`);
+                const awayInput = document.getElementById(`selected-away-${matchId}`);
+                const statusSelect = document.getElementById(`selected-status-${matchId}`);
+
+                if (!homeInput || !awayInput || !statusSelect) return;
+
+                const homeGoals = homeInput.value.trim();
+                const awayGoals = awayInput.value.trim();
+                const status = statusSelect.value;
+
+                await saveManualMatchResult(matchId, homeGoals, awayGoals, status);
+            });
+        }
+    });
+}
+
 
