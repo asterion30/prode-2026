@@ -322,7 +322,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
     }
   };
 
-  const handleWhatsAppSend = async () => {
+  const handleWhatsAppSend = () => {
     if (selectedNumbers.length === 0) return;
     
     const numsStr = selectedNumbers.map(n => n.toString().padStart(raffle.total_numbers > 99 ? 3 : 2, '0')).join(', ');
@@ -336,44 +336,8 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
     const cleanPhone = raffle.whatsapp_phone.replace(/[^0-9]/g, '');
     const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
 
-    try {
-      const imagePath = '/Premios/elije.webp';
-      const fileName = `Reserva_${raffle.id}.webp`;
-
-      // Try fetching the optimized elije image
-      const response = await fetch(imagePath);
-      if (!response.ok) throw new Error("Image fetch failed");
-      const blob = await response.blob();
-      const file = new File([blob], fileName, { type: 'image/webp' });
-
-      let shared = false;
-      if (navigator.share && navigator.canShare) {
-        try {
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: `Reserva Rifa - ${raffle.title}`,
-              text: msg
-            });
-            shared = true;
-          }
-        } catch (shareErr) {
-          console.log("Compartir imagen falló o fue cancelado:", shareErr);
-          if (shareErr.name === 'AbortError') {
-            shared = true;
-          }
-        }
-      }
-
-      if (!shared) {
-        // Fallback to direct WhatsApp link redirect
-        window.open(waUrl, '_blank');
-      }
-    } catch (err) {
-      console.error("Error al compartir reserva con imagen:", err);
-      // Fallback: direct WhatsApp link redirect
-      window.open(waUrl, '_blank');
-    }
+    // Open WhatsApp directly to bypass the browser's sharing dialog selection
+    window.open(waUrl, '_blank');
   };
 
   // Run the local digital raffle draw for a specific prize
@@ -1122,7 +1086,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
               style={{ width: '100%', gap: '0.5rem', background: '#25D366', boxShadow: '0 4px 12px rgba(37,211,102,0.3)' }}
             >
               <MessageSquare size={16} fill="currentColor" />
-              2. Reservar por WhatsApp y Enviar Comprobante
+              Reservar por WhatsApp
             </button>
           </div>
         </div>
