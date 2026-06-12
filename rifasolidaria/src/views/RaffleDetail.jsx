@@ -266,60 +266,22 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
     const text = shareMessage;
 
     try {
+      // 1. Download the image to the device gallery/downloads folder first
       const response = await fetch(imagePath);
-      if (!response.ok) throw new Error("Image fetch failed");
-      const blob = await response.blob();
-      const file = new File([blob], fileName, { type: 'image/webp' });
-      
-      let shared = false;
-      if (navigator.share && navigator.canShare) {
-        try {
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: `Rifa Solidaria - ${raffle.title}`,
-              text: text
-            });
-            shared = true;
-          }
-        } catch (shareErr) {
-          console.log("Compartir imagen falló o fue cancelado:", shareErr);
-          if (shareErr.name === 'AbortError') {
-            shared = true;
-          }
-        }
-      }
-      
-      if (!shared) {
-        // Fallback: download
+      if (response.ok) {
+        const blob = await response.blob();
         const link = document.createElement("a");
         link.download = fileName;
         link.href = URL.createObjectURL(blob);
         link.click();
-        
-        setTimeout(() => {
-          if (navigator.clipboard) {
-            navigator.clipboard.writeText(text);
-            alert("Se descargó la imagen de la rifa y se copió el mensaje de invitación al portapapeles. ¡Ya podés compartirla!");
-          } else {
-            alert(`Se descargó la imagen. Mensaje: "${text}"`);
-          }
-        }, 500);
       }
     } catch (err) {
-      console.error("Error al compartir la rifa con imagen:", err);
-      if (navigator.share) {
-        navigator.share({
-          title: `Rifa Solidaria - ${raffle.title}`,
-          text: text
-        }).catch(e => console.log(e));
-      } else {
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(text);
-          alert("Mensaje y enlace de la rifa copiados al portapapeles.");
-        }
-      }
+      console.error("Error al descargar la imagen de la rifa:", err);
     }
+
+    // 2. Open WhatsApp directly to share the text message
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
   };
 
   const handleWhatsAppSend = () => {
