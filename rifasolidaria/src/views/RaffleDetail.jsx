@@ -96,7 +96,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
         
         if (data.draw_type === 'internal') {
           setShareMessage(
-            `¡Hola! Te invito a participar de la rifa gratuita "${data.title}" en beneficio de "${data.beneficiary}".\n\n` +
+            `¡Hola! Te invito a participar de mi rifa gratuita "${data.title}".\n\n` +
             `🔮 Sortea en la App el día ${formattedDate}\n\n` +
             `🏆 Premios:\n${data.prizes.map((p, i) => `${i+1}° P: ${p.name}`).join('\n')}\n\n` +
             `🎟️ Valor del número: ¡GRATUITO!\n` +
@@ -104,7 +104,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
           );
         } else {
           setShareMessage(
-            `¡Hola! Te invito a colaborar con la rifa solidaria "${data.title}" en beneficio de "${data.beneficiary}".\n\n` +
+            `¡Hola! Te invito a colaborar con mi rifa "${data.title}".\n\n` +
             `🔮 Sortea por: ${data.draw_method} (${data.draw_moment || 'Nocturna'}) el ${formattedDate}\n\n` +
             `🏆 Premios:\n${data.prizes.map((p, i) => `${i+1}° P: ${p.name}`).join('\n')}\n\n` +
             `🎟️ Valor del número: $${data.ticket_value.toLocaleString('es-AR')}\n` +
