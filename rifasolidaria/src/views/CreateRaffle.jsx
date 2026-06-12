@@ -138,10 +138,6 @@ export const CreateRaffle = ({ onNavigate }) => {
         setError('El subtítulo o copete es obligatorio.');
         return false;
       }
-      if (!beneficiary.trim()) {
-        setError('La causa o beneficiario es obligatorio.');
-        return false;
-      }
     }
     
     if (currentStep === 2) {
@@ -479,14 +475,13 @@ export const CreateRaffle = ({ onNavigate }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Causa o Beneficiario</label>
+              <label className="form-label">Causa o Beneficiario (Opcional)</label>
               <input
                 type="text"
                 placeholder="Ej: Cooperadora Hospital Infantil / Tratamiento de Salud de Juan"
                 value={beneficiary}
                 onChange={(e) => setBeneficiary(e.target.value)}
                 className="form-control"
-                required
               />
             </div>
           </div>
