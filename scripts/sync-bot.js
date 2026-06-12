@@ -130,15 +130,24 @@ async function sync() {
     let updatesCount = 0;
     for (let f of finishedFixtures) {
         const homeNameAPI = f.teams.home.name;
+        const awayNameAPI = f.teams.away.name;
         
-        // Emparejamos usando la lógica de traducción y normalización
+        // Emparejamos usando la lógica de traducción y normalización para ambos equipos
         const matched = myPendingMatches.find(m => 
-            matchTeam(homeNameAPI, m.home_team)
+            (matchTeam(homeNameAPI, m.home_team) && matchTeam(awayNameAPI, m.away_team)) ||
+            (matchTeam(homeNameAPI, m.away_team) && matchTeam(awayNameAPI, m.home_team))
         );
         
         if (matched) {
-            const hGoals = f.goals.home.toString();
-            const aGoals = f.goals.away.toString();
+            let hGoals = f.goals.home.toString();
+            let aGoals = f.goals.away.toString();
+            
+            // Si los equipos están invertidos en la API respecto a nuestra DB, invertimos los goles correspondientes
+            if (matchTeam(homeNameAPI, matched.away_team)) {
+                hGoals = f.goals.away.toString();
+                aGoals = f.goals.home.toString();
+            }
+            
             console.log(`✅ ¡Encontrado! Evaluando oficialmente: ${matched.home_team} vs ${matched.away_team} -> ${hGoals}-${aGoals}`);
             
             // Enviamos el hack mágico de actualización mediante nuestra función secreta RPC
