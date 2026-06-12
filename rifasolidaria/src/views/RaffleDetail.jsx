@@ -73,6 +73,8 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
   const [editTitle, setEditTitle] = useState('');
   const [editSubtitle, setEditSubtitle] = useState('');
   const [editBeneficiary, setEditBeneficiary] = useState('');
+  const [editPaymentAlias, setEditPaymentAlias] = useState('');
+  const [editWhatsappPhone, setEditWhatsappPhone] = useState('');
   const [editPrizes, setEditPrizes] = useState([]);
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState('');
@@ -530,6 +532,8 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
     setEditTitle(raffle.title);
     setEditSubtitle(raffle.subtitle);
     setEditBeneficiary(raffle.beneficiary);
+    setEditPaymentAlias(raffle.payment_alias || '');
+    setEditWhatsappPhone(raffle.whatsapp_phone || '');
     setEditPrizes(raffle.prizes.map(p => ({ ...p })));
     setEditError('');
     setEditSaving(false);
@@ -592,12 +596,25 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
       return;
     }
 
+    if (raffle.draw_type === 'external') {
+      if (!editPaymentAlias.trim()) {
+        setEditError('El alias de pago no puede estar vacío.');
+        return;
+      }
+      if (!editWhatsappPhone.trim()) {
+        setEditError('El teléfono de WhatsApp no puede estar vacío.');
+        return;
+      }
+    }
+
     setEditSaving(true);
     try {
       const updated = await updateRaffle(raffle.id, {
         title: editTitle,
         subtitle: editSubtitle,
         beneficiary: editBeneficiary,
+        payment_alias: raffle.draw_type === 'external' ? editPaymentAlias : 'Gratuito',
+        whatsapp_phone: raffle.draw_type === 'external' ? editWhatsappPhone : 'N/A',
         prizes: filteredPrizes.map((p, index) => ({ id: index + 1, name: p.name, image: p.image || null }))
       }, user);
 
@@ -1780,6 +1797,33 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
                   required
                 />
               </div>
+
+              {raffle.draw_type === 'external' && (
+                <>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.75rem' }}>Alias de Pago (CVU / Alias MP)</label>
+                    <input
+                      type="text"
+                      value={editPaymentAlias}
+                      onChange={(e) => setEditPaymentAlias(e.target.value)}
+                      className="form-control"
+                      style={{ fontSize: '0.85rem', padding: '0.5rem 0.75rem' }}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '0.75rem' }}>Teléfono de WhatsApp (con código de país)</label>
+                    <input
+                      type="tel"
+                      value={editWhatsappPhone}
+                      onChange={(e) => setEditWhatsappPhone(e.target.value)}
+                      className="form-control"
+                      style={{ fontSize: '0.85rem', padding: '0.5rem 0.75rem' }}
+                      required
+                    />
+                  </div>
+                </>
+              )}
 
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '0.25rem', marginBottom: '0.5rem' }}>

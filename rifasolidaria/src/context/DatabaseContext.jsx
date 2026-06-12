@@ -312,6 +312,8 @@ export const DatabaseProvider = ({ children }) => {
           title: updatedFields.title,
           subtitle: updatedFields.subtitle,
           beneficiary: updatedFields.beneficiary,
+          payment_alias: updatedFields.payment_alias,
+          whatsapp_phone: updatedFields.whatsapp_phone,
           prizes: updatedFields.prizes
         })
         .eq('id', raffleId)
