@@ -430,6 +430,11 @@ function setActiveNav(activeBtn, activeView) {
         // Si el contenedor interno tiene scroll propio, resetearlo también
         const contentArea = document.getElementById("content-area");
         if (contentArea) contentArea.scrollTop = 0;
+        
+        // Reset custom chicana carousel scroll snap position when entering the ranking view
+        if (activeView === rankingView) {
+            setTimeout(resetChicanaCarouselPosition, 50);
+        }
     }
     if (activeBtn) {
         activeBtn.classList.add('text-brand-500', 'bg-brand-500/10', 'border-brand-500/20');
@@ -1798,75 +1803,151 @@ const customChicanaImages = [
 
 let selectedChicanaImagePath = "";
 let selectedChicanaFileName = "";
+let currentActiveIndex = 0;
+
+function updateActiveChicanaInfo() {
+    const img = customChicanaImages[currentActiveIndex];
+    if (!img) return;
+    selectedChicanaImagePath = img.path;
+    selectedChicanaFileName = img.path.split("/").pop();
+    
+    // Update name display text
+    const nameLabel = document.getElementById("chicana-image-name");
+    if (nameLabel) {
+        nameLabel.textContent = img.name;
+    }
+}
+
+function resetChicanaCarouselPosition() {
+    const carousel = document.getElementById("chicana-carousel");
+    if (!carousel) return;
+    const slideWidth = carousel.clientWidth;
+    if (slideWidth > 0) {
+        carousel.style.scrollBehavior = 'auto';
+        carousel.scrollLeft = (currentActiveIndex + 1) * slideWidth;
+        carousel.style.scrollBehavior = 'smooth';
+    }
+}
 
 function renderChicanaCarousel() {
     const carousel = document.getElementById("chicana-carousel");
-    const previewImg = document.getElementById("chicana-preview-img");
     if (!carousel) return;
     
     carousel.innerHTML = "";
-    customChicanaImages.forEach((img, idx) => {
-        const card = document.createElement("div");
-        card.className = `flex-shrink-0 w-24 h-24 bg-slate-950 border-2 ${idx === 0 ? 'border-brand-500' : 'border-slate-800'} hover:border-slate-600 rounded-xl overflow-hidden relative cursor-pointer transition-all snap-start select-none`;
-        card.dataset.index = idx;
-        card.dataset.path = img.path;
-        card.innerHTML = `
-            <img src="${img.path}" alt="${img.name}" class="w-full h-full object-cover">
-            <div class="absolute bottom-0 inset-x-0 bg-black/60 py-0.5 text-[8px] text-center text-slate-300 truncate px-1">${img.name}</div>
-            <div class="selected-checkmark absolute top-1 right-1 w-4 h-4 bg-brand-500 rounded-full flex items-center justify-center text-[10px] text-slate-950 font-black ${idx === 0 ? '' : 'hidden'}">
-                <i class="ph-bold ph-check"></i>
-            </div>
+    
+    // Create the slide list including clones for infinite scrolling:
+    // Clone of last, original items, clone of first.
+    const lastImg = customChicanaImages[customChicanaImages.length - 1];
+    const firstImg = customChicanaImages[0];
+    
+    const slidesData = [
+        { img: lastImg, isClone: true, originalIdx: customChicanaImages.length - 1 },
+        ...customChicanaImages.map((img, idx) => ({ img, isClone: false, originalIdx: idx })),
+        { img: firstImg, isClone: true, originalIdx: 0 }
+    ];
+    
+    slidesData.forEach((slide) => {
+        const slideEl = document.createElement("div");
+        slideEl.className = "flex-shrink-0 w-full snap-center relative aspect-square flex items-center justify-center bg-slate-950/40 select-none";
+        slideEl.dataset.originalIndex = slide.originalIdx;
+        
+        slideEl.innerHTML = `
+            <img src="${slide.img.path}" alt="${slide.img.name}" class="w-full h-full object-cover select-none pointer-events-none">
         `;
         
-        card.onclick = () => {
-            carousel.querySelectorAll(".selected-checkmark").forEach(el => el.classList.add("hidden"));
-            carousel.querySelectorAll(".flex-shrink-0").forEach(el => {
-                el.classList.remove("border-brand-500");
-                el.classList.add("border-slate-800");
-            });
-            
-            card.classList.remove("border-slate-800");
-            card.classList.add("border-brand-500");
-            card.querySelector(".selected-checkmark").classList.remove("hidden");
-            
-            selectedChicanaImagePath = img.path;
-            selectedChicanaFileName = img.path.split("/").pop();
-            
-            // Update preview image in real-time
-            if (previewImg) {
-                previewImg.src = img.path;
-            }
-        };
-        
-        carousel.appendChild(card);
+        carousel.appendChild(slideEl);
     });
     
-    selectedChicanaImagePath = customChicanaImages[0].path;
-    selectedChicanaFileName = customChicanaImages[0].path.split("/").pop();
-    if (previewImg) {
-        previewImg.src = selectedChicanaImagePath;
+    // Set initial image info
+    currentActiveIndex = 0;
+    updateActiveChicanaInfo();
+    
+    // Add Scroll Snap wrapping logic
+    let isWrapping = false;
+    carousel.addEventListener('scroll', () => {
+        const slideWidth = carousel.clientWidth;
+        if (slideWidth <= 0 || isWrapping) return;
+        
+        const scrollLeft = carousel.scrollLeft;
+        
+        // Wrap-around at boundaries
+        if (scrollLeft <= 5) {
+            isWrapping = true;
+            carousel.style.scrollBehavior = 'auto';
+            carousel.scrollLeft = customChicanaImages.length * slideWidth;
+            requestAnimationFrame(() => {
+                carousel.style.scrollBehavior = 'smooth';
+                isWrapping = false;
+            });
+            return;
+        }
+        
+        if (scrollLeft >= (customChicanaImages.length + 1) * slideWidth - 5) {
+            isWrapping = true;
+            carousel.style.scrollBehavior = 'auto';
+            carousel.scrollLeft = 1 * slideWidth;
+            requestAnimationFrame(() => {
+                carousel.style.scrollBehavior = 'smooth';
+                isWrapping = false;
+            });
+            return;
+        }
+        
+        // Calculate current slide and active index
+        const currentSlide = Math.round(scrollLeft / slideWidth);
+        let activeImgIndex = currentSlide - 1;
+        if (activeImgIndex < 0) activeImgIndex = customChicanaImages.length - 1;
+        if (activeImgIndex > customChicanaImages.length - 1) activeImgIndex = 0;
+        
+        if (currentActiveIndex !== activeImgIndex) {
+            currentActiveIndex = activeImgIndex;
+            updateActiveChicanaInfo();
+        }
+    });
+    
+    // Prev / Next button listeners
+    const btnPrev = document.getElementById("btn-prev-chicana");
+    const btnNext = document.getElementById("btn-next-chicana");
+    
+    if (btnPrev) {
+        btnPrev.onclick = () => {
+            const slideWidth = carousel.clientWidth;
+            if (slideWidth <= 0) return;
+            const currentSlide = Math.round(carousel.scrollLeft / slideWidth);
+            carousel.scrollTo({
+                left: (currentSlide - 1) * slideWidth,
+                behavior: 'smooth'
+            });
+        };
     }
+    
+    if (btnNext) {
+        btnNext.onclick = () => {
+            const slideWidth = carousel.clientWidth;
+            if (slideWidth <= 0) return;
+            const currentSlide = Math.round(carousel.scrollLeft / slideWidth);
+            carousel.scrollTo({
+                left: (currentSlide + 1) * slideWidth,
+                behavior: 'smooth'
+            });
+        };
+    }
+    
+    // Listen to resize to keep correct scroll alignment
+    window.removeEventListener('resize', resetChicanaCarouselPosition);
+    window.addEventListener('resize', resetChicanaCarouselPosition);
+    
+    // Defer initial scroll set to when layout is done (in case it is already visible)
+    setTimeout(resetChicanaCarouselPosition, 100);
 }
 
 function initCustomChicanaSharing() {
     const btnShare = document.getElementById("btn-share-custom-chicana");
     const textarea = document.getElementById("chicana-custom-text");
-    const previewText = document.getElementById("chicana-preview-text");
     if (!btnShare || !textarea) return;
     
-    // Reset textarea and preview text on load
+    // Reset textarea on load
     textarea.value = "";
-    if (previewText) {
-        previewText.textContent = "Escribe algo a la izquierda para ver la previsualización...";
-    }
-    
-    // Update preview text on input
-    textarea.oninput = () => {
-        const val = textarea.value.trim();
-        if (previewText) {
-            previewText.textContent = val || "Escribe algo a la izquierda para ver la previsualización...";
-        }
-    };
     
     btnShare.onclick = async () => {
         const customText = textarea.value.trim();

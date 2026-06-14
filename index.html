@@ -643,54 +643,49 @@
                          </div>
  
                          <!-- SECCIÓN 1: CREA TU CHICANA (ABIERTA POR DEFECTO) -->
-                         <div class="space-y-4 bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 shadow-lg">
+                         <div class="space-y-4 bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 shadow-lg max-w-md mx-auto w-full">
                              <div class="flex items-center gap-2 border-b border-slate-800/60 pb-3">
                                  <i class="ph-bold ph-palette text-brand-500 text-lg"></i>
                                  <h3 class="font-bold text-white text-sm uppercase tracking-wider">Crea tu Chicana Custom 🎨</h3>
                              </div>
                              
-                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                 <!-- Columna Izquierda: Controles -->
-                                 <div class="space-y-4">
-                                     <!-- Carrusel de Imágenes -->
-                                     <div class="space-y-2">
-                                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">1. Selecciona una Imagen</label>
-                                         <div id="chicana-carousel" class="flex gap-3 overflow-x-auto py-2 px-1 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent snap-x">
-                                             <!-- Se cargará dinámicamente -->
-                                         </div>
+                             <div class="space-y-4">
+                                 <!-- Carrusel de Imágenes de una Sola Imagen Grande -->
+                                 <div class="space-y-2">
+                                     <div class="flex justify-between items-center px-1">
+                                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">1. Selecciona una Imagen</label>
+                                         <span id="chicana-image-name" class="text-xs font-bold text-brand-500 bg-brand-500/10 px-2.5 py-0.5 rounded-full">Barrilete Cósmico 🚀</span>
                                      </div>
                                      
-                                     <!-- Input de Texto Custom -->
-                                     <div class="space-y-2">
-                                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">2. Escribe tu Chicana</label>
-                                         <textarea id="chicana-custom-text" rows="3" class="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500/50 transition-all resize-none" placeholder="Escribe tu chicana personalizada aquí..."></textarea>
+                                     <!-- Slider con flechas -->
+                                     <div class="relative group w-full">
+                                         <!-- Botón Anterior -->
+                                         <button id="btn-prev-chicana" type="button" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-slate-950/80 hover:bg-brand-500 text-white hover:text-slate-950 flex items-center justify-center transition-all border border-slate-800 shadow-md">
+                                             <i class="ph-bold ph-caret-left text-sm"></i>
+                                         </button>
+                                         
+                                         <!-- Contenedor del Slider con Snap -->
+                                         <div id="chicana-carousel" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar rounded-xl border border-slate-800 bg-slate-950/40 aspect-square w-full">
+                                             <!-- Se cargará dinámicamente -->
+                                         </div>
+                                         
+                                         <!-- Botón Siguiente -->
+                                         <button id="btn-next-chicana" type="button" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-slate-950/80 hover:bg-brand-500 text-white hover:text-slate-950 flex items-center justify-center transition-all border border-slate-800 shadow-md">
+                                             <i class="ph-bold ph-caret-right text-sm"></i>
+                                         </button>
                                      </div>
                                  </div>
                                  
-                                 <!-- Columna Derecha: Previsualización en tiempo real -->
-                                 <div class="space-y-2 flex flex-col justify-between">
-                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">3. Previsualización en Vivo</label>
-                                     
-                                     <!-- Preview Card -->
-                                     <div id="chicana-preview-card" class="bg-gradient-to-br from-brand-500/10 via-brand-dark to-slate-950 p-6 rounded-2xl border border-brand-500/30 flex flex-col justify-between space-y-4 transition-all duration-300 relative group overflow-hidden max-w-sm mx-auto w-full min-h-[220px]">
-                                         <div class="flex flex-col space-y-3 h-full justify-between">
-                                             <div class="flex items-start justify-between gap-3">
-                                                 <div class="space-y-1 flex-1 pr-1 min-w-0">
-                                                     <span class="text-[10px] bg-brand-500/20 text-brand-500 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Chicana Custom</span>
-                                                     <h3 class="text-sm font-bold text-white mt-1.5 truncate">Tu Mensaje</h3>
-                                                     <p id="chicana-preview-text" class="text-xs text-slate-300 leading-relaxed italic mt-2 break-words max-h-[100px] overflow-y-auto">Escribe algo a la izquierda para ver la previsualización...</p>
-                                                 </div>
-                                                 <div class="w-16 h-16 rounded-xl overflow-hidden border border-slate-800 bg-slate-950 flex-shrink-0 flex items-center justify-center">
-                                                     <img id="chicana-preview-img" src="/Premios/Barrilete.webp" alt="Preview" class="w-full h-full object-cover">
-                                                 </div>
-                                             </div>
-                                             
-                                             <button id="btn-share-custom-chicana" class="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs shadow-md">
-                                                 <i class="ph-bold ph-share-network text-sm"></i> Compartir Chicana Custom
-                                             </button>
-                                         </div>
-                                     </div>
+                                 <!-- Escribe tu Chicana -->
+                                 <div class="space-y-2">
+                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">2. Escribe tu Chicana</label>
+                                     <textarea id="chicana-custom-text" rows="3" class="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500/50 transition-all resize-none" placeholder="Escribe tu chicana personalizada aquí..."></textarea>
                                  </div>
+
+                                 <!-- Botón de Compartir -->
+                                 <button id="btn-share-custom-chicana" class="w-full py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-sm shadow-md">
+                                     <i class="ph-bold ph-share-network text-base"></i> Compartir Chicana Custom
+                                 </button>
                              </div>
                          </div>
 
