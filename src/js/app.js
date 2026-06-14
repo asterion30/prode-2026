@@ -1821,10 +1821,10 @@ function updateActiveChicanaInfo() {
 function resetChicanaCarouselPosition() {
     const carousel = document.getElementById("chicana-carousel");
     if (!carousel) return;
-    const slideWidth = carousel.clientWidth;
-    if (slideWidth > 0) {
+    const slideHeight = carousel.clientHeight;
+    if (slideHeight > 0) {
         carousel.style.scrollBehavior = 'auto';
-        carousel.scrollLeft = (currentActiveIndex + 1) * slideWidth;
+        carousel.scrollTop = (currentActiveIndex + 1) * slideHeight;
         carousel.style.scrollBehavior = 'smooth';
     }
 }
@@ -1848,7 +1848,7 @@ function renderChicanaCarousel() {
     
     slidesData.forEach((slide) => {
         const slideEl = document.createElement("div");
-        slideEl.className = "flex-shrink-0 w-full snap-center relative aspect-square flex items-center justify-center bg-slate-950/40 select-none";
+        slideEl.className = "flex-shrink-0 w-full h-full snap-center relative flex items-center justify-center bg-slate-950/40 select-none";
         slideEl.dataset.originalIndex = slide.originalIdx;
         
         slideEl.innerHTML = `
@@ -1865,16 +1865,16 @@ function renderChicanaCarousel() {
     // Add Scroll Snap wrapping logic
     let isWrapping = false;
     carousel.addEventListener('scroll', () => {
-        const slideWidth = carousel.clientWidth;
-        if (slideWidth <= 0 || isWrapping) return;
+        const slideHeight = carousel.clientHeight;
+        if (slideHeight <= 0 || isWrapping) return;
         
-        const scrollLeft = carousel.scrollLeft;
+        const scrollTop = carousel.scrollTop;
         
         // Wrap-around at boundaries
-        if (scrollLeft <= 5) {
+        if (scrollTop <= 5) {
             isWrapping = true;
             carousel.style.scrollBehavior = 'auto';
-            carousel.scrollLeft = customChicanaImages.length * slideWidth;
+            carousel.scrollTop = customChicanaImages.length * slideHeight;
             requestAnimationFrame(() => {
                 carousel.style.scrollBehavior = 'smooth';
                 isWrapping = false;
@@ -1882,10 +1882,10 @@ function renderChicanaCarousel() {
             return;
         }
         
-        if (scrollLeft >= (customChicanaImages.length + 1) * slideWidth - 5) {
+        if (scrollTop >= (customChicanaImages.length + 1) * slideHeight - 5) {
             isWrapping = true;
             carousel.style.scrollBehavior = 'auto';
-            carousel.scrollLeft = 1 * slideWidth;
+            carousel.scrollTop = 1 * slideHeight;
             requestAnimationFrame(() => {
                 carousel.style.scrollBehavior = 'smooth';
                 isWrapping = false;
@@ -1894,7 +1894,7 @@ function renderChicanaCarousel() {
         }
         
         // Calculate current slide and active index
-        const currentSlide = Math.round(scrollLeft / slideWidth);
+        const currentSlide = Math.round(scrollTop / slideHeight);
         let activeImgIndex = currentSlide - 1;
         if (activeImgIndex < 0) activeImgIndex = customChicanaImages.length - 1;
         if (activeImgIndex > customChicanaImages.length - 1) activeImgIndex = 0;
@@ -1911,11 +1911,11 @@ function renderChicanaCarousel() {
     
     if (btnPrev) {
         btnPrev.onclick = () => {
-            const slideWidth = carousel.clientWidth;
-            if (slideWidth <= 0) return;
-            const currentSlide = Math.round(carousel.scrollLeft / slideWidth);
+            const slideHeight = carousel.clientHeight;
+            if (slideHeight <= 0) return;
+            const currentSlide = Math.round(carousel.scrollTop / slideHeight);
             carousel.scrollTo({
-                left: (currentSlide - 1) * slideWidth,
+                top: (currentSlide - 1) * slideHeight,
                 behavior: 'smooth'
             });
         };
@@ -1923,11 +1923,11 @@ function renderChicanaCarousel() {
     
     if (btnNext) {
         btnNext.onclick = () => {
-            const slideWidth = carousel.clientWidth;
-            if (slideWidth <= 0) return;
-            const currentSlide = Math.round(carousel.scrollLeft / slideWidth);
+            const slideHeight = carousel.clientHeight;
+            if (slideHeight <= 0) return;
+            const currentSlide = Math.round(carousel.scrollTop / slideHeight);
             carousel.scrollTo({
-                left: (currentSlide + 1) * slideWidth,
+                top: (currentSlide + 1) * slideHeight,
                 behavior: 'smooth'
             });
         };
