@@ -34,6 +34,10 @@ let currentLeaguePage = 0;
 let currentLeagueMembers = [];
 let currentLeagueOwnerId = null;
 let currentLeagueId = null;
+let rankingState = [];
+let jackpotWinningPoints = 0;
+let luckyPrizeShared = false;
+
 
 // =======================
 // DOM ELEMENTS
@@ -399,7 +403,11 @@ function setupAppSubscriptions(uid) {
 
     // Suscribirse al Ranking
     subscribeToRanking((ranking) => {
+        rankingState = ranking;
         renderRanking(ranking);
+        if (typeof updateJackpotAvailability === 'function') {
+            updateJackpotAvailability();
+        }
     });
 }
 
@@ -1488,6 +1496,45 @@ const handleSharePremioCard = async (imagePath, fileName, text, successAlert = "
 // Dynamic Premios Cards Definition
 const premiosCards = [
   {
+    id: "barrilete",
+    title: "Barrilete Cósmico",
+    description: "\"¿De qué planeta viniste? Vas re arriba en el prode\"",
+    badge: "Chicana de Líder",
+    icon: "ph-rocket-launch",
+    image: "/Premios/Barrilete.webp",
+    bgColor: "from-sky-500/10",
+    borderColor: "border-sky-500/20",
+    hoverBorderColor: "hover:border-sky-500/40",
+    btnColor: "bg-sky-500 hover:bg-sky-600 text-slate-950",
+    text: "¡Barrilete cósmico! ¿De qué planeta viniste? Vas re arriba en el Prode Mundial 2026: https://sapate.net.ar/! 🚀🏆⚽"
+  },
+  {
+    id: "geminichicana",
+    title: "Predicción de IA",
+    description: "\"Según Gemini, no tienes chances en el Prode\"",
+    badge: "Chicana de IA",
+    icon: "ph-cpu",
+    image: "/Premios/Gemini.webp",
+    bgColor: "from-indigo-500/10",
+    borderColor: "border-indigo-500/20",
+    hoverBorderColor: "hover:border-indigo-500/40",
+    btnColor: "bg-indigo-500 hover:bg-indigo-600 text-white",
+    text: "Según la Inteligencia Artificial de Gemini, no tenés chances de ganar el Prode Mundial 2026: https://sapate.net.ar/! 🤖🔮🤣"
+  },
+  {
+    id: "lluvia",
+    title: "Lluvia de Goles",
+    description: "\"Que lluevan goles, porque tu prode hace agua\"",
+    badge: "Chicana del Clima",
+    icon: "ph-cloud-rain",
+    image: "/Premios/Lluvia.webp",
+    bgColor: "from-teal-500/10",
+    borderColor: "border-teal-500/20",
+    hoverBorderColor: "hover:border-teal-500/40",
+    btnColor: "bg-teal-500 hover:bg-teal-600 text-slate-950",
+    text: "¡Que lluevan goles! Porque tus predicciones del Prode Mundial 2026 hacen agua por todos lados: https://sapate.net.ar/! 🌧️⚽️🤣"
+  },
+  {
     id: "birra",
     title: "Te pago una birra",
     description: "\"Te pago una birra porque vas ganando\"",
@@ -1724,6 +1771,137 @@ function getUniqueTeams() {
         .sort((a, b) => a.localeCompare(b));
 }
 
+const customChicanaImages = [
+    { name: "Barrilete Cósmico 🚀", path: "/Premios/Barrilete.webp" },
+    { name: "Sugerencia Gemini 🤖", path: "/Premios/Gemini.webp" },
+    { name: "Lluvia de Goles 🌧️", path: "/Premios/Lluvia.webp" },
+    { name: "Te Pago una Birra 🍺", path: "/Premios/Birra.webp" },
+    { name: "Pagame un Asado 🥩", path: "/Premios/MeDebes.webp" },
+    { name: "Un resultado, un asado ⚽", path: "/Premios/TePago.webp" },
+    { name: "Pacto del Empate 🥤", path: "/Premios/Empate.webp" },
+    { name: "Si sobrevivo, papitas 🍟", path: "/Premios/Penales.webp" },
+    { name: "A darlo vuelta! ⏳", path: "/Premios/Remontada.webp" },
+    { name: "Despertate ⏰", path: "/Premios/Despertate.webp" },
+    { name: "Gol de Último Minuto 🍫", path: "/Premios/GolDeUltimominuto.webp" },
+    { name: "Alentando 📣", path: "/Premios/HayQueCantar.webp" },
+    { name: "Re manija 🤪", path: "/Premios/HayqueSaltar.webp" },
+    { name: "Son Malos! 🐕", path: "/Premios/Perros.webp" },
+    { name: "Previa 🍻", path: "/Premios/Previa.webp" },
+    { name: "Medio Tiempo 🥪", path: "/Premios/MedioTiempo.webp" },
+    { name: "Hay Alargue 🥃", path: "/Premios/HayAlargue.webp" },
+    { name: "VAR 🖥️", path: "/Premios/Var.webp" },
+    { name: "Elije tu destino 🔮", path: "/Premios/elije.webp" },
+    { name: "Alentando Bis 🙌", path: "/Premios/Alentando.webp" },
+    { name: "Te veo con hambre 🌭", path: "/Premios/Hambre.webp" },
+    { name: "Rifando 🎫", path: "/Premios/Rifando.webp" }
+];
+
+let selectedChicanaImagePath = "";
+let selectedChicanaFileName = "";
+
+function renderChicanaCarousel() {
+    const carousel = document.getElementById("chicana-carousel");
+    const previewImg = document.getElementById("chicana-preview-img");
+    if (!carousel) return;
+    
+    carousel.innerHTML = "";
+    customChicanaImages.forEach((img, idx) => {
+        const card = document.createElement("div");
+        card.className = `flex-shrink-0 w-24 h-24 bg-slate-950 border-2 ${idx === 0 ? 'border-brand-500' : 'border-slate-800'} hover:border-slate-600 rounded-xl overflow-hidden relative cursor-pointer transition-all snap-start select-none`;
+        card.dataset.index = idx;
+        card.dataset.path = img.path;
+        card.innerHTML = `
+            <img src="${img.path}" alt="${img.name}" class="w-full h-full object-cover">
+            <div class="absolute bottom-0 inset-x-0 bg-black/60 py-0.5 text-[8px] text-center text-slate-300 truncate px-1">${img.name}</div>
+            <div class="selected-checkmark absolute top-1 right-1 w-4 h-4 bg-brand-500 rounded-full flex items-center justify-center text-[10px] text-slate-950 font-black ${idx === 0 ? '' : 'hidden'}">
+                <i class="ph-bold ph-check"></i>
+            </div>
+        `;
+        
+        card.onclick = () => {
+            carousel.querySelectorAll(".selected-checkmark").forEach(el => el.classList.add("hidden"));
+            carousel.querySelectorAll(".flex-shrink-0").forEach(el => {
+                el.classList.remove("border-brand-500");
+                el.classList.add("border-slate-800");
+            });
+            
+            card.classList.remove("border-slate-800");
+            card.classList.add("border-brand-500");
+            card.querySelector(".selected-checkmark").classList.remove("hidden");
+            
+            selectedChicanaImagePath = img.path;
+            selectedChicanaFileName = img.path.split("/").pop();
+            
+            // Update preview image in real-time
+            if (previewImg) {
+                previewImg.src = img.path;
+            }
+        };
+        
+        carousel.appendChild(card);
+    });
+    
+    selectedChicanaImagePath = customChicanaImages[0].path;
+    selectedChicanaFileName = customChicanaImages[0].path.split("/").pop();
+    if (previewImg) {
+        previewImg.src = selectedChicanaImagePath;
+    }
+}
+
+function initCustomChicanaSharing() {
+    const btnShare = document.getElementById("btn-share-custom-chicana");
+    const textarea = document.getElementById("chicana-custom-text");
+    const previewText = document.getElementById("chicana-preview-text");
+    if (!btnShare || !textarea) return;
+    
+    // Reset textarea and preview text on load
+    textarea.value = "";
+    if (previewText) {
+        previewText.textContent = "Escribe algo a la izquierda para ver la previsualización...";
+    }
+    
+    // Update preview text on input
+    textarea.oninput = () => {
+        const val = textarea.value.trim();
+        if (previewText) {
+            previewText.textContent = val || "Escribe algo a la izquierda para ver la previsualización...";
+        }
+    };
+    
+    btnShare.onclick = async () => {
+        const customText = textarea.value.trim();
+        if (!customText) {
+            alert("Por favor escribe un mensaje para tu chicana.");
+            return;
+        }
+        
+        btnShare.disabled = true;
+        await handleSharePremioCard(
+            selectedChicanaImagePath, 
+            selectedChicanaFileName, 
+            customText + "\n\nParticipe del Prode: " + window.location.origin
+        );
+        btnShare.disabled = false;
+    };
+}
+
+function setupPredefinedToggler() {
+    const btn = document.getElementById("btn-toggle-predefined-chicanas");
+    const container = document.getElementById("predefined-chicanas-container");
+    const icon = document.getElementById("icon-toggle-predefined-chicanas");
+    if (btn && container && icon) {
+        btn.onclick = null;
+        btn.onclick = () => {
+            const isHidden = container.classList.toggle("hidden");
+            if (isHidden) {
+                icon.classList.remove("rotate-90");
+            } else {
+                icon.classList.add("rotate-90");
+            }
+        };
+    }
+}
+
 function initPremios() {
     if (shuffledPremiosCards.length === 0) {
         // Shuffle Fisher-Yates
@@ -1744,6 +1922,13 @@ function initPremios() {
     
     // Setup scroll observer
     setupPremiosObserver();
+
+    // Setup custom chicana carousel, sharing, and predefined toggler (only once)
+    if (!selectedChicanaImagePath) {
+        renderChicanaCarousel();
+        initCustomChicanaSharing();
+        setupPredefinedToggler();
+    }
 }
 
 function setupPremiosObserver() {
@@ -2991,18 +3176,30 @@ async function initEspecialesView() {
     populateSelect(selectSorpresa);
     populateSelect(selectDecepcion);
 
-    if (currentUser) {
-        // Cargar selección de Supabase
-        const { data: userData } = await supabase
-            .from('especiales')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .single();
+    const isUserMock = isMock || (currentUser && String(currentUser.id).startsWith("mock_"));
 
-        if (userData) {
-            selectFavorito.value = userData.favorito || "";
-            selectSorpresa.value = userData.sorpresa || "";
-            selectDecepcion.value = userData.decepcion || "";
+    if (currentUser) {
+        if (isUserMock) {
+            const storedEsp = localStorage.getItem(`prode_mock_especiales_${currentUser.id}`);
+            if (storedEsp) {
+                const userData = JSON.parse(storedEsp);
+                selectFavorito.value = userData.favorito || "";
+                selectSorpresa.value = userData.sorpresa || "";
+                selectDecepcion.value = userData.decepcion || "";
+            }
+        } else {
+            // Cargar selección de Supabase
+            const { data: userData } = await supabase
+                .from('especiales')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .single();
+
+            if (userData) {
+                selectFavorito.value = userData.favorito || "";
+                selectSorpresa.value = userData.sorpresa || "";
+                selectDecepcion.value = userData.decepcion || "";
+            }
         }
     }
 
@@ -3024,27 +3221,64 @@ async function initEspecialesView() {
             const sor = selectSorpresa.value;
             const dec = selectDecepcion.value;
 
-            const { error } = await supabase
-                .from('especiales')
-                .upsert({ 
-                    user_id: currentUser.id, 
-                    favorito: fav, 
-                    sorpresa: sor, 
-                    decepcion: dec,
-                    updated_at: new Date().toISOString()
-                });
-
-            if (error) {
-                console.error("Error al guardar especiales:", error);
-                alert("Hubo un error al guardar tus elecciones.");
-            } else {
+            if (isUserMock) {
+                localStorage.setItem(`prode_mock_especiales_${currentUser.id}`, JSON.stringify({
+                    favorito: fav,
+                    sorpresa: sor,
+                    decepcion: dec
+                }));
                 updateEspecialesRanking();
                 alert("¡Tus elecciones especiales se guardaron correctamente!");
+            } else {
+                const { error } = await supabase
+                    .from('especiales')
+                    .upsert({ 
+                        user_id: currentUser.id, 
+                        favorito: fav, 
+                        sorpresa: sor, 
+                        decepcion: dec,
+                        updated_at: new Date().toISOString()
+                    });
+
+                if (error) {
+                    console.error("Error al guardar especiales:", error);
+                    alert("Hubo un error al guardar tus elecciones.");
+                } else {
+                    updateEspecialesRanking();
+                    alert("¡Tus elecciones especiales se guardaron correctamente!");
+                }
             }
             
             btnSaveEspeciales.disabled = false;
             btnSaveEspeciales.textContent = "Guardar Elecciones";
         };
+    }
+
+    // Configurar colapsables de la vista de especiales
+    const setupCollapsible = (btnId, containerId, iconId) => {
+        const btn = document.getElementById(btnId);
+        const container = document.getElementById(containerId);
+        const icon = document.getElementById(iconId);
+        if (btn && container && icon) {
+            // Unbind previous clicks
+            btn.onclick = null;
+            btn.onclick = () => {
+                const isHidden = container.classList.toggle("hidden");
+                if (isHidden) {
+                    icon.classList.remove("rotate-90");
+                } else {
+                    icon.classList.add("rotate-90");
+                }
+            };
+        }
+    };
+    setupCollapsible("btn-toggle-especiales-selection", "especiales-selection-container", "icon-toggle-especiales-selection");
+    setupCollapsible("btn-toggle-jackpot", "jackpot-container", "icon-toggle-jackpot");
+    setupCollapsible("btn-toggle-especiales-trends", "especiales-trends-container", "icon-toggle-especiales-trends");
+
+    // Inicializar lógica de Jackpot
+    if (typeof initJackpotGame === 'function') {
+        initJackpotGame();
     }
 }
 
@@ -3067,17 +3301,38 @@ async function updateEspecialesRanking() {
     const baseDec = { "Alemania": 0, "España": 0, "Inglaterra": 0 };
 
     // Obtener votos reales de Supabase
-    const { data: allVotes, error } = await supabase
-        .from('especiales')
-        .select('favorito, sorpresa, decepcion');
-
-    if (!error && allVotes) {
-        allVotes.forEach(v => {
-            if (v.favorito) baseFav[v.favorito] = (baseFav[v.favorito] || 0) + 1;
-            if (v.sorpresa) baseSor[v.sorpresa] = (baseSor[v.sorpresa] || 0) + 1;
-            if (v.decepcion) baseDec[v.decepcion] = (baseDec[v.decepcion] || 0) + 1;
-        });
+    let allVotes = [];
+    if (!isMock) {
+        try {
+            const { data, error } = await supabase
+                .from('especiales')
+                .select('favorito, sorpresa, decepcion');
+            if (!error && data) {
+                allVotes = data;
+            }
+        } catch (e) {
+            console.warn("Bypassed Supabase ranking fetch:", e);
+        }
     }
+
+    // Merge with any local mock votes to show dynamic rankings
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("prode_mock_especiales_")) {
+            try {
+                const stored = JSON.parse(localStorage.getItem(key));
+                if (stored) {
+                    allVotes.push(stored);
+                }
+            } catch(e) {}
+        }
+    }
+
+    allVotes.forEach(v => {
+        if (v.favorito) baseFav[v.favorito] = (baseFav[v.favorito] || 0) + 1;
+        if (v.sorpresa) baseSor[v.sorpresa] = (baseSor[v.sorpresa] || 0) + 1;
+        if (v.decepcion) baseDec[v.decepcion] = (baseDec[v.decepcion] || 0) + 1;
+    });
 
     // Ordenar y renderizar cada sección
     const renderSection = (container, votes, barColorClass) => {
@@ -3627,5 +3882,557 @@ if (btnAdminLoadSelectedMatch && selectAdminAllMatches && adminSelectedMatchEdit
         }
     });
 }
+
+
+// =============================================
+// MINI JACKPOT Y TARJETA DE LA SUERTE LOGIC
+// =============================================
+
+function getCurrentUserRank() {
+    const { user: currentUser, alias: currentAlias } = getCurrentUser();
+    if (!currentUser) return -1;
+    if (isMock) {
+        return rankingState.findIndex(r => r.alias === currentAlias);
+    } else {
+        return rankingState.findIndex(r => r.id === currentUser.id);
+    }
+}
+
+function updateJackpotAvailability() {
+    const btnSpin = document.getElementById("btn-spin-jackpot");
+    const btnMockWin = document.getElementById("btn-spin-jackpot-mock-win");
+    const statusMsg = document.getElementById("jackpot-status-msg");
+    if (!btnSpin || !statusMsg) return;
+
+    const { user: currentUser, alias: currentAlias } = getCurrentUser();
+    if (!currentUser) {
+        btnSpin.disabled = true;
+        if (btnMockWin) btnMockWin.classList.add("hidden");
+        statusMsg.innerHTML = "Iniciá sesión para jugar al Jackpot.";
+        return;
+    }
+
+    if (rankingState.length === 0) {
+        btnSpin.disabled = true;
+        if (btnMockWin) btnMockWin.classList.add("hidden");
+        statusMsg.innerHTML = "Cargando clasificación general...";
+        return;
+    }
+
+    const rankIdx = getCurrentUserRank();
+    const isUserMock = isMock || (currentUser && String(currentUser.id).startsWith("mock_"));
+    
+    // Check daily cooldown (both in localStorage and in database profile field)
+    const lastWinStr = localStorage.getItem("prode_jackpot_last_win_" + (currentUser.id || currentAlias));
+    const dbWinStr = currentUser.last_jackpot_win;
+    const todayStr = new Date().toDateString();
+    if (lastWinStr === todayStr || dbWinStr === todayStr) {
+        btnSpin.disabled = true;
+        if (btnMockWin) btnMockWin.classList.add("hidden");
+        statusMsg.innerHTML = "🍀 ¡Ya ganaste tu tarjeta de la suerte hoy! Volvé mañana para jugar de nuevo.";
+        return;
+    }
+
+    if (rankIdx !== -1 && rankIdx < 3) {
+        // Podium (1st, 2nd, 3rd)
+        btnSpin.disabled = true;
+        if (btnMockWin) btnMockWin.classList.add("hidden");
+        statusMsg.innerHTML = "🏆 El podio (1°, 2° y 3° puesto) no puede jugar al jackpot. ¡Dejá algo de suerte para el resto!";
+        return;
+    }
+
+    // Get current user score
+    let userScore = 0;
+    if (isUserMock) {
+        const stored = localStorage.getItem("prode_mock_user");
+        if (stored) {
+            userScore = JSON.parse(stored).score || 0;
+        }
+    } else {
+        const meInRanking = rankingState.find(r => r.id === currentUser.id);
+        userScore = meInRanking ? meInRanking.score : 0;
+    }
+
+    // 0-Score safeguard: if 4th place has 0 pts or less than 10, set baseline target to 10
+    let targetScore = rankingState.length >= 4 ? rankingState[3].score : 10;
+    if (targetScore < 10) {
+        targetScore = 10;
+    }
+
+    if (userScore >= targetScore) {
+        btnSpin.disabled = true;
+        if (btnMockWin) btnMockWin.classList.add("hidden");
+        statusMsg.innerHTML = `⚠️ Ya alcanzaste o superaste el puntaje del 4° puesto (${targetScore} pts). ¡No podés sumar más por ahora!`;
+        return;
+    }
+
+    // Eligible!
+    btnSpin.disabled = false;
+    if (isUserMock && btnMockWin) {
+        btnMockWin.classList.remove("hidden");
+        btnMockWin.disabled = false;
+    }
+    const maxWin = targetScore - userScore;
+    statusMsg.innerHTML = `🎰 ¡Estás habilitado para jugar! Podés ganar hasta <strong>${maxWin} puntos</strong> para igualar al 4° puesto (${targetScore} pts).`;
+}
+
+function initJackpotGame() {
+    updateJackpotAvailability();
+
+    const btnSpin = document.getElementById("btn-spin-jackpot");
+    const btnMockWin = document.getElementById("btn-spin-jackpot-mock-win");
+    const statusMsg = document.getElementById("jackpot-status-msg");
+    if (!btnSpin) return;
+
+    // Set up standard icons/flags on reels on load if empty
+    const reelEls = [
+        document.getElementById("jackpot-reel-1"),
+        document.getElementById("jackpot-reel-2"),
+        document.getElementById("jackpot-reel-3")
+    ];
+
+    const teams = Object.values(GROUP_MAP)
+        .flat()
+        .map(t => ({ name: t.team, flag: t.flag }));
+
+    reelEls.forEach((reelEl, index) => {
+        if (reelEl && (reelEl.innerHTML.includes("ph-question") || reelEl.innerHTML.trim() === "")) {
+            const randomTeam = teams[Math.floor(Math.random() * teams.length)];
+            const flagUrl = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${randomTeam.flag}.svg`;
+            reelEl.innerHTML = `<img src="${flagUrl}" alt="${randomTeam.name}" title="${randomTeam.name}">`;
+        }
+    });
+
+    const performSpin = (forceWin = false) => {
+        btnSpin.disabled = true;
+        if (btnMockWin) btnMockWin.disabled = true;
+        
+        statusMsg.textContent = forceWin ? "🎰 ¡Girando rodillos (Ganada Asegurada)..." : "🎰 ¡Girando rodillos!...";
+
+        reelEls.forEach(el => el.classList.add("reel-blur"));
+
+        let spinIntervals = [];
+        let finalTeams = [null, null, null];
+
+        // Pick forced winning team flag for a 3-match win if forceWin is true
+        const winningTeam = forceWin ? teams[Math.floor(Math.random() * teams.length)] : null;
+
+        // Spin reels at slightly different speeds/times
+        reelEls.forEach((reelEl, index) => {
+            const interval = setInterval(() => {
+                const randomTeam = teams[Math.floor(Math.random() * teams.length)];
+                const flagUrl = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${randomTeam.flag}.svg`;
+                reelEl.innerHTML = `<img src="${flagUrl}" alt="${randomTeam.name}" title="${randomTeam.name}">`;
+                finalTeams[index] = randomTeam;
+            }, 80 + index * 20);
+            
+            spinIntervals.push(interval);
+        });
+
+        // Stop reels sequentially
+        setTimeout(() => {
+            clearInterval(spinIntervals[0]);
+            reelEls[0].classList.remove("reel-blur");
+            if (forceWin) {
+                const flagUrl = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${winningTeam.flag}.svg`;
+                reelEls[0].innerHTML = `<img src="${flagUrl}" alt="${winningTeam.name}" title="${winningTeam.name}">`;
+                finalTeams[0] = winningTeam;
+            }
+            
+            setTimeout(() => {
+                clearInterval(spinIntervals[1]);
+                reelEls[1].classList.remove("reel-blur");
+                if (forceWin) {
+                    const flagUrl = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${winningTeam.flag}.svg`;
+                    reelEls[1].innerHTML = `<img src="${flagUrl}" alt="${winningTeam.name}" title="${winningTeam.name}">`;
+                    finalTeams[1] = winningTeam;
+                }
+                
+                setTimeout(() => {
+                    clearInterval(spinIntervals[2]);
+                    reelEls[2].classList.remove("reel-blur");
+                    if (forceWin) {
+                        const flagUrl = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${winningTeam.flag}.svg`;
+                        reelEls[2].innerHTML = `<img src="${flagUrl}" alt="${winningTeam.name}" title="${winningTeam.name}">`;
+                        finalTeams[2] = winningTeam;
+                    }
+                    
+                    if (btnMockWin) btnMockWin.disabled = false;
+                    // Evaluate result
+                    evaluateJackpotResult(finalTeams);
+                }, 600);
+            }, 600);
+        }, 1200);
+    };
+
+    btnSpin.onclick = () => performSpin(false);
+
+    if (btnMockWin) {
+        btnMockWin.onclick = () => performSpin(true);
+    }
+
+    // Close button for lucky card modal
+    const btnCloseLucky = document.getElementById("btn-close-lucky-card");
+    const luckyModal = document.getElementById("modal-lucky-card");
+    if (btnCloseLucky && luckyModal) {
+        btnCloseLucky.onclick = () => {
+            luckyModal.classList.add("hidden");
+            luckyModal.classList.remove("flex");
+            updateJackpotAvailability();
+        };
+    }
+}
+
+function evaluateJackpotResult(finalTeams) {
+    const btnSpin = document.getElementById("btn-spin-jackpot");
+    const statusMsg = document.getElementById("jackpot-status-msg");
+    const { user: currentUser } = getCurrentUser();
+
+    // Check matches
+    const isThreeMatch = (finalTeams[0].flag === finalTeams[1].flag && finalTeams[1].flag === finalTeams[2].flag);
+    const isTwoMatch = (finalTeams[0].flag === finalTeams[1].flag || finalTeams[1].flag === finalTeams[2].flag || finalTeams[0].flag === finalTeams[2].flag);
+    
+    const matchCount = isThreeMatch ? 3 : (isTwoMatch ? 2 : 0);
+
+    let pointsWon = 0;
+    if (matchCount === 3) {
+        pointsWon = 3;
+    } else if (matchCount === 2) {
+        pointsWon = 1;
+    }
+
+    if (pointsWon === 0) {
+        statusMsg.innerHTML = "❌ No hubo suerte esta vez. ¡Volvé a intentar!";
+        btnSpin.disabled = false;
+        updateJackpotAvailability();
+        return;
+    }
+
+    // We won points! Check how many we can actually claim (capped at 4th place)
+    let userScore = 0;
+    const isUserMock = isMock || (currentUser && String(currentUser.id).startsWith("mock_"));
+    if (isUserMock) {
+        const stored = localStorage.getItem("prode_mock_user");
+        if (stored) {
+            userScore = JSON.parse(stored).score || 0;
+        }
+    } else {
+        const meInRanking = rankingState.find(r => r.id === currentUser.id);
+        userScore = meInRanking ? meInRanking.score : 0;
+    }
+
+    // 0-Score safeguard: if 4th place has 0 pts or less than 10, set baseline target to 10
+    let targetScore = rankingState.length >= 4 ? rankingState[3].score : 10;
+    if (targetScore < 10) {
+        targetScore = 10;
+    }
+    const maxWin = Math.max(0, targetScore - userScore);
+    
+    // Apply cap
+    const finalPointsWon = Math.min(pointsWon, maxWin);
+
+    if (finalPointsWon <= 0) {
+        statusMsg.innerHTML = "⚠️ Ganaste pero ya igualaste o superaste al 4° puesto. ¡Puntos acumulados: 0!";
+        btnSpin.disabled = false;
+        updateJackpotAvailability();
+        return;
+    }
+
+    // Open Lucky Card modal to share and claim!
+    jackpotWinningPoints = finalPointsWon;
+    showLuckyCardModal(finalPointsWon);
+}
+
+function showLuckyCardModal(points) {
+    const modal = document.getElementById("modal-lucky-card");
+    const luckyImg = document.getElementById("lucky-card-img");
+    const pointsLabel = document.getElementById("lucky-card-points-label");
+    const btnShare = document.getElementById("btn-share-lucky-card");
+
+    if (!modal || !luckyImg || !pointsLabel || !btnShare) return;
+
+    // Trigger visual celebration animation!
+    triggerConfetti();
+
+    // Pick random prize image
+    const randomCard = premiosCards[Math.floor(Math.random() * premiosCards.length)];
+    luckyImg.src = randomCard.image || "/Premios/Birra.webp";
+
+    pointsLabel.textContent = `🎁 ¡Vas a reclamar +${points} ${points === 1 ? 'punto' : 'puntos'}!`;
+    luckyPrizeShared = false;
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+
+    btnShare.onclick = async () => {
+        const textToShare = `Tarjeta de la suerte compartí y segui jugando. ¡Sumé +${points} puntos en el Prode Mundial 2026! 🍀🏆⚽`;
+        const shareUrl = window.location.origin;
+
+        let sharedSuccessfully = false;
+        
+        if (navigator.share) {
+            try {
+                // Fetch image to create File object
+                const imgRes = await fetch(luckyImg.src);
+                const blob = await imgRes.blob();
+                const file = new File([blob], 'tarjeta_de_la_suerte.webp', { type: 'image/webp' });
+                
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: "Tarjeta de la Suerte - Prode 2026",
+                        text: textToShare + "\n" + shareUrl
+                    });
+                    sharedSuccessfully = true;
+                } else {
+                    await navigator.share({
+                        title: "Tarjeta de la Suerte - Prode 2026",
+                        text: textToShare,
+                        url: shareUrl
+                    });
+                    sharedSuccessfully = true;
+                }
+            } catch (err) {
+                console.log("Web share failed, trying fallback...", err);
+            }
+        }
+
+        if (!sharedSuccessfully) {
+            // Fallback: WhatsApp share
+            const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(textToShare + " " + shareUrl)}`;
+            window.open(waUrl, "_blank");
+            sharedSuccessfully = true; // Count as shared for fallback
+        }
+
+        if (sharedSuccessfully) {
+            await claimJackpotPoints(points);
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+    };
+}
+
+async function claimJackpotPoints(points) {
+    const { user: currentUser, alias: currentAlias } = getCurrentUser();
+    if (!currentUser) return;
+
+    showLoader();
+    try {
+        let currentScore = 0;
+        const isUserMock = isMock || (currentUser && String(currentUser.id).startsWith("mock_"));
+        if (isUserMock) {
+            const stored = localStorage.getItem("prode_mock_user");
+            if (stored) {
+                const u = JSON.parse(stored);
+                currentScore = u.score || 0;
+                const newScore = currentScore + points;
+                u.score = newScore;
+                u.last_jackpot_win = todayStr;
+                localStorage.setItem("prode_mock_user", JSON.stringify(u));
+                
+                // Set daily cooldown
+                localStorage.setItem("prode_jackpot_last_win_" + u.uid, todayStr);
+                
+                // Update local memory user score and last jackpot win
+                currentUser.score = newScore;
+                currentUser.last_jackpot_win = todayStr;
+
+                // Animate points counting up on the screen in real-time
+                animatePointsUpdate(currentScore, newScore);
+
+                // Update rankingState locally
+                const myRankIdx = rankingState.findIndex(r => r.alias === currentAlias || r.id === currentUser.id);
+                if (myRankIdx !== -1) {
+                    rankingState[myRankIdx].score = newScore;
+                    rankingState.sort((a, b) => b.score - a.score);
+                } else {
+                    rankingState.push({ id: currentUser.id, alias: currentAlias, score: newScore });
+                    rankingState.sort((a, b) => b.score - a.score);
+                }
+
+                // Update UI panels in real-time without page reload
+                renderRanking(rankingState);
+                if (typeof updateEspecialesRanking === 'function') {
+                    updateEspecialesRanking();
+                }
+                updateJackpotAvailability();
+
+                showDevNotification(`🎉 ¡Puntos sumados! Se sumaron +${points} puntos (Total: ${newScore} pts) en Modo Mock.`);
+            }
+        } else {
+            // Production Supabase Mode
+            const { data: userData, error: fetchErr } = await supabase
+                .from('users')
+                .select('score')
+                .eq('id', currentUser.id)
+                .single();
+                
+            if (fetchErr) throw fetchErr;
+
+            currentScore = userData.score || 0;
+            const newScore = currentScore + points;
+
+            const todayStr = new Date().toDateString();
+
+            const { error: updateErr } = await supabase
+                .from('users')
+                .update({ 
+                    score: newScore,
+                    last_jackpot_win: todayStr
+                })
+                .eq('id', currentUser.id);
+
+            if (updateErr) throw updateErr;
+
+            // Update local session memory
+            currentUser.last_jackpot_win = todayStr;
+
+            // Set daily cooldown in localStorage
+            localStorage.setItem("prode_jackpot_last_win_" + currentUser.id, todayStr);
+
+            // Animate points counting up on the screen
+            animatePointsUpdate(currentScore, newScore);
+
+            // Update rankingState locally
+            const myRankIdx = rankingState.findIndex(r => r.id === currentUser.id);
+            if (myRankIdx !== -1) {
+                rankingState[myRankIdx].score = newScore;
+                rankingState.sort((a, b) => b.score - a.score);
+            }
+
+            renderRanking(rankingState);
+            if (typeof updateEspecialesRanking === 'function') {
+                updateEspecialesRanking();
+            }
+            updateJackpotAvailability();
+
+            showDevNotification(`🎉 ¡Excelente! Puntos acreditados. Sumaste +${points} puntos al ranking.`);
+        }
+    } catch (err) {
+        console.error("Error claiming jackpot points:", err);
+        alert("Hubo un error al acreditar tus puntos. Inténtalo de nuevo.");
+    } finally {
+        hideLoader();
+    }
+}
+
+// =============================================
+// CONFETTI, NOTIFICATIONS AND POINTS ANIMATION
+// =============================================
+
+function triggerConfetti() {
+    const existing = document.getElementById("confetti-container");
+    if (existing) existing.remove();
+
+    const container = document.createElement("div");
+    container.id = "confetti-container";
+    container.className = "confetti-container";
+    document.body.appendChild(container);
+
+    const colors = [
+        "#f59e0b", // amber/gold
+        "#10b981", // emerald
+        "#3b82f6", // blue
+        "#ec4899", // pink
+        "#ef4444", // red
+        "#8b5cf6", // purple
+        "#06b6d4", // cyan
+        "#eab308"  // yellow
+    ];
+
+    const shapes = ["rect", "circle"];
+
+    for (let i = 0; i < 120; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti-piece";
+        
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        const left = Math.random() * 100;
+        const size = Math.random() * 8 + 6; // 6 to 14px
+        const duration = Math.random() * 2 + 1.8; // 1.8 to 3.8s
+        const delay = Math.random() * 1.2;
+        const sway = (Math.random() - 0.5) * 180; // -90px to 90px
+
+        piece.style.backgroundColor = color;
+        piece.style.left = `${left}%`;
+        piece.style.width = `${size}px`;
+        piece.style.height = shape === "circle" ? `${size}px` : `${size * 0.6}px`;
+        if (shape === "circle") {
+            piece.style.borderRadius = "50%";
+        }
+        piece.style.animationDuration = `${duration}s`;
+        piece.style.animationDelay = `${delay}s`;
+        piece.style.setProperty("--sway-x", `${sway}px`);
+
+        container.appendChild(piece);
+    }
+
+    setTimeout(() => {
+        container.remove();
+    }, 6000);
+}
+
+function animatePointsUpdate(startScore, endScore, durationMs = 1500) {
+    const display = document.getElementById("user-points-display");
+    if (!display) return;
+
+    display.classList.add("glow-pulse-green");
+
+    const startTime = performance.now();
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / durationMs, 1);
+        
+        // Easing function (easeOutQuad)
+        const ease = progress * (2 - progress);
+        
+        const current = Math.floor(startScore + (endScore - startScore) * ease);
+        display.textContent = `${current} pts`;
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            display.textContent = `${endScore} pts`;
+            setTimeout(() => {
+                display.classList.remove("glow-pulse-green");
+            }, 600);
+        }
+    }
+
+    requestAnimationFrame(update);
+}
+
+function showDevNotification(message) {
+    let container = document.getElementById("toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "toast-container";
+        container.className = "fixed bottom-5 right-5 z-[10000] flex flex-col gap-2 pointer-events-none";
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = "px-4 py-3 bg-slate-900/90 text-white text-sm font-semibold rounded-xl border border-slate-800 shadow-2xl flex items-center gap-2 transform translate-y-10 opacity-0 transition-all duration-300 ease-out pointer-events-auto max-w-sm";
+    toast.innerHTML = `
+        <i class="ph-bold ph-info text-brand-500 text-lg"></i>
+        <span>${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.remove("translate-y-10", "opacity-0");
+    }, 10);
+
+    setTimeout(() => {
+        toast.classList.add("translate-y-10", "opacity-0");
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 4500);
+}
+
 
 

@@ -170,7 +170,7 @@ export function subscribeToMatches(callback) {
 }
 
 export function subscribeToUserPredictions(userId, callback) {
-    if (isMock) {
+    if (isMock || (userId && String(userId).startsWith("mock_"))) {
         let lastData = localStorage.getItem(`prode_preds_${userId}`) || "{}";
         callback(JSON.parse(lastData));
         
@@ -223,7 +223,7 @@ export async function savePrediction(matchId, result, homeGoals = '', awayGoals 
     
     // El frontend ya valida la hora, pero lo ideal es que Cloud Rules validen esto en backend.
     
-    if (isMock) {
+    if (isMock || (user && String(user.id || user.uid).startsWith("mock_"))) {
         const k = `prode_preds_${user.uid || user.id}`;
         const preds = JSON.parse(localStorage.getItem(k) || "{}");
         preds[matchId] = { result, homeGoals, awayGoals, updatedAt: new Date().toISOString() };

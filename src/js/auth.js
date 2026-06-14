@@ -15,7 +15,7 @@ export function initAuth(onUserChange) {
     if (import.meta.env.DEV && (isMock || hasMockParam || stored)) {
         if (stored) {
             const user = JSON.parse(stored);
-            currentUser = { id: user.uid };
+            currentUser = { id: user.uid, last_jackpot_win: user.last_jackpot_win || null };
             currentAlias = user.alias;
             onUserChange(currentUser, currentAlias, user.score);
         } else {
@@ -32,7 +32,7 @@ export function initAuth(onUserChange) {
                 // Obtener perfil del usuario desde la tabla users
                 let { data, error } = await supabase
                     .from('users')
-                    .select('alias, nombre, apellido, legajo, score, avatar_url, is_banned')
+                    .select('alias, nombre, apellido, legajo, score, avatar_url, is_banned, last_jackpot_win')
                     .eq('id', currentUser.id)
                     .single();
 
@@ -84,6 +84,7 @@ export function initAuth(onUserChange) {
                     currentAlias = data.alias || (data.nombre + ' ' + data.apellido).trim() || 'Usuario';
                     score = data.score || 0;
                     currentAvatarUrl = data.avatar_url || null;
+                    currentUser.last_jackpot_win = data.last_jackpot_win || null;
 
                     // Si el perfil no tiene nombre o avatar, y los metadatos de Google sí los tienen, los actualizamos
                     const meta = currentUser.user_metadata || {};

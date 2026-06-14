@@ -9,6 +9,7 @@ create table if not exists public.users (
   legajo text not null default '',
   score integer default 0,
   is_banned boolean default false,
+  last_jackpot_win text default null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
