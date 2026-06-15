@@ -35,17 +35,49 @@ export const ImageExporter = ({ raffle }) => {
       // Hide it back
       element.style.display = 'none';
 
-      const dataUrl = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.download = `rifa-${raffle.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.png`;
-      link.href = dataUrl;
-      link.click();
-
-      // Open WhatsApp sharing link (same behavior as compartir rifa)
+      const fileName = `rifa-${raffle.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.png`;
       const shareLink = `${window.location.origin}${window.location.pathname}#/raffle/${raffle.id}`;
       const text = `🔗 Elegí tus números ingresando acá: ${shareLink}`;
-      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-      window.open(waUrl, '_blank');
+
+      // Convert canvas to Blob
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) {
+        throw new Error('No se pudo generar el blob de la imagen');
+      }
+
+      const file = new File([blob], fileName, { type: 'image/png' });
+      const shareData = {
+        files: [file],
+        title: raffle.title,
+        text: text
+      };
+
+      let shared = false;
+      if (navigator.share && navigator.canShare) {
+        try {
+          if (navigator.canShare(shareData)) {
+            await navigator.share(shareData);
+            shared = true;
+          }
+        } catch (shareErr) {
+          console.log('Error sharing via Web Share API:', shareErr);
+          if (shareErr.name === 'AbortError') {
+            shared = true;
+          }
+        }
+      }
+
+      if (!shared) {
+        // Fallback: download locally and open WhatsApp link
+        const dataUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = dataUrl;
+        link.click();
+
+        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+        window.open(waUrl, '_blank');
+      }
     } catch (err) {
       console.error('Error al exportar imagen:', err);
       alert('Hubo un error al generar la imagen. Por favor, intenta de nuevo.');

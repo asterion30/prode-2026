@@ -1966,14 +1966,6 @@ let selectedChicanaImagePath = "";
 let selectedChicanaFileName = "";
 let currentActiveIndex = 0;
 
-// Audio recording state
-let mediaRecorder = null;
-let audioChunks = [];
-let recordedAudioBlob = null;
-let recordedAudioFile = null;
-let recordingTimerInterval = null;
-let recordingSeconds = 0;
-let previewAudio = null;
 
 function updateActiveChicanaInfo() {
     const img = customChicanaImages[currentActiveIndex];
@@ -2111,7 +2103,7 @@ function renderChicanaCarousel() {
     setTimeout(resetChicanaCarouselPosition, 100);
 }
 
-const handleShareCustomChicana = async (imagePath, fileName, text, audioFile) => {
+const handleShareCustomChicana = async (imagePath, fileName, text) => {
     try {
         const response = await fetch(imagePath);
         if (!response.ok) throw new Error("Image fetch failed");
@@ -2121,9 +2113,6 @@ const handleShareCustomChicana = async (imagePath, fileName, text, audioFile) =>
         const imgFile = new File([imgBlob], fileName, { type: imgType });
         
         const filesToShare = [imgFile];
-        if (audioFile) {
-            filesToShare.push(audioFile);
-        }
         
         let shared = false;
         if (navigator.share && navigator.canShare) {
@@ -2145,29 +2134,20 @@ const handleShareCustomChicana = async (imagePath, fileName, text, audioFile) =>
         }
         
         if (!shared) {
-            // Fallback: download the image, and if audio exists, download audio, and copy text
+            // Fallback: download the image and copy text
             const imgLink = document.createElement("a");
             imgLink.download = fileName;
             imgLink.href = URL.createObjectURL(imgBlob);
             imgLink.click();
             
-            if (audioFile) {
-                setTimeout(() => {
-                    const audioLink = document.createElement("a");
-                    audioLink.download = audioFile.name;
-                    audioLink.href = URL.createObjectURL(audioFile);
-                    audioLink.click();
-                }, 300);
-            }
-            
             setTimeout(() => {
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(text);
-                    alert("Se descargaron los archivos (imagen + audio) y se copió el texto al portapapeles. ¡Ya puedes compartirlos en WhatsApp o Telegram!");
+                    alert("Se descargó la imagen y se copió el texto al portapapeles. ¡Ya puedes compartirla en WhatsApp o Telegram!");
                 } else {
-                    alert(`Se descargaron los archivos. Texto: "${text}"`);
+                    alert(`Se descargó la imagen. Texto: "${text}"`);
                 }
-            }, 800);
+            }, 500);
         }
     } catch (err) {
         console.error("Error al compartir chicana custom:", err);
@@ -2194,221 +2174,10 @@ function initCustomChicanaSharing() {
         await handleShareCustomChicana(
             selectedChicanaImagePath, 
             selectedChicanaFileName, 
-            customText + "\n\nParticipe del Prode: " + window.location.origin,
-            recordedAudioFile
+            customText + "\n\nParticipe del Prode: " + window.location.origin
         );
         btnShare.disabled = false;
     };
-}
-
-function initAudioRecording() {
-    const btnRecord = document.getElementById("btn-record-audio");
-    const recordIcon = document.getElementById("record-icon");
-    const recordPulse = document.getElementById("record-pulse");
-    const recordTimer = document.getElementById("audio-record-timer");
-    const recordStatus = document.getElementById("audio-record-status");
-    const waveContainer = document.getElementById("audio-wave-container");
-    
-    const previewContainer = document.getElementById("audio-preview-container");
-    const btnPlayPreview = document.getElementById("btn-play-preview");
-    const playPreviewIcon = document.getElementById("play-preview-icon");
-    const previewDuration = document.getElementById("audio-preview-duration");
-    const btnDeleteAudio = document.getElementById("btn-delete-audio");
-    
-    if (!btnRecord || !recordIcon || !recordTimer || !recordStatus) return;
-    
-    let audioStream = null;
-    
-    const formatTime = (totalSeconds) => {
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    };
-    
-    const stopRecordingTracks = () => {
-        if (audioStream) {
-            audioStream.getTracks().forEach(track => track.stop());
-            audioStream = null;
-        }
-    };
-    
-    const startRecording = async () => {
-        try {
-            audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            
-            audioChunks = [];
-            
-            // Choose MIME type
-            const mimeTypes = ['audio/mp4', 'audio/webm', 'audio/ogg', 'audio/wav'];
-            let selectedMimeType = '';
-            for (const type of mimeTypes) {
-                if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(type)) {
-                    selectedMimeType = type;
-                    break;
-                }
-            }
-            
-            const options = selectedMimeType ? { mimeType: selectedMimeType } : {};
-            mediaRecorder = new MediaRecorder(audioStream, options);
-            
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data && event.data.size > 0) {
-                    audioChunks.push(event.data);
-                }
-            };
-            
-            mediaRecorder.onstop = () => {
-                const finalMimeType = mediaRecorder.mimeType || 'audio/wav';
-                recordedAudioBlob = new Blob(audioChunks, { type: finalMimeType });
-                
-                let extension = 'wav';
-                if (finalMimeType.includes('mp4')) extension = 'mp4';
-                else if (finalMimeType.includes('webm')) extension = 'webm';
-                else if (finalMimeType.includes('ogg')) extension = 'ogg';
-                
-                recordedAudioFile = new File([recordedAudioBlob], `chicana-audio.${extension}`, { type: finalMimeType });
-                
-                // Set up preview
-                if (previewAudio) {
-                    previewAudio.pause();
-                    previewAudio = null;
-                }
-                
-                previewAudio = new Audio(URL.createObjectURL(recordedAudioBlob));
-                previewAudio.onloadedmetadata = () => {
-                    if (previewDuration) {
-                        previewDuration.textContent = formatTime(Math.round(previewAudio.duration));
-                    }
-                };
-                
-                previewAudio.onended = () => {
-                    if (playPreviewIcon) {
-                        playPreviewIcon.className = "ph-fill ph-play text-sm";
-                    }
-                };
-                
-                // Show preview container, disable record button
-                if (previewContainer) {
-                    previewContainer.classList.remove("hidden");
-                }
-                btnRecord.disabled = true;
-                btnRecord.classList.add("opacity-40", "cursor-not-allowed");
-                btnRecord.classList.remove("hover:bg-red-600/20", "hover:text-red-500", "hover:border-red-500/30");
-            };
-            
-            // Start recorder
-            mediaRecorder.start();
-            
-            // Start timer
-            recordingSeconds = 0;
-            if (recordTimer) recordTimer.textContent = "0:00";
-            if (recordStatus) recordStatus.textContent = "Grabando...";
-            
-            recordingTimerInterval = setInterval(() => {
-                recordingSeconds++;
-                if (recordTimer) {
-                    recordTimer.textContent = formatTime(recordingSeconds);
-                }
-                if (recordingSeconds >= 60) {
-                    stopRecording();
-                }
-            }, 1000);
-            
-            // Update UI to recording state
-            btnRecord.classList.add("bg-red-600/20", "text-red-500", "border-red-500/50");
-            btnRecord.classList.remove("bg-slate-800", "text-slate-300", "border-slate-700/60");
-            recordIcon.className = "ph-bold ph-stop text-xl";
-            if (recordPulse) recordPulse.classList.remove("hidden");
-            if (waveContainer) waveContainer.classList.remove("hidden");
-            
-        } catch (err) {
-            console.error("Error accessing microphone:", err);
-            alert("No se pudo acceder al micrófono. Por favor, habilita los permisos de audio en tu navegador.");
-            stopRecordingTracks();
-            resetRecorderUI();
-        }
-    };
-    
-    const stopRecording = () => {
-        if (mediaRecorder && mediaRecorder.state !== "inactive") {
-            mediaRecorder.stop();
-        }
-        stopRecordingTracks();
-        if (recordingTimerInterval) {
-            clearInterval(recordingTimerInterval);
-            recordingTimerInterval = null;
-        }
-        
-        // Reset record button UI (but keep it disabled if we have a preview)
-        btnRecord.classList.remove("bg-red-600/20", "text-red-500", "border-red-500/50");
-        btnRecord.classList.add("bg-slate-800", "text-slate-300", "border-slate-700/60");
-        recordIcon.className = "ph-bold ph-microphone text-xl";
-        if (recordPulse) recordPulse.classList.add("hidden");
-        if (waveContainer) waveContainer.classList.add("hidden");
-        if (recordStatus) recordStatus.textContent = "Listo para compartir";
-    };
-    
-    const resetRecorderUI = () => {
-        if (recordingTimerInterval) {
-            clearInterval(recordingTimerInterval);
-            recordingTimerInterval = null;
-        }
-        stopRecordingTracks();
-        
-        btnRecord.disabled = false;
-        btnRecord.classList.remove("opacity-40", "cursor-not-allowed");
-        btnRecord.classList.add("hover:bg-red-600/20", "hover:text-red-500", "hover:border-red-500/30");
-        btnRecord.classList.remove("bg-red-600/20", "text-red-500", "border-red-500/50");
-        btnRecord.classList.add("bg-slate-800", "text-slate-300", "border-slate-700/60");
-        
-        recordIcon.className = "ph-bold ph-microphone text-xl";
-        if (recordPulse) recordPulse.classList.add("hidden");
-        if (waveContainer) waveContainer.classList.add("hidden");
-        
-        if (recordTimer) recordTimer.textContent = "0:00";
-        if (recordStatus) recordStatus.textContent = "Listo para grabar";
-        if (previewContainer) previewContainer.classList.add("hidden");
-    };
-    
-    btnRecord.onclick = () => {
-        if (mediaRecorder && mediaRecorder.state === "recording") {
-            stopRecording();
-        } else {
-            startRecording();
-        }
-    };
-    
-    if (btnPlayPreview) {
-        btnPlayPreview.onclick = () => {
-            if (!previewAudio) return;
-            
-            if (previewAudio.paused) {
-                previewAudio.play();
-                if (playPreviewIcon) {
-                    playPreviewIcon.className = "ph-fill ph-pause text-sm";
-                }
-            } else {
-                previewAudio.pause();
-                if (playPreviewIcon) {
-                    playPreviewIcon.className = "ph-fill ph-play text-sm";
-                }
-            }
-        };
-    }
-    
-    if (btnDeleteAudio) {
-        btnDeleteAudio.onclick = () => {
-            if (previewAudio) {
-                previewAudio.pause();
-                previewAudio = null;
-            }
-            recordedAudioBlob = null;
-            recordedAudioFile = null;
-            audioChunks = [];
-            
-            resetRecorderUI();
-        };
-    }
 }
 
 function setupPredefinedToggler() {
@@ -2686,7 +2455,6 @@ function initPremios() {
         loadCustomChicanasFromDb().then(() => {
             renderChicanaCarousel();
             initCustomChicanaSharing();
-            initAudioRecording();
             setupPredefinedToggler();
             setupCustomChicanaToggler();
             setupAdminChicanaUpload();
