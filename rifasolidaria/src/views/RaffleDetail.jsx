@@ -104,7 +104,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
           );
         } else {
           setShareMessage(
-            `¡Hola! Te invito a colaborar con mi rifa "${data.title}".\n\n` +
+            `¡Hola! Te invito a participar de mi rifa "${data.title}".\n\n` +
             `🔮 Sortea por: ${data.draw_method} (${data.draw_moment || 'Nocturna'}) el ${formattedDate}\n\n` +
             `🏆 Premios:\n${data.prizes.map((p, i) => `${i+1}° P: ${p.name}`).join('\n')}\n\n` +
             `🎟️ Valor del número: $${data.ticket_value.toLocaleString('es-AR')}\n` +
@@ -1349,7 +1349,7 @@ export const RaffleDetail = ({ raffleId, onNavigate }) => {
 
           {/* Poster Image Exporter component */}
           <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            <h3 style={{ fontSize: '1rem', color: 'white', textAlign: 'left' }}>Exportar Tablero</h3>
+            <h3 style={{ fontSize: '1rem', color: 'white', textAlign: 'left' }}>Compartir Tablero</h3>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', textAlign: 'left', lineHeight: '1.4' }}>
               Genera una imagen optimizada del estado actual de tu rifa para publicarla en tus historias de WhatsApp, Instagram o Facebook.
             </p>

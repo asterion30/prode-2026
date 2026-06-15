@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
-import { Download, Sparkles } from 'lucide-react';
+import { Download, Sparkles, Share2 } from 'lucide-react';
 
 export const ImageExporter = ({ raffle }) => {
   const [exporting, setExporting] = useState(false);
@@ -40,6 +40,12 @@ export const ImageExporter = ({ raffle }) => {
       link.download = `rifa-${raffle.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.png`;
       link.href = dataUrl;
       link.click();
+
+      // Open WhatsApp sharing link (same behavior as compartir rifa)
+      const shareLink = `${window.location.origin}${window.location.pathname}#/raffle/${raffle.id}`;
+      const text = `🔗 Elegí tus números ingresando acá: ${shareLink}`;
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank');
     } catch (err) {
       console.error('Error al exportar imagen:', err);
       alert('Hubo un error al generar la imagen. Por favor, intenta de nuevo.');
@@ -122,8 +128,8 @@ export const ImageExporter = ({ raffle }) => {
           </>
         ) : (
           <>
-            <Download size={18} />
-            Descargar Imagen para Compartir (9:16)
+            <Share2 size={18} />
+            Compartir Tablero
           </>
         )}
       </button>

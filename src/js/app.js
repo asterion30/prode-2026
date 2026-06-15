@@ -37,6 +37,12 @@ let currentLeagueId = null;
 let rankingState = [];
 let jackpotWinningPoints = 0;
 let luckyPrizeShared = false;
+let fixtureViewMode = "grid";
+try {
+    fixtureViewMode = localStorage.getItem("fixture_view_mode") || "grid";
+} catch (e) {
+    console.warn("Storage access not allowed or threw an error:", e);
+}
 
 
 // =======================
@@ -60,6 +66,8 @@ const matchesListEl = document.getElementById("matches-list");
 const rankingListEl = document.getElementById("ranking-list");
 const predictionsGridEl = document.getElementById("predictions-grid");
 const stageTabsContainer = document.getElementById("stage-tabs");
+const btnToggleFixtureView = document.getElementById("btn-toggle-fixture-view");
+const fixtureViewText = document.getElementById("fixture-view-text");
 
 const btnNavMatches = document.getElementById("nav-matches");
 const btnNavRanking = document.getElementById("nav-ranking");
@@ -444,6 +452,32 @@ function setActiveNav(activeBtn, activeView) {
 
 btnNavMatches.addEventListener('click', () => setActiveNav(btnNavMatches, matchesView));
 
+if (btnToggleFixtureView) {
+    const fixtureViewIconEl = document.getElementById("fixture-view-icon") || btnToggleFixtureView.querySelector('i:last-child');
+    if (fixtureViewIconEl) {
+        fixtureViewIconEl.className = fixtureViewMode === 'carousel' ? "ph-bold ph-list text-sm" : "ph-bold ph-slideshow text-sm";
+    }
+    
+    btnToggleFixtureView.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log("btnToggleFixtureView clicked. Current mode before toggle:", fixtureViewMode);
+        fixtureViewMode = fixtureViewMode === 'carousel' ? 'grid' : 'carousel';
+        console.log("New mode set to:", fixtureViewMode);
+        
+        try {
+            localStorage.setItem("fixture_view_mode", fixtureViewMode);
+        } catch (err) {
+            console.error("Failed to write to localStorage in sandboxed env:", err);
+        }
+        
+        if (fixtureViewIconEl) {
+            fixtureViewIconEl.className = fixtureViewMode === 'carousel' ? "ph-bold ph-list text-sm" : "ph-bold ph-slideshow text-sm";
+        }
+        
+        renderMatches();
+    });
+}
+
 btnNavRanking.addEventListener('click', () => setActiveNav(btnNavRanking, rankingView));
 
 if (btnNavGrupos) {
@@ -800,21 +834,199 @@ function renderStageTabs() {
     });
 }
 
-function renderMatches() {
-    matchesListEl.innerHTML = "";
+function createMatchCardElement(match, isCarousel) {
+    const matchDate = new Date(match.matchDate);
+    const now = new Date();
+    const diffMs = matchDate - now;
+    const hoursLeft = diffMs / (1000 * 60 * 60);
+    const isLocked = match.tbd || hoursLeft <= 1 || match.status === 'finished';
+    const pred = predictionsState[match.id] || { result: '' };
+
+    const card = document.createElement("div");
+    card.className = isCarousel
+        ? "bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-xl fade-in relative overflow-hidden shrink-0 snap-center w-full h-[295px] flex flex-col justify-between"
+        : "bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-sm fade-in relative overflow-hidden";
     
-    // Configurar tiempo actual
-    const now = new Date(); // Usará hora actual real
+    if (isLocked) {
+        card.classList.add("opacity-60");
+        if (match.tbd) card.classList.add("grayscale-[0.5]");
+    }
     
-    const filteredMatches = matchesState.filter(m => m.stage === currentStage);
+    const timeStr = matchDate.toLocaleDateString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    const fullDateStr = matchDate.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const formattedDate = match.tbd ? 'TBD' : (isCarousel ? fullDateStr : timeStr);
     
-    if (filteredMatches.length === 0) {
-        matchesListEl.innerHTML = `<div class="text-center text-slate-500 text-sm mt-10">No hay partidos cargados para esta fase.</div>`;
-        return;
+    const renderFlag = (flagName, teamName) => {
+        if (flagName === 'un') {
+            return `<div class="w-7 h-7 mt-1 bg-slate-700 rounded-full flex items-center justify-center border border-slate-600 shadow-inner"><i class="ph-bold ph-question text-slate-400"></i></div>`;
+        }
+        return `<img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${flagName}.svg" alt="${teamName}" class="w-7 h-auto drop-shadow-md rounded-[2px] mt-1 object-cover border border-slate-700" loading="lazy">`;
+    };
+
+    let statusBadge = '';
+    if (match.tbd) {
+        statusBadge = `<div class="absolute top-0 right-0 bg-slate-600/80 text-[10px] text-white font-bold px-2 py-1 rounded-bl-lg">POR DEFINIR</div>`;
+    } else if (hoursLeft <= 1 || match.status === 'finished') {
+        statusBadge = `<div class="absolute top-0 right-0 bg-red-500/80 text-[10px] text-white font-bold px-2 py-1 rounded-bl-lg">CERRADO</div>`;
     }
 
-    let matchesToRender = [...filteredMatches].sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
+    let finalScoreHtml = '';
+    if (match.homeGoals !== null && match.homeGoals !== undefined && match.homeGoals !== '') {
+        finalScoreHtml = `
+            <div class="mt-2.5 mb-1 flex flex-col items-center justify-center bg-brand-500/10 border border-brand-500/20 rounded-xl py-1.5 px-3">
+                <span class="text-[9px] text-brand-400 font-bold uppercase tracking-widest mb-0.5">Resultado Final</span>
+                <span class="text-sm font-black text-white">${match.homeGoals} - ${match.awayGoals}</span>
+            </div>
+        `;
+    }
 
+    card.innerHTML = `
+        ${statusBadge}
+        <div class="text-center text-[10px] text-slate-400 mb-4 font-bold uppercase tracking-widest">${formattedDate}</div>
+        
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex flex-col items-center flex-[2] min-w-[70px] shrink-0">
+                    <span class="text-xs font-bold font-sans text-center leading-tight mb-2 max-w-full overflow-hidden text-ellipsis text-slate-200">${match.homeTeam}</span>
+                    ${renderFlag(match.homeFlag, match.homeTeam)}
+                </div>
+                
+                <div class="flex flex-col items-center gap-2 flex-[3] max-w-[140px] min-w-[110px] shrink-0">
+                    <div class="flex items-center justify-between bg-slate-900 rounded-lg p-1 border border-slate-700 w-full shadow-inner ${match.tbd ? 'opacity-50 pointer-events-none' : ''}">
+                        <button id="btn-L-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'L' ? 'bg-brand-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all" ${isLocked ? 'disabled' : ''}>L</button>
+                        <button id="btn-E-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'E' ? 'bg-slate-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all mx-1" ${isLocked ? 'disabled' : ''}>E</button>
+                        <button id="btn-V-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'V' ? 'bg-brand-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all" ${isLocked ? 'disabled' : ''}>V</button>
+                    </div>
+                    
+                    <div class="flex items-center justify-center gap-2 w-full ${match.tbd ? 'opacity-50 pointer-events-none' : ''}">
+                        <input type="number" id="home-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" max="25" placeholder="-" value="${pred.homeGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
+                        <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Goles</span>
+                        <input type="number" id="away-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" max="25" placeholder="-" value="${pred.awayGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center flex-[2] min-w-[70px] shrink-0">
+                    <span class="text-xs font-bold font-sans text-center leading-tight mb-2 max-w-full overflow-hidden text-ellipsis text-slate-200">${match.awayTeam}</span>
+                    ${renderFlag(match.awayFlag, match.awayTeam)}
+                </div>
+            </div>
+        </div>
+        
+        ${finalScoreHtml}
+        
+        <div class="mt-3 flex flex-col items-center justify-center gap-1">
+            <span id="status-${match.id}" class="text-[10px] text-brand-500 font-medium opacity-0 transition-opacity h-4">Guardado ✓</span>
+            <span class="text-[9px] text-slate-500 italic text-center leading-tight">Los resultados pueden modificarse hasta una hora antes del partido</span>
+            ${pred.result ? `
+                <button id="btn-share-match-${match.id}" class="mt-2 bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 hover:text-brand-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border border-brand-500/20 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i class="ph-bold ph-share-network text-sm"></i> Compartir Pronóstico
+                </button>
+            ` : ''}
+        </div>
+    `;
+
+    if (!isLocked) {
+        const handleBet = async (res) => {
+            const currentNow = new Date();
+            const currentDiffMs = matchDate - currentNow;
+            const currentHoursLeft = currentDiffMs / (1000 * 60 * 60);
+            if (match.status === 'finished' || currentHoursLeft <= 1) {
+                alert("Este partido ya está cerrado para nuevos pronósticos (cierra 1 hora antes de iniciar). Se recargará la página.");
+                location.reload();
+                return;
+            }
+
+            const hGInput = card.querySelector(`#home-goals-${match.id}`);
+            const aGInput = card.querySelector(`#away-goals-${match.id}`);
+            let hG = hGInput.value;
+            let aG = aGInput.value;
+            
+            if (hG !== '' && parseInt(hG, 10) > 25) { hG = '25'; hGInput.value = '25'; }
+            if (aG !== '' && parseInt(aG, 10) > 25) { aG = '25'; aGInput.value = '25'; }
+            
+            if (hG !== '' && aG !== '') {
+                const h = parseInt(hG, 10);
+                const a = parseInt(aG, 10);
+                let impliedRes = 'E';
+                if (h > a) impliedRes = 'L';
+                else if (a > h) impliedRes = 'V';
+                if (impliedRes !== res) res = impliedRes;
+            }
+            
+            const statusEl = card.querySelector(`#status-${match.id}`);
+            ['L','E','V'].forEach(k => {
+                const b = card.querySelector(`#btn-${k}-${match.id}`);
+                b.className = `prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm transition-all ${k === 'E' ? 'mx-1' : ''} text-slate-400 hover:bg-slate-700`;
+            });
+            
+            if (res) {
+                const activeBtn = card.querySelector(`#btn-${res}-${match.id}`);
+                activeBtn.className = `prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm transition-all shadow-md ${res === 'E' ? 'mx-1 bg-slate-500 text-white' : 'bg-brand-500 text-white'}`;
+            }
+            
+            statusEl.textContent = "Guardando...";
+            statusEl.classList.remove("opacity-0", "text-red-400", "text-brand-500");
+            statusEl.classList.add("text-slate-400");
+            
+            try {
+                await savePrediction(match.id, res, hG, aG);
+                statusEl.textContent = "¡Guardado ✓!";
+                statusEl.classList.remove("text-slate-400");
+                statusEl.classList.add("text-brand-500");
+                setTimeout(() => { if (statusEl) statusEl.classList.add("opacity-0"); }, 2000);
+            } catch(error) {
+                statusEl.textContent = "Error al guardar";
+                statusEl.classList.remove("text-slate-400");
+                statusEl.classList.add("text-red-400");
+            }
+        };
+        
+        const handleGoalChange = () => {
+            const hG = card.querySelector(`#home-goals-${match.id}`).value;
+            const aG = card.querySelector(`#away-goals-${match.id}`).value;
+            if (hG !== '' && aG !== '') {
+                const h = parseInt(hG, 10);
+                const a = parseInt(aG, 10);
+                let detectedRes = 'E';
+                if (h > a) detectedRes = 'L';
+                else if (a > h) detectedRes = 'V';
+                handleBet(detectedRes);
+            } else {
+                const isL = card.querySelector(`#btn-L-${match.id}`).classList.contains('bg-brand-500');
+                const isV = card.querySelector(`#btn-V-${match.id}`).classList.contains('bg-brand-500');
+                const isE = card.querySelector(`#btn-E-${match.id}`).classList.contains('bg-slate-500');
+                let currRes = '';
+                if (isL) currRes = 'L'; else if (isV) currRes = 'V'; else if (isE) currRes = 'E';
+                if (currRes) handleBet(currRes);
+            }
+        };
+
+        card.querySelector(`#btn-L-${match.id}`).addEventListener("click", () => handleBet('L'));
+        card.querySelector(`#btn-E-${match.id}`).addEventListener("click", () => handleBet('E'));
+        card.querySelector(`#btn-V-${match.id}`).addEventListener("click", () => handleBet('V'));
+        
+        const enforceMax = (e) => { if(e.target.value && parseInt(e.target.value, 10) > 25) e.target.value = '25'; };
+        const homeInput = card.querySelector(`#home-goals-${match.id}`);
+        const awayInput = card.querySelector(`#away-goals-${match.id}`);
+        homeInput.addEventListener("input", enforceMax);
+        awayInput.addEventListener("input", enforceMax);
+        homeInput.addEventListener("input", handleGoalChange);
+        awayInput.addEventListener("input", handleGoalChange);
+    }
+
+    const shareBtn = card.querySelector(`#btn-share-match-${match.id}`);
+    if (shareBtn) {
+        shareBtn.addEventListener("click", () => {
+            const currentUserObj = getCurrentUser();
+            const userAlias = currentUserObj.alias || 'Usuario';
+            sharePredictionImage(match, pred, userAlias);
+        });
+    }
+
+    return card;
+}
+
+function renderMatchesGrid(matchesToRender) {
     let lastDayLabel = null;
     let currentDayContainer = null;
     window.prodeOpenSections = window.prodeOpenSections || new Set();
@@ -864,179 +1076,116 @@ function renderMatches() {
             lastDayLabel = dayLabel;
         }
 
-        // Configurar tiempo actual y bloqueo
-        const now = new Date();
-        const diffMs = matchDate - now;
-        const hoursLeft = diffMs / (1000 * 60 * 60);
-        const isLocked = match.tbd || hoursLeft <= 1 || match.status === 'finished';
-        const pred = predictionsState[match.id] || { result: '' };
-        
-        // Match Card HTML
-        const card = document.createElement("div");
-        card.className = "bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-sm fade-in relative overflow-hidden";
-        if (isLocked) {
-            card.classList.add("opacity-60");
-            if(match.tbd) card.classList.add("grayscale-[0.5]");
-        }
-        
-        const dateStr = matchDate.toLocaleDateString('es-AR', { hour: '2-digit', minute: '2-digit' });
-        
-        const renderFlag = (flagName, teamName) => {
-            if (flagName === 'un') {
-                return `<div class="w-7 h-7 mt-1 bg-slate-700 rounded-full flex items-center justify-center border border-slate-600 shadow-inner"><i class="ph-bold ph-question text-slate-400"></i></div>`;
-            }
-            return `<img src="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${flagName}.svg" alt="${teamName}" class="w-7 h-auto drop-shadow-md rounded-[2px] mt-1 object-cover border border-slate-700" loading="lazy">`;
-        };
-
-        let statusBadge = '';
-        if (match.tbd) {
-            statusBadge = `<div class="absolute top-0 right-0 bg-slate-600/80 text-[10px] text-white font-bold px-2 py-1 rounded-bl-lg">POR DEFINIR</div>`;
-        } else if (hoursLeft <= 1 || match.status === 'finished') {
-            statusBadge = `<div class="absolute top-0 right-0 bg-red-500/80 text-[10px] text-white font-bold px-2 py-1 rounded-bl-lg">CERRADO</div>`;
-        }
-
-        card.innerHTML = `
-            ${statusBadge}
-            <div class="text-center text-[10px] text-slate-400 mb-4 font-bold uppercase tracking-widest">${match.tbd ? 'TBD' : dateStr}</div>
-            
-            <div class="flex flex-col gap-3">
-                <div class="flex items-center justify-between gap-2">
-                    <div class="flex flex-col items-center flex-[2]">
-                        <span class="text-xs font-bold font-sans text-center leading-tight mb-2 max-w-full overflow-hidden text-ellipsis text-slate-200">${match.homeTeam}</span>
-                        ${renderFlag(match.homeFlag, match.homeTeam)}
-                    </div>
-                    
-                    <div class="flex flex-col items-center gap-2 flex-[3] max-w-[140px]">
-                        <div class="flex items-center justify-between bg-slate-900 rounded-lg p-1 border border-slate-700 w-full shadow-inner ${match.tbd ? 'opacity-50 pointer-events-none' : ''}">
-                            <button id="btn-L-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'L' ? 'bg-brand-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all" ${isLocked ? 'disabled' : ''}>L</button>
-                            <button id="btn-E-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'E' ? 'bg-slate-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all mx-1" ${isLocked ? 'disabled' : ''}>E</button>
-                            <button id="btn-V-${match.id}" class="prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm ${pred.result === 'V' ? 'bg-brand-500 text-white shadow-md' : 'text-slate-400 hover:bg-slate-700'} transition-all" ${isLocked ? 'disabled' : ''}>V</button>
-                        </div>
-                        
-                        <div class="flex items-center justify-center gap-2 w-full ${match.tbd ? 'opacity-50 pointer-events-none' : ''}">
-                            <input type="number" id="home-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" max="25" placeholder="-" value="${pred.homeGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
-                            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Goles</span>
-                            <input type="number" id="away-goals-${match.id}" class="w-10 h-7 text-center bg-slate-900 border border-slate-700 rounded text-slate-200 font-bold text-xs focus:ring-1 focus:ring-brand-500 outline-none" min="0" max="25" placeholder="-" value="${pred.awayGoals ?? ''}" ${isLocked ? 'disabled' : ''}>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col items-center flex-[2]">
-                        <span class="text-xs font-bold font-sans text-center leading-tight mb-2 max-w-full overflow-hidden text-ellipsis text-slate-200">${match.awayTeam}</span>
-                        ${renderFlag(match.awayFlag, match.awayTeam)}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-3 flex flex-col items-center justify-center gap-1">
-                <span id="status-${match.id}" class="text-[10px] text-brand-500 font-medium opacity-0 transition-opacity h-4">Guardado ✓</span>
-                <span class="text-[9px] text-slate-500 italic text-center leading-tight">Los resultados pueden modificarse hasta una hora antes del partido</span>
-                ${pred.result ? `
-                    <button id="btn-share-match-${match.id}" class="mt-2 bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 hover:text-brand-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border border-brand-500/20 flex items-center justify-center gap-1.5 cursor-pointer">
-                        <i class="ph-bold ph-share-network text-sm"></i> Compartir Pronóstico
-                    </button>
-                ` : ''}
-            </div>
-        `;
-        
+        const card = createMatchCardElement(match, false);
         currentDayContainer.appendChild(card);
-        
-        if (!isLocked) {
-            const handleBet = async (res) => {
-                // Validar de nuevo el cierre del partido antes de guardar (evita guardar si la página quedó abierta)
-                const currentNow = new Date();
-                const currentDiffMs = matchDate - currentNow;
-                const currentHoursLeft = currentDiffMs / (1000 * 60 * 60);
-                if (match.status === 'finished' || currentHoursLeft <= 1) {
-                    alert("Este partido ya está cerrado para nuevos pronósticos (cierra 1 hora antes de iniciar). Se recargará la página.");
-                    location.reload();
-                    return;
-                }
+    });
+}
 
-                const hGInput = document.getElementById(`home-goals-${match.id}`);
-                const aGInput = document.getElementById(`away-goals-${match.id}`);
-                let hG = hGInput.value;
-                let aG = aGInput.value;
-                
-                if (hG !== '' && parseInt(hG, 10) > 25) { hG = '25'; hGInput.value = '25'; }
-                if (aG !== '' && parseInt(aG, 10) > 25) { aG = '25'; aGInput.value = '25'; }
-                
-                if (hG !== '' && aG !== '') {
-                    const h = parseInt(hG, 10);
-                    const a = parseInt(aG, 10);
-                    let impliedRes = 'E';
-                    if (h > a) impliedRes = 'L';
-                    else if (a > h) impliedRes = 'V';
-                    if (impliedRes !== res) res = impliedRes;
-                }
-                
-                const statusEl = document.getElementById(`status-${match.id}`);
-                ['L','E','V'].forEach(k => {
-                    const b = document.getElementById(`btn-${k}-${match.id}`);
-                    b.className = `prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm transition-all ${k === 'E' ? 'mx-1' : ''} text-slate-400 hover:bg-slate-700`;
-                });
-                
-                if (res) {
-                    const activeBtn = document.getElementById(`btn-${res}-${match.id}`);
-                    activeBtn.className = `prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm transition-all shadow-md ${res === 'E' ? 'mx-1 bg-slate-500 text-white' : 'bg-brand-500 text-white'}`;
-                }
-                
-                statusEl.textContent = "Guardando...";
-                statusEl.classList.remove("opacity-0", "text-red-400", "text-brand-500");
-                statusEl.classList.add("text-slate-400");
-                
-                try {
-                    await savePrediction(match.id, res, hG, aG);
-                    statusEl.textContent = "¡Guardado ✓!";
-                    statusEl.classList.remove("text-slate-400");
-                    statusEl.classList.add("text-brand-500");
-                    setTimeout(() => statusEl.classList.add("opacity-0"), 2000);
-                } catch(error) {
-                    statusEl.textContent = "Error al guardar";
-                    statusEl.classList.remove("text-slate-400");
-                    statusEl.classList.add("text-red-400");
-                }
-            };
-            
-            const handleGoalChange = () => {
-                const hG = document.getElementById(`home-goals-${match.id}`).value;
-                const aG = document.getElementById(`away-goals-${match.id}`).value;
-                if (hG !== '' && aG !== '') {
-                    const h = parseInt(hG, 10);
-                    const a = parseInt(aG, 10);
-                    let detectedRes = 'E';
-                    if (h > a) detectedRes = 'L';
-                    else if (a > h) detectedRes = 'V';
-                    handleBet(detectedRes);
-                } else {
-                    const isL = document.getElementById(`btn-L-${match.id}`).classList.contains('bg-brand-500');
-                    const isV = document.getElementById(`btn-V-${match.id}`).classList.contains('bg-brand-500');
-                    const isE = document.getElementById(`btn-E-${match.id}`).classList.contains('bg-slate-500');
-                    let currRes = '';
-                    if (isL) currRes = 'L'; else if (isV) currRes = 'V'; else if (isE) currRes = 'E';
-                    if (currRes) handleBet(currRes);
-                }
-            };
+function renderMatchesCarousel(matchesToRender) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "relative group w-full max-w-md mx-auto py-8";
 
-            document.getElementById(`btn-L-${match.id}`).addEventListener("click", () => handleBet('L'));
-            document.getElementById(`btn-E-${match.id}`).addEventListener("click", () => handleBet('E'));
-            document.getElementById(`btn-V-${match.id}`).addEventListener("click", () => handleBet('V'));
-            
-            const enforceMax = (e) => { if(e.target.value && parseInt(e.target.value, 10) > 25) e.target.value = '25'; };
-            document.getElementById(`home-goals-${match.id}`).addEventListener("input", enforceMax);
-            document.getElementById(`away-goals-${match.id}`).addEventListener("input", enforceMax);
-            document.getElementById(`home-goals-${match.id}`).addEventListener("input", handleGoalChange);
-            document.getElementById(`away-goals-${match.id}`).addEventListener("input", handleGoalChange);
+    const carousel = document.createElement("div");
+    carousel.id = "matches-carousel";
+    carousel.className = "flex flex-col gap-4 overflow-y-auto snap-y snap-mandatory pb-4 scroll-smooth hide-scrollbar w-full h-[295px]";
+
+    matchesToRender.forEach(match => {
+        const card = createMatchCardElement(match, true);
+        carousel.appendChild(card);
+    });
+
+    // Create Top and Bottom floating overlay buttons
+    const btnPrev = document.createElement("button");
+    btnPrev.type = "button";
+    btnPrev.id = "btn-prev-match-carousel";
+    btnPrev.className = "absolute top-1 left-1/2 -translate-x-1/2 z-10 w-8 h-8 rounded-full bg-slate-950/85 hover:bg-brand-500 text-white hover:text-slate-950 flex items-center justify-center transition-all border border-slate-700 shadow-md opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer disabled:opacity-0 disabled:pointer-events-none";
+    btnPrev.innerHTML = `<i class="ph-bold ph-caret-up text-base"></i>`;
+
+    const btnNext = document.createElement("button");
+    btnNext.type = "button";
+    btnNext.id = "btn-next-match-carousel";
+    btnNext.className = "absolute bottom-1 left-1/2 -translate-x-1/2 z-10 w-8 h-8 rounded-full bg-slate-950/85 hover:bg-brand-500 text-white hover:text-slate-950 flex items-center justify-center transition-all border border-slate-700 shadow-md opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer disabled:opacity-0 disabled:pointer-events-none";
+    btnNext.innerHTML = `<i class="ph-bold ph-caret-down text-base"></i>`;
+
+    wrapper.appendChild(btnPrev);
+    wrapper.appendChild(carousel);
+    wrapper.appendChild(btnNext);
+    matchesListEl.appendChild(wrapper);
+
+    const getCardHeight = () => {
+        if (carousel.firstElementChild) {
+            return carousel.firstElementChild.offsetHeight + 16;
         }
+        return 295 + 16;
+    };
 
-        const shareBtn = document.getElementById(`btn-share-match-${match.id}`);
-        if (shareBtn) {
-            shareBtn.addEventListener("click", () => {
-                const currentUserObj = getCurrentUser();
-                const userAlias = currentUserObj.alias || 'Usuario';
-                sharePredictionImage(match, pred, userAlias);
-            });
+    const updateNavButtons = () => {
+        const scrollTop = carousel.scrollTop;
+        const cardHeight = getCardHeight();
+        const currentIndex = Math.min(
+            Math.max(0, Math.round(scrollTop / cardHeight)),
+            matchesToRender.length - 1
+        );
+        
+        btnPrev.disabled = currentIndex === 0;
+        btnNext.disabled = currentIndex === matchesToRender.length - 1;
+    };
+
+    carousel.addEventListener('scroll', updateNavButtons);
+
+    btnPrev.onclick = () => {
+        const cardHeight = getCardHeight();
+        carousel.scrollBy({ top: -cardHeight, behavior: 'smooth' });
+    };
+
+    btnNext.onclick = () => {
+        const cardHeight = getCardHeight();
+        carousel.scrollBy({ top: cardHeight, behavior: 'smooth' });
+    };
+
+    // Calculate closest match
+    let closestIndex = 0;
+    let minDiff = Infinity;
+    const nowMs = Date.now();
+    matchesToRender.forEach((m, idx) => {
+        if (m.tbd) return;
+        const mTime = new Date(m.matchDate).getTime();
+        const diff = mTime - nowMs;
+        if (m.status !== 'finished') {
+            const absDiff = Math.abs(diff);
+            if (absDiff < minDiff) {
+                minDiff = absDiff;
+                closestIndex = idx;
+            }
         }
     });
+
+    setTimeout(() => {
+        const closestCard = carousel.children[closestIndex];
+        if (closestCard) {
+            closestCard.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
+        }
+        updateNavButtons();
+    }, 100);
+}
+
+function renderMatches() {
+    matchesListEl.innerHTML = "";
+    
+    const filteredMatches = matchesState.filter(m => m.stage === currentStage);
+    
+    if (filteredMatches.length === 0) {
+        matchesListEl.innerHTML = `<div class="text-center text-slate-500 text-sm mt-10">No hay partidos cargados para esta fase.</div>`;
+        return;
+    }
+
+    let matchesToRender = [...filteredMatches].sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
+
+    if (fixtureViewMode === 'carousel') {
+        renderMatchesCarousel(matchesToRender);
+    } else {
+        renderMatchesGrid(matchesToRender);
+    }
 }
 
 function renderRanking(ranking) {
@@ -1805,6 +1954,15 @@ let selectedChicanaImagePath = "";
 let selectedChicanaFileName = "";
 let currentActiveIndex = 0;
 
+// Audio recording state
+let mediaRecorder = null;
+let audioChunks = [];
+let recordedAudioBlob = null;
+let recordedAudioFile = null;
+let recordingTimerInterval = null;
+let recordingSeconds = 0;
+let previewAudio = null;
+
 function updateActiveChicanaInfo() {
     const img = customChicanaImages[currentActiveIndex];
     if (!img) return;
@@ -1941,6 +2099,70 @@ function renderChicanaCarousel() {
     setTimeout(resetChicanaCarouselPosition, 100);
 }
 
+const handleShareCustomChicana = async (imagePath, fileName, text, audioFile) => {
+    try {
+        const response = await fetch(imagePath);
+        if (!response.ok) throw new Error("Image fetch failed");
+        const imgBlob = await response.blob();
+        
+        const imgType = fileName.endsWith('.png') ? 'image/png' : 'image/webp';
+        const imgFile = new File([imgBlob], fileName, { type: imgType });
+        
+        const filesToShare = [imgFile];
+        if (audioFile) {
+            filesToShare.push(audioFile);
+        }
+        
+        let shared = false;
+        if (navigator.share && navigator.canShare) {
+            try {
+                if (navigator.canShare({ files: filesToShare })) {
+                    await navigator.share({
+                        files: filesToShare,
+                        title: "Mi Chicana - Prode Mundial 2026",
+                        text: text
+                    });
+                    shared = true;
+                }
+            } catch (shareErr) {
+                console.log("Compartir custom falló o fue cancelado:", shareErr);
+                if (shareErr.name === 'AbortError') {
+                    shared = true;
+                }
+            }
+        }
+        
+        if (!shared) {
+            // Fallback: download the image, and if audio exists, download audio, and copy text
+            const imgLink = document.createElement("a");
+            imgLink.download = fileName;
+            imgLink.href = URL.createObjectURL(imgBlob);
+            imgLink.click();
+            
+            if (audioFile) {
+                setTimeout(() => {
+                    const audioLink = document.createElement("a");
+                    audioLink.download = audioFile.name;
+                    audioLink.href = URL.createObjectURL(audioFile);
+                    audioLink.click();
+                }, 300);
+            }
+            
+            setTimeout(() => {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text);
+                    alert("Se descargaron los archivos (imagen + audio) y se copió el texto al portapapeles. ¡Ya puedes compartirlos en WhatsApp o Telegram!");
+                } else {
+                    alert(`Se descargaron los archivos. Texto: "${text}"`);
+                }
+            }, 800);
+        }
+    } catch (err) {
+        console.error("Error al compartir chicana custom:", err);
+        handleShareText(text);
+    }
+};
+
 function initCustomChicanaSharing() {
     const btnShare = document.getElementById("btn-share-custom-chicana");
     const textarea = document.getElementById("chicana-custom-text");
@@ -1957,13 +2179,224 @@ function initCustomChicanaSharing() {
         }
         
         btnShare.disabled = true;
-        await handleSharePremioCard(
+        await handleShareCustomChicana(
             selectedChicanaImagePath, 
             selectedChicanaFileName, 
-            customText + "\n\nParticipe del Prode: " + window.location.origin
+            customText + "\n\nParticipe del Prode: " + window.location.origin,
+            recordedAudioFile
         );
         btnShare.disabled = false;
     };
+}
+
+function initAudioRecording() {
+    const btnRecord = document.getElementById("btn-record-audio");
+    const recordIcon = document.getElementById("record-icon");
+    const recordPulse = document.getElementById("record-pulse");
+    const recordTimer = document.getElementById("audio-record-timer");
+    const recordStatus = document.getElementById("audio-record-status");
+    const waveContainer = document.getElementById("audio-wave-container");
+    
+    const previewContainer = document.getElementById("audio-preview-container");
+    const btnPlayPreview = document.getElementById("btn-play-preview");
+    const playPreviewIcon = document.getElementById("play-preview-icon");
+    const previewDuration = document.getElementById("audio-preview-duration");
+    const btnDeleteAudio = document.getElementById("btn-delete-audio");
+    
+    if (!btnRecord || !recordIcon || !recordTimer || !recordStatus) return;
+    
+    let audioStream = null;
+    
+    const formatTime = (totalSeconds) => {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+    
+    const stopRecordingTracks = () => {
+        if (audioStream) {
+            audioStream.getTracks().forEach(track => track.stop());
+            audioStream = null;
+        }
+    };
+    
+    const startRecording = async () => {
+        try {
+            audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            audioChunks = [];
+            
+            // Choose MIME type
+            const mimeTypes = ['audio/mp4', 'audio/webm', 'audio/ogg', 'audio/wav'];
+            let selectedMimeType = '';
+            for (const type of mimeTypes) {
+                if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(type)) {
+                    selectedMimeType = type;
+                    break;
+                }
+            }
+            
+            const options = selectedMimeType ? { mimeType: selectedMimeType } : {};
+            mediaRecorder = new MediaRecorder(audioStream, options);
+            
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data && event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
+            
+            mediaRecorder.onstop = () => {
+                const finalMimeType = mediaRecorder.mimeType || 'audio/wav';
+                recordedAudioBlob = new Blob(audioChunks, { type: finalMimeType });
+                
+                let extension = 'wav';
+                if (finalMimeType.includes('mp4')) extension = 'mp4';
+                else if (finalMimeType.includes('webm')) extension = 'webm';
+                else if (finalMimeType.includes('ogg')) extension = 'ogg';
+                
+                recordedAudioFile = new File([recordedAudioBlob], `chicana-audio.${extension}`, { type: finalMimeType });
+                
+                // Set up preview
+                if (previewAudio) {
+                    previewAudio.pause();
+                    previewAudio = null;
+                }
+                
+                previewAudio = new Audio(URL.createObjectURL(recordedAudioBlob));
+                previewAudio.onloadedmetadata = () => {
+                    if (previewDuration) {
+                        previewDuration.textContent = formatTime(Math.round(previewAudio.duration));
+                    }
+                };
+                
+                previewAudio.onended = () => {
+                    if (playPreviewIcon) {
+                        playPreviewIcon.className = "ph-fill ph-play text-sm";
+                    }
+                };
+                
+                // Show preview container, disable record button
+                if (previewContainer) {
+                    previewContainer.classList.remove("hidden");
+                }
+                btnRecord.disabled = true;
+                btnRecord.classList.add("opacity-40", "cursor-not-allowed");
+                btnRecord.classList.remove("hover:bg-red-600/20", "hover:text-red-500", "hover:border-red-500/30");
+            };
+            
+            // Start recorder
+            mediaRecorder.start();
+            
+            // Start timer
+            recordingSeconds = 0;
+            if (recordTimer) recordTimer.textContent = "0:00";
+            if (recordStatus) recordStatus.textContent = "Grabando...";
+            
+            recordingTimerInterval = setInterval(() => {
+                recordingSeconds++;
+                if (recordTimer) {
+                    recordTimer.textContent = formatTime(recordingSeconds);
+                }
+                if (recordingSeconds >= 60) {
+                    stopRecording();
+                }
+            }, 1000);
+            
+            // Update UI to recording state
+            btnRecord.classList.add("bg-red-600/20", "text-red-500", "border-red-500/50");
+            btnRecord.classList.remove("bg-slate-800", "text-slate-300", "border-slate-700/60");
+            recordIcon.className = "ph-bold ph-stop text-xl";
+            if (recordPulse) recordPulse.classList.remove("hidden");
+            if (waveContainer) waveContainer.classList.remove("hidden");
+            
+        } catch (err) {
+            console.error("Error accessing microphone:", err);
+            alert("No se pudo acceder al micrófono. Por favor, habilita los permisos de audio en tu navegador.");
+            stopRecordingTracks();
+            resetRecorderUI();
+        }
+    };
+    
+    const stopRecording = () => {
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+        }
+        stopRecordingTracks();
+        if (recordingTimerInterval) {
+            clearInterval(recordingTimerInterval);
+            recordingTimerInterval = null;
+        }
+        
+        // Reset record button UI (but keep it disabled if we have a preview)
+        btnRecord.classList.remove("bg-red-600/20", "text-red-500", "border-red-500/50");
+        btnRecord.classList.add("bg-slate-800", "text-slate-300", "border-slate-700/60");
+        recordIcon.className = "ph-bold ph-microphone text-xl";
+        if (recordPulse) recordPulse.classList.add("hidden");
+        if (waveContainer) waveContainer.classList.add("hidden");
+        if (recordStatus) recordStatus.textContent = "Listo para compartir";
+    };
+    
+    const resetRecorderUI = () => {
+        if (recordingTimerInterval) {
+            clearInterval(recordingTimerInterval);
+            recordingTimerInterval = null;
+        }
+        stopRecordingTracks();
+        
+        btnRecord.disabled = false;
+        btnRecord.classList.remove("opacity-40", "cursor-not-allowed");
+        btnRecord.classList.add("hover:bg-red-600/20", "hover:text-red-500", "hover:border-red-500/30");
+        btnRecord.classList.remove("bg-red-600/20", "text-red-500", "border-red-500/50");
+        btnRecord.classList.add("bg-slate-800", "text-slate-300", "border-slate-700/60");
+        
+        recordIcon.className = "ph-bold ph-microphone text-xl";
+        if (recordPulse) recordPulse.classList.add("hidden");
+        if (waveContainer) waveContainer.classList.add("hidden");
+        
+        if (recordTimer) recordTimer.textContent = "0:00";
+        if (recordStatus) recordStatus.textContent = "Listo para grabar";
+        if (previewContainer) previewContainer.classList.add("hidden");
+    };
+    
+    btnRecord.onclick = () => {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    };
+    
+    if (btnPlayPreview) {
+        btnPlayPreview.onclick = () => {
+            if (!previewAudio) return;
+            
+            if (previewAudio.paused) {
+                previewAudio.play();
+                if (playPreviewIcon) {
+                    playPreviewIcon.className = "ph-fill ph-pause text-sm";
+                }
+            } else {
+                previewAudio.pause();
+                if (playPreviewIcon) {
+                    playPreviewIcon.className = "ph-fill ph-play text-sm";
+                }
+            }
+        };
+    }
+    
+    if (btnDeleteAudio) {
+        btnDeleteAudio.onclick = () => {
+            if (previewAudio) {
+                previewAudio.pause();
+                previewAudio = null;
+            }
+            recordedAudioBlob = null;
+            recordedAudioFile = null;
+            audioChunks = [];
+            
+            resetRecorderUI();
+        };
+    }
 }
 
 function setupPredefinedToggler() {
@@ -1978,6 +2411,25 @@ function setupPredefinedToggler() {
                 icon.classList.remove("rotate-90");
             } else {
                 icon.classList.add("rotate-90");
+            }
+        };
+    }
+}
+
+function setupCustomChicanaToggler() {
+    const btn = document.getElementById("btn-toggle-custom-chicana");
+    const container = document.getElementById("custom-chicana-container");
+    const icon = document.getElementById("icon-toggle-custom-chicana");
+    if (btn && container && icon) {
+        btn.onclick = null;
+        btn.onclick = () => {
+            const isHidden = container.classList.toggle("hidden");
+            if (isHidden) {
+                icon.classList.remove("rotate-90");
+            } else {
+                icon.classList.add("rotate-90");
+                // Reset carousel position when opening so the heights are computed correctly
+                setTimeout(resetChicanaCarouselPosition, 50);
             }
         };
     }
@@ -2008,7 +2460,9 @@ function initPremios() {
     if (!selectedChicanaImagePath) {
         renderChicanaCarousel();
         initCustomChicanaSharing();
+        initAudioRecording();
         setupPredefinedToggler();
+        setupCustomChicanaToggler();
     }
 }
 

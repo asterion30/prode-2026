@@ -578,5 +578,15 @@ button, input {
     }
 }
 
+/* Audio Wave Visualizer Animation */
+@keyframes audio-wave {
+    0% {
+        transform: scaleY(0.2);
+    }
+    100% {
+        transform: scaleY(1);
+    }
+}
+
 
 
