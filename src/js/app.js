@@ -299,6 +299,16 @@ initAuth((user, alias, score, avatarUrl) => {
             }
         }
 
+        // Show/hide admin chicana upload panel
+        const adminChicanaPanel = document.getElementById("admin-chicana-upload-panel");
+        if (adminChicanaPanel) {
+            if (IS_SUPER_ADMIN) {
+                adminChicanaPanel.classList.remove("hidden");
+            } else {
+                adminChicanaPanel.classList.add("hidden");
+            }
+        }
+
         // Cargar avatar: primero desde BD, luego fallback a localStorage
         const savedAvatar = localStorage.getItem(`avatar_${user.id}`);
         const cleanedAvatarUrl = (avatarUrl && avatarUrl !== 'null' && avatarUrl !== 'undefined') ? avatarUrl.trim() : null;
@@ -328,6 +338,8 @@ initAuth((user, alias, score, avatarUrl) => {
         mainView.classList.add("hidden");
         loginView.classList.remove("hidden");
         if (appContainer) appContainer.classList.remove("md:h-[800px]");
+        const adminChicanaPanel = document.getElementById("admin-chicana-upload-panel");
+        if (adminChicanaPanel) adminChicanaPanel.classList.add("hidden");
         hideLoader();
     }
 });
@@ -2435,6 +2447,219 @@ function setupCustomChicanaToggler() {
     }
 }
 
+async function loadCustomChicanasFromDb() {
+    try {
+        const { data, error } = await supabase
+            .from('custom_chicanas')
+            .select('*')
+            .order('created_at', { ascending: true });
+        
+        if (error) {
+            console.warn("Table custom_chicanas might not exist yet:", error.message);
+            return;
+        }
+        
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                const exists = customChicanaImages.some(img => img.path === item.path);
+                if (!exists) {
+                    customChicanaImages.push({
+                        name: item.name,
+                        path: item.path,
+                        isDbCustom: true,
+                        dbId: item.id
+                    });
+                }
+            });
+        }
+    } catch (err) {
+        console.warn("Error loading custom chicanas from DB:", err);
+    }
+}
+
+async function compressChicanaToWebP(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onerror = reject;
+            img.onload = () => {
+                const SIZE = 600;
+                const canvas = document.createElement('canvas');
+                canvas.width  = SIZE;
+                canvas.height = SIZE;
+                const ctx = canvas.getContext('2d');
+
+                // Crop centrado (cuadrado)
+                const side = Math.min(img.width, img.height);
+                const sx = (img.width  - side) / 2;
+                const sy = (img.height - side) / 2;
+                ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+
+                // Reducir calidad hasta ≤ 150 KB
+                let quality = 0.85;
+                const tryCompress = () => {
+                    canvas.toBlob((b) => {
+                        if (!b) { reject(new Error('Canvas toBlob falló')); return; }
+                        if (b.size <= 153600 || quality <= 0.3) {
+                            resolve(b);
+                        } else {
+                            quality -= 0.05;
+                            tryCompress();
+                        }
+                    }, 'image/webp', quality);
+                };
+                tryCompress();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function setupAdminChicanaUpload() {
+    const triggerBtn = document.getElementById("btn-trigger-chicana-upload");
+    const saveBtn = document.getElementById("btn-save-chicana-upload");
+    const fileInput = document.getElementById("admin-chicana-file-input");
+    const nameInput = document.getElementById("admin-chicana-name");
+    const filenameDisplay = document.getElementById("admin-upload-filename");
+    const adminPanel = document.getElementById("admin-chicana-upload-panel");
+    
+    if (!triggerBtn || !saveBtn || !fileInput || !nameInput || !filenameDisplay) return;
+    
+    // Show/hide panel based on admin status
+    if (IS_SUPER_ADMIN) {
+        if (adminPanel) adminPanel.classList.remove("hidden");
+    } else {
+        if (adminPanel) adminPanel.classList.add("hidden");
+        return;
+    }
+    
+    let selectedFile = null;
+    
+    triggerBtn.onclick = () => {
+        fileInput.click();
+    };
+    
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        selectedFile = file;
+        filenameDisplay.textContent = `Archivo: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+        filenameDisplay.classList.remove("hidden");
+        
+        // Auto-fill name if empty
+        if (!nameInput.value.trim()) {
+            const baseName = file.name.split('.').slice(0, -1).join('.');
+            nameInput.value = baseName.charAt(0).toUpperCase() + baseName.slice(1);
+        }
+        
+        saveBtn.disabled = false;
+    };
+    
+    saveBtn.onclick = async () => {
+        const nameVal = nameInput.value.trim();
+        if (!nameVal) {
+            alert("Por favor escribe un nombre para la chicana.");
+            return;
+        }
+        if (!selectedFile) {
+            alert("Por favor selecciona una imagen.");
+            return;
+        }
+        
+        // Disable form
+        nameInput.disabled = true;
+        triggerBtn.disabled = true;
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Subiendo...";
+        
+        try {
+            // 1. Optimize image client-side to WebP (600x600px square, max 150KB)
+            const blob = await compressChicanaToWebP(selectedFile);
+            
+            // 2. Upload to Supabase Storage in 'chicanas' bucket
+            const fileExt = 'webp';
+            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+            
+            const { error: uploadErr } = await supabase.storage
+                .from('chicanas')
+                .upload(fileName, blob, {
+                    contentType: 'image/webp',
+                    upsert: true
+                });
+                
+            if (uploadErr) {
+                if (uploadErr.message?.toLowerCase().includes("bucket")) {
+                    throw new Error("El bucket 'chicanas' no existe. Asegúrate de ejecutar la migración SQL 'supabase-migration-chicanas.sql' en Supabase.");
+                }
+                throw uploadErr;
+            }
+            
+            // 3. Get Public URL
+            const { data: urlData } = supabase.storage
+                .from('chicanas')
+                .getPublicUrl(fileName);
+                
+            const publicUrl = urlData.publicUrl;
+            
+            // 4. Save metadata to custom_chicanas table
+            const { data: insertData, error: insertErr } = await supabase
+                .from('custom_chicanas')
+                .insert({
+                    name: nameVal,
+                    path: publicUrl
+                })
+                .select()
+                .single();
+                
+            if (insertErr) {
+                if (insertErr.message?.toLowerCase().includes("relation")) {
+                    throw new Error("La tabla 'custom_chicanas' no existe. Asegúrate de ejecutar la migración SQL 'supabase-migration-chicanas.sql' en Supabase.");
+                }
+                throw insertErr;
+            }
+            
+            // 5. Add to local array and re-render carousel
+            customChicanaImages.push({
+                name: nameVal,
+                path: publicUrl,
+                isDbCustom: true,
+                dbId: insertData.id
+            });
+            
+            // Set as active
+            currentActiveIndex = customChicanaImages.length - 1;
+            
+            // Re-render carousel
+            renderChicanaCarousel();
+            
+            // Clear inputs
+            nameInput.value = "";
+            fileInput.value = "";
+            selectedFile = null;
+            filenameDisplay.classList.add("hidden");
+            
+            alert("¡Chicanita subida y optimizada con éxito! Ya aparece en tu carrusel.");
+            
+        } catch (err) {
+            console.error("Error al subir chicana custom:", err);
+            alert("Error al guardar: " + err.message);
+        } finally {
+            // Re-enable form
+            nameInput.disabled = false;
+            triggerBtn.disabled = false;
+            saveBtn.disabled = false;
+            saveBtn.textContent = "Guardar";
+            if (!selectedFile) {
+                saveBtn.disabled = true;
+            }
+        }
+    };
+}
+
 function initPremios() {
     if (shuffledPremiosCards.length === 0) {
         // Shuffle Fisher-Yates
@@ -2458,11 +2683,14 @@ function initPremios() {
 
     // Setup custom chicana carousel, sharing, and predefined toggler (only once)
     if (!selectedChicanaImagePath) {
-        renderChicanaCarousel();
-        initCustomChicanaSharing();
-        initAudioRecording();
-        setupPredefinedToggler();
-        setupCustomChicanaToggler();
+        loadCustomChicanasFromDb().then(() => {
+            renderChicanaCarousel();
+            initCustomChicanaSharing();
+            initAudioRecording();
+            setupPredefinedToggler();
+            setupCustomChicanaToggler();
+            setupAdminChicanaUpload();
+        });
     }
 }
 
