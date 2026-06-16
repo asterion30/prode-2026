@@ -877,7 +877,7 @@ function createMatchCardElement(match, isCarousel) {
 
     const card = document.createElement("div");
     card.className = isCarousel
-        ? "bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-xl fade-in relative overflow-hidden shrink-0 snap-center w-full h-[295px] flex flex-col justify-between"
+        ? "bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-xl fade-in relative overflow-hidden shrink-0 snap-start w-full h-[295px] flex flex-col justify-between"
         : "bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-sm fade-in relative overflow-hidden";
     
     if (isLocked) {
@@ -1126,7 +1126,7 @@ function renderMatchesCarousel(matchesToRender) {
 
     const carousel = document.createElement("div");
     carousel.id = "matches-carousel";
-    carousel.className = "flex flex-col gap-4 overflow-y-auto snap-y snap-mandatory pb-4 scroll-smooth hide-scrollbar w-full h-[295px]";
+    carousel.className = "flex flex-col gap-4 overflow-y-auto snap-y snap-mandatory scroll-smooth hide-scrollbar w-full h-[295px]";
 
     matchesToRender.forEach(match => {
         const card = createMatchCardElement(match, true);
@@ -1200,10 +1200,8 @@ function renderMatchesCarousel(matchesToRender) {
     });
 
     setTimeout(() => {
-        const closestCard = carousel.children[closestIndex];
-        if (closestCard) {
-            closestCard.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
-        }
+        const cardHeight = getCardHeight();
+        carousel.scrollTop = closestIndex * cardHeight;
         updateNavButtons();
     }, 100);
 }
