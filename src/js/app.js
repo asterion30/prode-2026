@@ -877,7 +877,7 @@ function createMatchCardElement(match, isCarousel) {
 
     const card = document.createElement("div");
     card.className = isCarousel
-        ? "bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-xl fade-in relative overflow-hidden shrink-0 snap-start w-full h-[295px] flex flex-col justify-between"
+        ? "bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-xl fade-in relative overflow-hidden shrink-0 snap-center w-full h-[295px] flex flex-col justify-between"
         : "bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-sm fade-in relative overflow-hidden";
     
     if (isLocked) {
@@ -1126,7 +1126,7 @@ function renderMatchesCarousel(matchesToRender) {
 
     const carousel = document.createElement("div");
     carousel.id = "matches-carousel";
-    carousel.className = "flex flex-col gap-4 overflow-y-auto snap-y snap-mandatory scroll-smooth hide-scrollbar w-full h-[295px]";
+    carousel.className = "flex flex-col gap-4 overflow-y-auto snap-y snap-mandatory scroll-smooth hide-scrollbar w-full h-[310px]";
 
     matchesToRender.forEach(match => {
         const card = createMatchCardElement(match, true);
@@ -1158,14 +1158,39 @@ function renderMatchesCarousel(matchesToRender) {
         return 295 + 16;
     };
 
-    const updateNavButtons = () => {
+    const centerCard = (index, behavior = 'smooth') => {
+        const cardEl = carousel.children[index];
+        if (cardEl) {
+            const cardTop = cardEl.offsetTop;
+            const cardHeight = cardEl.offsetHeight;
+            const carouselHeight = carousel.clientHeight;
+            carousel.scrollTo({
+                top: cardTop - (carouselHeight - cardHeight) / 2,
+                behavior: behavior
+            });
+        }
+    };
+
+    const getActiveIndex = () => {
         const scrollTop = carousel.scrollTop;
-        const cardHeight = getCardHeight();
-        const currentIndex = Math.min(
-            Math.max(0, Math.round(scrollTop / cardHeight)),
-            matchesToRender.length - 1
-        );
+        const carouselHeight = carousel.clientHeight;
+        const centerOffset = carouselHeight / 2;
+        let activeIdx = 0;
+        let minDiff = Infinity;
         
+        Array.from(carousel.children).forEach((card, idx) => {
+            const cardCenter = card.offsetTop + card.offsetHeight / 2;
+            const diff = Math.abs(cardCenter - (scrollTop + centerOffset));
+            if (diff < minDiff) {
+                minDiff = diff;
+                activeIdx = idx;
+            }
+        });
+        return activeIdx;
+    };
+
+    const updateNavButtons = () => {
+        const currentIndex = getActiveIndex();
         btnPrev.disabled = currentIndex === 0;
         btnNext.disabled = currentIndex === matchesToRender.length - 1;
     };
@@ -1173,13 +1198,17 @@ function renderMatchesCarousel(matchesToRender) {
     carousel.addEventListener('scroll', updateNavButtons);
 
     btnPrev.onclick = () => {
-        const cardHeight = getCardHeight();
-        carousel.scrollBy({ top: -cardHeight, behavior: 'smooth' });
+        const currentIdx = getActiveIndex();
+        if (currentIdx > 0) {
+            centerCard(currentIdx - 1);
+        }
     };
 
     btnNext.onclick = () => {
-        const cardHeight = getCardHeight();
-        carousel.scrollBy({ top: cardHeight, behavior: 'smooth' });
+        const currentIdx = getActiveIndex();
+        if (currentIdx < matchesToRender.length - 1) {
+            centerCard(currentIdx + 1);
+        }
     };
 
     // Calculate closest match
@@ -1200,8 +1229,7 @@ function renderMatchesCarousel(matchesToRender) {
     });
 
     setTimeout(() => {
-        const cardHeight = getCardHeight();
-        carousel.scrollTop = closestIndex * cardHeight;
+        centerCard(closestIndex, 'auto');
         updateNavButtons();
     }, 100);
 }
