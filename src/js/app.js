@@ -398,6 +398,24 @@ if (btnLogout) {
     });
 }
 
+function arePredictionsEqual(p1, p2) {
+    if (!p1 || !p2) return false;
+    const keys1 = Object.keys(p1);
+    const keys2 = Object.keys(p2);
+    if (keys1.length !== keys2.length) return false;
+    for (const key of keys1) {
+        const val1 = p1[key];
+        const val2 = p2[key];
+        if (!val2) return false;
+        if (val1.result !== val2.result ||
+            String(val1.homeGoals ?? '') !== String(val2.homeGoals ?? '') ||
+            String(val1.awayGoals ?? '') !== String(val2.awayGoals ?? '')) {
+            return false;
+        }
+    }
+    return true;
+}
+
 // =======================
 // MAIN APP LOGIC
 // =======================
@@ -416,9 +434,12 @@ function setupAppSubscriptions(uid) {
 
     // Suscribirse a predicciones
     subscribeToUserPredictions(uid, (preds) => {
+        const equal = arePredictionsEqual(predictionsState, preds);
         predictionsState = preds;
-        renderMatches(); // Re-render to show values
-        renderPredictionsGrid();
+        if (!equal) {
+            renderMatches(); // Re-render to show values
+            renderPredictionsGrid();
+        }
     });
 
     // Suscribirse al Ranking
@@ -982,6 +1003,12 @@ function createMatchCardElement(match, isCarousel) {
             
             try {
                 await savePrediction(match.id, res, hG, aG);
+                predictionsState[match.id] = {
+                    result: res,
+                    homeGoals: hG,
+                    awayGoals: aG,
+                    updatedAt: new Date().toISOString()
+                };
                 statusEl.textContent = "¡Guardado ✓!";
                 statusEl.classList.remove("text-slate-400");
                 statusEl.classList.add("text-brand-500");
