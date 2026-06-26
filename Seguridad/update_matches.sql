@@ -21,18 +21,20 @@ UPDATE public.matches SET match_date = '2026-06-20T20:00:00+00:00' WHERE id = 'm
 UPDATE public.matches SET match_date = '2026-06-21T00:00:00+00:00' WHERE id = 'm_Ecuador_Curazao';
 UPDATE public.matches SET match_date = '2026-06-21T03:00:00+00:00' WHERE id = 'm_Túnez_Japón';
 UPDATE public.matches SET match_date = '2026-06-23T01:00:00+00:00' WHERE id = 'm_Francia_Irak';
-UPDATE public.matches SET match_date = '2026-06-23T18:00:00+00:00' WHERE id = 'm_Portugal_Uzbekistán';
+UPDATE public.matches SET match_date = '2026-06-23T17:00:00+00:00' WHERE id = 'm_Portugal_Uzbekistán';
+UPDATE public.matches SET match_date = '2026-06-23T20:00:00+00:00' WHERE id = 'm_Inglaterra_Ghana';
+UPDATE public.matches SET match_date = '2026-06-23T23:00:00+00:00' WHERE id = 'm_Panamá_Croacia';
 
 -- Matchday 3
 UPDATE public.matches SET match_date = '2026-06-25T01:00:00+00:00' WHERE id = 'm_RepúblicaCheca_México';
 UPDATE public.matches SET match_date = '2026-06-25T01:00:00+00:00' WHERE id = 'm_Sudáfrica_RepúblicadeCorea';
-UPDATE public.matches SET match_date = '2026-06-25T02:00:00+00:00' WHERE id = 'm_Suiza_Canadá';
-UPDATE public.matches SET match_date = '2026-06-24T19:00:00+00:00' WHERE id = 'm_BosniayHerzegovina_Catar';
+UPDATE public.matches SET match_date = '2026-06-24T19:00:00+00:00' WHERE id = 'm_Suiza_Canadá';
+UPDATE public.matches SET match_date = '2026-06-25T02:00:00+00:00' WHERE id = 'm_BosniayHerzegovina_Catar';
 UPDATE public.matches SET match_date = '2026-06-24T22:00:00+00:00' WHERE id = 'm_Escocia_Brasil';
 UPDATE public.matches SET match_date = '2026-06-24T22:00:00+00:00' WHERE id = 'm_Marruecos_Haití';
-UPDATE public.matches SET match_date = '2026-06-27T23:30:00+00:00' WHERE id = 'm_Colombia_Portugal';
+UPDATE public.matches SET match_date = '2026-06-28T01:00:00+00:00' WHERE id = 'm_Colombia_Portugal';
 UPDATE public.matches SET match_date = '2026-06-27T23:30:00+00:00' WHERE id = 'm_RDCongo_Uzbekistán';
 UPDATE public.matches SET match_date = '2026-06-27T21:00:00+00:00' WHERE id = 'm_Panamá_Inglaterra';
 UPDATE public.matches SET match_date = '2026-06-27T21:00:00+00:00' WHERE id = 'm_Croacia_Ghana';
-UPDATE public.matches SET match_date = '2026-06-27T21:00:00+00:00' WHERE id = 'm_Argelia_Austria';
+UPDATE public.matches SET match_date = '2026-06-28T02:00:00+00:00' WHERE id = 'm_Argelia_Austria';
 UPDATE public.matches SET match_date = '2026-06-28T02:00:00+00:00' WHERE id = 'm_Jordania_Argentina';
