@@ -38,3 +38,9 @@ UPDATE public.matches SET match_date = '2026-06-27T21:00:00+00:00' WHERE id = 'm
 UPDATE public.matches SET match_date = '2026-06-27T21:00:00+00:00' WHERE id = 'm_Croacia_Ghana';
 UPDATE public.matches SET match_date = '2026-06-28T02:00:00+00:00' WHERE id = 'm_Argelia_Austria';
 UPDATE public.matches SET match_date = '2026-06-28T02:00:00+00:00' WHERE id = 'm_Jordania_Argentina';
+
+-- Corrección del partido España vs Arabia Saudí (Estaba invertido 0-4 en lugar de 4-0)
+UPDATE public.matches SET home_goals = '4', away_goals = '0' WHERE id = 'm_España_ArabiaSaudí';
+
+-- Recalcular puntajes tras corregir el resultado
+SELECT public.calculate_scores();
