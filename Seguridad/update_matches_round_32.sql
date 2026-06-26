@@ -82,9 +82,9 @@ UPDATE public.matches
 SET home_team = 'Suiza', home_flag = 'ch', match_date = '2026-07-03T03:00:00+00:00' 
 WHERE id = 'm85';
 
--- Match 86: 1º Grupo J vs 2º Grupo H
+-- Match 86: Argentina vs 2º Grupo H (1ºJ vs 2ºH)
 UPDATE public.matches 
-SET match_date = '2026-07-03T22:00:00+00:00' 
+SET home_team = 'Argentina', home_flag = 'ar', match_date = '2026-07-03T22:00:00+00:00' 
 WHERE id = 'm86';
 
 -- Match 87: 1º Grupo K vs 3º Grupo D/E/I/J/L
