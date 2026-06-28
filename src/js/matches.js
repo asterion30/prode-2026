@@ -3,9 +3,10 @@ import { supabase, isMock } from "./supabase-config.js";
 import { getCurrentUser } from "./auth.js";
 import { calculateStandings } from "./standings.js";
 
-// Helper para actualizar cruces dinámicos en eliminatorias según la fase de grupos
+// Helper para actualizar cruces dinámicos en eliminatorias según la fase de grupos y resultados previos
 export function resolveKnockoutBrackets(matches) {
     if (!matches || matches.length === 0) return matches;
+
     const standings = calculateStandings(matches);
     const winners = {};
     const runnersUp = {};
@@ -17,8 +18,41 @@ export function resolveKnockoutBrackets(matches) {
         }
     });
 
+    const matchWinners = {};
+    const matchLosers = {};
+
+    matches.forEach(m => {
+        if (m.status === 'finished' && m.homeGoals !== null && m.awayGoals !== null && m.homeGoals !== '' && m.awayGoals !== '') {
+            const hg = parseInt(m.homeGoals, 10);
+            const ag = parseInt(m.awayGoals, 10);
+            let winTeam = '', winFlag = '', loseTeam = '', loseFlag = '';
+
+            if (hg > ag) {
+                winTeam = m.homeTeam; winFlag = m.homeFlag;
+                loseTeam = m.awayTeam; loseFlag = m.awayFlag;
+            } else if (ag > hg) {
+                winTeam = m.awayTeam; winFlag = m.awayFlag;
+                loseTeam = m.homeTeam; loseFlag = m.homeFlag;
+            } else if (m.qualifiedTeam) {
+                if (m.qualifiedTeam === m.homeTeam) {
+                    winTeam = m.homeTeam; winFlag = m.homeFlag;
+                    loseTeam = m.awayTeam; loseFlag = m.awayFlag;
+                } else if (m.qualifiedTeam === m.awayTeam) {
+                    winTeam = m.awayTeam; winFlag = m.awayFlag;
+                    loseTeam = m.homeTeam; loseFlag = m.homeFlag;
+                }
+            }
+
+            if (winTeam) {
+                const num = m.id.replace('m', '');
+                matchWinners[`Ganador Partido ${num}`] = { team: winTeam, flag: winFlag };
+                matchLosers[`Perdedor Partido ${num}`] = { team: loseTeam, flag: loseFlag };
+            }
+        }
+    });
+
     return matches.map(m => {
-        if (m.stage !== 'groups' && m.tbd) {
+        if (m.stage !== 'groups') {
             let newHome = m.homeTeam;
             let newAway = m.awayTeam;
             let newHomeFlag = m.homeFlag;
@@ -26,33 +60,38 @@ export function resolveKnockoutBrackets(matches) {
             let updated = false;
 
             if (winners[m.homeTeam] && winners[m.homeTeam].pj > 0) {
-                newHome = winners[m.homeTeam].team;
-                newHomeFlag = winners[m.homeTeam].flag;
-                updated = true;
+                newHome = winners[m.homeTeam].team; newHomeFlag = winners[m.homeTeam].flag; updated = true;
             } else if (runnersUp[m.homeTeam] && runnersUp[m.homeTeam].pj > 0) {
-                newHome = runnersUp[m.homeTeam].team;
-                newHomeFlag = runnersUp[m.homeTeam].flag;
-                updated = true;
+                newHome = runnersUp[m.homeTeam].team; newHomeFlag = runnersUp[m.homeTeam].flag; updated = true;
             }
 
             if (winners[m.awayTeam] && winners[m.awayTeam].pj > 0) {
-                newAway = winners[m.awayTeam].team;
-                newAwayFlag = winners[m.awayTeam].flag;
-                updated = true;
+                newAway = winners[m.awayTeam].team; newAwayFlag = winners[m.awayTeam].flag; updated = true;
             } else if (runnersUp[m.awayTeam] && runnersUp[m.awayTeam].pj > 0) {
-                newAway = runnersUp[m.awayTeam].team;
-                newAwayFlag = runnersUp[m.awayTeam].flag;
-                updated = true;
+                newAway = runnersUp[m.awayTeam].team; newAwayFlag = runnersUp[m.awayTeam].flag; updated = true;
+            }
+
+            if (matchWinners[m.homeTeam]) {
+                newHome = matchWinners[m.homeTeam].team; newHomeFlag = matchWinners[m.homeTeam].flag; updated = true;
+            } else if (matchLosers[m.homeTeam]) {
+                newHome = matchLosers[m.homeTeam].team; newHomeFlag = matchLosers[m.homeTeam].flag; updated = true;
+            }
+
+            if (matchWinners[m.awayTeam]) {
+                newAway = matchWinners[m.awayTeam].team; newAwayFlag = matchWinners[m.awayTeam].flag; updated = true;
+            } else if (matchLosers[m.awayTeam]) {
+                newAway = matchLosers[m.awayTeam].team; newAwayFlag = matchLosers[m.awayTeam].flag; updated = true;
             }
 
             if (updated) {
+                const isStillTbd = newHome.includes('Grupo') || newAway.includes('Grupo') || newHome.includes('Partido') || newAway.includes('Partido');
                 return {
                     ...m,
                     homeTeam: newHome,
                     awayTeam: newAway,
                     homeFlag: newHomeFlag,
                     awayFlag: newAwayFlag,
-                    tbd: (newHome.includes('Grupo') || newAway.includes('Grupo'))
+                    tbd: isStillTbd
                 };
             }
         }
