@@ -189,7 +189,7 @@ MOCK_MATCHES.push({ id: "m83", stage: "round_32", homeTeam: "Portugal", awayTeam
 MOCK_MATCHES.push({ id: "m84", stage: "round_32", homeTeam: "España", awayTeam: "Austria", matchDate: "2026-07-02T15:00:00-04:00", homeFlag: "es", awayFlag: "at", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m85", stage: "round_32", homeTeam: "Suiza", awayTeam: "Argelia", matchDate: "2026-07-02T23:00:00-04:00", homeFlag: "ch", awayFlag: "dz", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m86", stage: "round_32", homeTeam: "Argentina", awayTeam: "Cabo Verde", matchDate: "2026-07-03T18:00:00-04:00", homeFlag: "ar", awayFlag: "cv", status: "pending", tbd: false });
-MOCK_MATCHES.push({ id: "m87", stage: "round_32", homeTeam: "Colombia", awayTeam: "Uruguay", matchDate: "2026-07-03T21:30:00-04:00", homeFlag: "co", awayFlag: "uy", status: "pending", tbd: false });
+MOCK_MATCHES.push({ id: "m87", stage: "round_32", homeTeam: "Colombia", awayTeam: "Ghana", matchDate: "2026-07-03T21:30:00-04:00", homeFlag: "co", awayFlag: "gh", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m88", stage: "round_32", homeTeam: "Bélgica", awayTeam: "Senegal", matchDate: "2026-07-03T14:00:00-04:00", homeFlag: "be", awayFlag: "sn", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m89", stage: "round_16", homeTeam: "Ganador Partido 74", awayTeam: "Ganador Partido 77", matchDate: "2026-07-03T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
 MOCK_MATCHES.push({ id: "m90", stage: "round_16", homeTeam: "Ganador Partido 73", awayTeam: "Ganador Partido 75", matchDate: "2026-07-03T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
