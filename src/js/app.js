@@ -914,12 +914,17 @@ function createMatchCardElement(match, isCarousel) {
     }
 
     let qualificationHtml = '';
-    if (match.stage === 'round_32') {
-        const homeSel = pred.qualifiedTeam === match.homeTeam;
-        const awaySel = pred.qualifiedTeam === match.awayTeam;
+    if (match.stage !== 'groups') {
+        let qualTeam = pred.qualifiedTeam || '';
+        if (pred.result === 'L') qualTeam = match.homeTeam;
+        else if (pred.result === 'V') qualTeam = match.awayTeam;
+
+        const isEmpate = pred.result === 'E';
+        const homeSel = qualTeam === match.homeTeam;
+        const awaySel = qualTeam === match.awayTeam;
         qualificationHtml = `
-            <div class="mt-3 pt-2.5 border-t border-slate-700/60 flex flex-col items-center justify-center gap-1.5 w-full">
-                <span class="text-[10px] text-brand-400 font-bold uppercase tracking-wider">🏆 Clasifica a 8vos (+1 pto)</span>
+            <div id="qual-container-${match.id}" class="mt-3 pt-2.5 border-t border-slate-700/60 flex flex-col items-center justify-center gap-1.5 w-full ${isEmpate ? '' : 'hidden'}">
+                <span class="text-[10px] text-brand-400 font-bold uppercase tracking-wider">🏆 ¿Quién clasifica de ronda?</span>
                 <div class="flex items-center justify-center gap-2 w-full max-w-[240px]">
                     <button id="btn-qual-home-${match.id}" class="qual-btn flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all border ${homeSel ? 'bg-brand-500 text-white border-brand-500 shadow-md' : 'bg-slate-900 text-slate-400 border-slate-700 hover:bg-slate-700'} ${match.tbd ? 'opacity-50 pointer-events-none' : ''}" ${isLocked || match.tbd ? 'disabled' : ''}>
                         ${escapeHTML(match.homeTeam)}
@@ -989,9 +994,15 @@ function createMatchCardElement(match, isCarousel) {
                 return;
             }
 
-            const currentPred = predictionsState[match.id] || {};
-            if (qualTeam === undefined) {
-                qualTeam = currentPred.qualifiedTeam || '';
+            if (res === 'L') {
+                qualTeam = match.homeTeam;
+            } else if (res === 'V') {
+                qualTeam = match.awayTeam;
+            } else if (res === 'E') {
+                const currentPred = predictionsState[match.id] || {};
+                if (qualTeam === undefined) {
+                    qualTeam = currentPred.qualifiedTeam || '';
+                }
             }
 
             const hGInput = card.querySelector(`#home-goals-${match.id}`);
@@ -1008,7 +1019,11 @@ function createMatchCardElement(match, isCarousel) {
                 let impliedRes = 'E';
                 if (h > a) impliedRes = 'L';
                 else if (a > h) impliedRes = 'V';
-                if (impliedRes !== res) res = impliedRes;
+                if (impliedRes !== res) {
+                    res = impliedRes;
+                    if (res === 'L') qualTeam = match.homeTeam;
+                    else if (res === 'V') qualTeam = match.awayTeam;
+                }
             }
             
             const statusEl = card.querySelector(`#status-${match.id}`);
@@ -1022,7 +1037,12 @@ function createMatchCardElement(match, isCarousel) {
                 activeBtn.className = `prode-btn flex-1 py-1.5 px-1 rounded font-bold text-sm transition-all shadow-md ${res === 'E' ? 'mx-1 bg-slate-500 text-white' : 'bg-brand-500 text-white'}`;
             }
 
-            if (match.stage === 'round_32') {
+            if (match.stage !== 'groups') {
+                const qualContainer = card.querySelector(`#qual-container-${match.id}`);
+                if (qualContainer) {
+                    if (res === 'E') qualContainer.classList.remove('hidden');
+                    else qualContainer.classList.add('hidden');
+                }
                 const btnQH = card.querySelector(`#btn-qual-home-${match.id}`);
                 const btnQA = card.querySelector(`#btn-qual-away-${match.id}`);
                 if (btnQH && btnQA) {
@@ -1079,29 +1099,19 @@ function createMatchCardElement(match, isCarousel) {
         card.querySelector(`#btn-E-${match.id}`).addEventListener("click", () => handleBet('E'));
         card.querySelector(`#btn-V-${match.id}`).addEventListener("click", () => handleBet('V'));
         
-        if (match.stage === 'round_32') {
+        if (match.stage !== 'groups') {
             const btnQualHome = card.querySelector(`#btn-qual-home-${match.id}`);
             const btnQualAway = card.querySelector(`#btn-qual-away-${match.id}`);
             if (btnQualHome && btnQualAway) {
                 btnQualHome.addEventListener("click", () => {
                     const currentQual = (predictionsState[match.id] || {}).qualifiedTeam || '';
                     const newQual = currentQual === match.homeTeam ? '' : match.homeTeam;
-                    const isL = card.querySelector(`#btn-L-${match.id}`).classList.contains('bg-brand-500');
-                    const isV = card.querySelector(`#btn-V-${match.id}`).classList.contains('bg-brand-500');
-                    const isE = card.querySelector(`#btn-E-${match.id}`).classList.contains('bg-slate-500');
-                    let currRes = '';
-                    if (isL) currRes = 'L'; else if (isV) currRes = 'V'; else if (isE) currRes = 'E';
-                    handleBet(currRes, newQual);
+                    handleBet('E', newQual);
                 });
                 btnQualAway.addEventListener("click", () => {
                     const currentQual = (predictionsState[match.id] || {}).qualifiedTeam || '';
                     const newQual = currentQual === match.awayTeam ? '' : match.awayTeam;
-                    const isL = card.querySelector(`#btn-L-${match.id}`).classList.contains('bg-brand-500');
-                    const isV = card.querySelector(`#btn-V-${match.id}`).classList.contains('bg-brand-500');
-                    const isE = card.querySelector(`#btn-E-${match.id}`).classList.contains('bg-slate-500');
-                    let currRes = '';
-                    if (isL) currRes = 'L'; else if (isV) currRes = 'V'; else if (isE) currRes = 'E';
-                    handleBet(currRes, newQual);
+                    handleBet('E', newQual);
                 });
             }
         }

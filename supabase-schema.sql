@@ -148,31 +148,40 @@ begin
       if m.status = 'finished' and m.home_goals is not null and m.away_goals is not null then
           
           -- Calculate actual match result
-          if m.home_goals::int > m.away_goals::int then match_res := 'L';
-          elsif m.away_goals::int > m.home_goals::int then match_res := 'V';
-          else match_res := 'E';
+          if m.home_goals::int > m.away_goals::int then 
+             match_res := 'L';
+             actual_qualified := m.home_team;
+          elsif m.away_goals::int > m.home_goals::int then 
+             match_res := 'V';
+             actual_qualified := m.away_team;
+          else 
+             match_res := 'E';
+             actual_qualified := m.qualified_team;
           end if;
           
-          -- Compare with user prediction for 90 min result
-          if p.result = match_res then
-             total_score := total_score + 1; -- 1 point for guessing the winner/tie
-             
-             -- 2 extra points for exact goals (3 total)
-             if p.home_goals = m.home_goals and p.away_goals = m.away_goals then
-                total_score := total_score + 2; 
-             end if;
-          end if;
-
-          -- Compare with user prediction for qualified team (1 point)
-          if p.qualified_team is not null and p.qualified_team != '' then
-             actual_qualified := m.qualified_team;
-             if actual_qualified is null or actual_qualified = '' then
-                if m.home_goals::int > m.away_goals::int then actual_qualified := m.home_team;
-                elsif m.away_goals::int > m.home_goals::int then actual_qualified := m.away_team;
+          if m.stage = 'groups' then
+             if p.result = match_res then
+                total_score := total_score + 1;
+                if p.home_goals = m.home_goals and p.away_goals = m.away_goals then
+                   total_score := total_score + 2;
                 end if;
              end if;
-             if actual_qualified is not null and p.qualified_team = actual_qualified then
-                total_score := total_score + 1;
+          else
+             -- En etapas eliminatorias: si hay empate, para ganar el punto de resultado se debe acertar el empate Y el equipo clasificado.
+             if match_res = 'E' then
+                if p.result = 'E' and p.qualified_team is not null and actual_qualified is not null and p.qualified_team = actual_qualified then
+                   total_score := total_score + 1;
+                   if p.home_goals = m.home_goals and p.away_goals = m.away_goals then
+                      total_score := total_score + 2;
+                   end if;
+                end if;
+             else
+                if p.result = match_res then
+                   total_score := total_score + 1;
+                   if p.home_goals = m.home_goals and p.away_goals = m.away_goals then
+                      total_score := total_score + 2;
+                   end if;
+                end if;
              end if;
           end if;
       end if;
