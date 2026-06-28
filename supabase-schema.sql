@@ -31,6 +31,7 @@ create table if not exists public.matches (
   away_flag text not null,
   home_goals text,
   away_goals text,
+  qualified_team text,
   status text default 'pending',
   tbd boolean default false
 );
@@ -43,6 +44,7 @@ create table if not exists public.predictions (
   result text,
   home_goals text,
   away_goals text,
+  qualified_team text,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique(user_id, match_id)
 );
@@ -135,6 +137,7 @@ declare
   m record;
   total_score int;
   match_res text;
+  actual_qualified text;
 begin
   for u in select id from public.users loop
     total_score := 0;
@@ -150,13 +153,26 @@ begin
           else match_res := 'E';
           end if;
           
-          -- Compare with user prediction
+          -- Compare with user prediction for 90 min result
           if p.result = match_res then
              total_score := total_score + 1; -- 1 point for guessing the winner/tie
              
              -- 2 extra points for exact goals (3 total)
              if p.home_goals = m.home_goals and p.away_goals = m.away_goals then
                 total_score := total_score + 2; 
+             end if;
+          end if;
+
+          -- Compare with user prediction for qualified team (1 point)
+          if p.qualified_team is not null and p.qualified_team != '' then
+             actual_qualified := m.qualified_team;
+             if actual_qualified is null or actual_qualified = '' then
+                if m.home_goals::int > m.away_goals::int then actual_qualified := m.home_team;
+                elsif m.away_goals::int > m.home_goals::int then actual_qualified := m.away_team;
+                end if;
+             end if;
+             if actual_qualified is not null and p.qualified_team = actual_qualified then
+                total_score := total_score + 1;
              end if;
           end if;
       end if;

@@ -1,6 +1,64 @@
 // js/matches.js
 import { supabase, isMock } from "./supabase-config.js";
 import { getCurrentUser } from "./auth.js";
+import { calculateStandings } from "./standings.js";
+
+// Helper para actualizar cruces dinámicos en eliminatorias según la fase de grupos
+export function resolveKnockoutBrackets(matches) {
+    if (!matches || matches.length === 0) return matches;
+    const standings = calculateStandings(matches);
+    const winners = {};
+    const runnersUp = {};
+    Object.keys(standings).forEach(g => {
+        const list = standings[g];
+        if (list && list.length > 0) {
+            winners[`1º Grupo ${g}`] = { team: list[0].team, flag: list[0].flag, pj: list[0].pj };
+            runnersUp[`2º Grupo ${g}`] = { team: list[1].team, flag: list[1].flag, pj: list[1].pj };
+        }
+    });
+
+    return matches.map(m => {
+        if (m.stage !== 'groups' && m.tbd) {
+            let newHome = m.homeTeam;
+            let newAway = m.awayTeam;
+            let newHomeFlag = m.homeFlag;
+            let newAwayFlag = m.awayFlag;
+            let updated = false;
+
+            if (winners[m.homeTeam] && winners[m.homeTeam].pj > 0) {
+                newHome = winners[m.homeTeam].team;
+                newHomeFlag = winners[m.homeTeam].flag;
+                updated = true;
+            } else if (runnersUp[m.homeTeam] && runnersUp[m.homeTeam].pj > 0) {
+                newHome = runnersUp[m.homeTeam].team;
+                newHomeFlag = runnersUp[m.homeTeam].flag;
+                updated = true;
+            }
+
+            if (winners[m.awayTeam] && winners[m.awayTeam].pj > 0) {
+                newAway = winners[m.awayTeam].team;
+                newAwayFlag = winners[m.awayTeam].flag;
+                updated = true;
+            } else if (runnersUp[m.awayTeam] && runnersUp[m.awayTeam].pj > 0) {
+                newAway = runnersUp[m.awayTeam].team;
+                newAwayFlag = runnersUp[m.awayTeam].flag;
+                updated = true;
+            }
+
+            if (updated) {
+                return {
+                    ...m,
+                    homeTeam: newHome,
+                    awayTeam: newAway,
+                    homeFlag: newHomeFlag,
+                    awayFlag: newAwayFlag,
+                    tbd: (newHome.includes('Grupo') || newAway.includes('Grupo'))
+                };
+            }
+        }
+        return m;
+    });
+}
 
 // Mock Data for the 2026 World Cup (Sample)
 // Used when Firebase is not connected
@@ -113,7 +171,7 @@ MOCK_MATCHES.push({ id: "m104", stage: "final", homeTeam: "Ganador Partido 101",
 
 export function subscribeToMatches(callback) {
     if (isMock) {
-        callback(MOCK_MATCHES);
+        callback(resolveKnockoutBrackets(MOCK_MATCHES));
         return () => {};
     }
 
@@ -130,7 +188,7 @@ export function subscribeToMatches(callback) {
                 const seedData = MOCK_MATCHES.map(m => ({
                     id: m.id, stage: m.stage, home_team: m.homeTeam, away_team: m.awayTeam,
                     match_date: m.matchDate, home_flag: m.homeFlag, away_flag: m.awayFlag,
-                    status: m.status, tbd: m.tbd
+                    status: m.status, tbd: m.tbd, qualified_team: m.qualifiedTeam
                 }));
                 const { error: seedErr } = await supabase.from('matches').insert(seedData);
                 if (!seedErr) {
@@ -150,10 +208,11 @@ export function subscribeToMatches(callback) {
                 awayFlag: m.away_flag,
                 homeGoals: m.home_goals,
                 awayGoals: m.away_goals,
+                qualifiedTeam: m.qualified_team,
                 status: m.status,
                 tbd: m.tbd
             }));
-            callback(formatted);
+            callback(resolveKnockoutBrackets(formatted));
         }
     };
     
@@ -198,6 +257,7 @@ export function subscribeToUserPredictions(userId, callback) {
                     result: p.result,
                     homeGoals: p.home_goals,
                     awayGoals: p.away_goals,
+                    qualifiedTeam: p.qualified_team,
                     updatedAt: p.updated_at
                 };
             });
@@ -217,16 +277,14 @@ export function subscribeToUserPredictions(userId, callback) {
     return () => { supabase.removeChannel(channel); };
 }
 
-export async function savePrediction(matchId, result, homeGoals = '', awayGoals = '') {
+export async function savePrediction(matchId, result, homeGoals = '', awayGoals = '', qualifiedTeam = '') {
     const { user } = getCurrentUser();
     if (!user) throw new Error("Debes estar logueado.");
-    
-    // El frontend ya valida la hora, pero lo ideal es que Cloud Rules validen esto en backend.
     
     if (isMock || (user && String(user.id || user.uid).startsWith("mock_"))) {
         const k = `prode_preds_${user.uid || user.id}`;
         const preds = JSON.parse(localStorage.getItem(k) || "{}");
-        preds[matchId] = { result, homeGoals, awayGoals, updatedAt: new Date().toISOString() };
+        preds[matchId] = { result, homeGoals, awayGoals, qualifiedTeam, updatedAt: new Date().toISOString() };
         localStorage.setItem(k, JSON.stringify(preds));
         return;
     }
@@ -239,6 +297,7 @@ export async function savePrediction(matchId, result, homeGoals = '', awayGoals 
             result: result,
             home_goals: homeGoals,
             away_goals: awayGoals,
+            qualified_team: qualifiedTeam,
             updated_at: new Date().toISOString()
         }, { onConflict: 'user_id, match_id' });
         
