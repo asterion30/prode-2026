@@ -4354,18 +4354,28 @@ window.renderAdminMatches = function() {
         const div = document.createElement("div");
         div.className = "flex flex-col md:flex-row items-start md:items-center justify-between gap-3 p-3 bg-slate-900/40 rounded-xl border border-slate-800/80 text-xs";
 
+        const showQualifiedSelect = m.stage !== 'groups';
+        const qualifiedSelectHtml = showQualifiedSelect ? `
+            <select id="admin-qualified-${m.id}" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none w-28">
+                <option value="">Clasifica...</option>
+                <option value="${escapeHTML(m.homeTeam)}" ${m.qualifiedTeam === m.homeTeam ? 'selected' : ''}>${escapeHTML(m.homeTeam)}</option>
+                <option value="${escapeHTML(m.awayTeam)}" ${m.qualifiedTeam === m.awayTeam ? 'selected' : ''}>${escapeHTML(m.awayTeam)}</option>
+            </select>
+        ` : '';
+
         div.innerHTML = `
             <div class="flex items-center gap-2 flex-1 min-w-0">
                 <span class="px-2 py-0.5 bg-slate-800 text-slate-400 rounded-md font-mono text-[10px]">${dateStr} ${timeStr}</span>
-                <span class="font-bold text-white truncate">${m.homeTeam} vs ${m.awayTeam}</span>
+                <span class="font-bold text-white truncate">${escapeHTML(m.homeTeam)} vs ${escapeHTML(m.awayTeam)}</span>
                 <span class="text-[10px] bg-slate-800 text-slate-500 px-1.5 rounded uppercase tracking-wider">${translateStage(m.stage)}</span>
             </div>
-            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end flex-wrap">
                 <div class="flex items-center gap-1">
                     <input type="number" min="0" placeholder="-" id="admin-home-${m.id}" class="w-12 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg text-center py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none" value="${m.homeGoals !== null && m.homeGoals !== undefined ? m.homeGoals : ''}">
                     <span class="text-slate-500 font-bold">-</span>
                     <input type="number" min="0" placeholder="-" id="admin-away-${m.id}" class="w-12 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg text-center py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none" value="${m.awayGoals !== null && m.awayGoals !== undefined ? m.awayGoals : ''}">
                 </div>
+                ${qualifiedSelectHtml}
                 <select id="admin-status-${m.id}" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none">
                     <option value="pending" ${m.status === 'pending' ? 'selected' : ''}>Pendiente</option>
                     <option value="finished" ${m.status === 'finished' ? 'selected' : ''}>Finalizado</option>
@@ -4386,14 +4396,16 @@ window.renderAdminMatches = function() {
             const homeInput = document.getElementById(`admin-home-${matchId}`);
             const awayInput = document.getElementById(`admin-away-${matchId}`);
             const statusSelect = document.getElementById(`admin-status-${matchId}`);
+            const qualifiedSelect = document.getElementById(`admin-qualified-${matchId}`);
 
             if (!homeInput || !awayInput || !statusSelect) return;
 
             const homeGoals = homeInput.value.trim();
             const awayGoals = awayInput.value.trim();
             const status = statusSelect.value;
+            const qualifiedTeam = qualifiedSelect ? qualifiedSelect.value : null;
 
-            await saveManualMatchResult(matchId, homeGoals, awayGoals, status);
+            await saveManualMatchResult(matchId, homeGoals, awayGoals, status, qualifiedTeam);
         });
     });
 };
@@ -4423,10 +4435,35 @@ window.populateAdminMatchesSelect = function() {
     });
 };
 
-async function saveManualMatchResult(matchId, homeGoals, awayGoals, status) {
+async function saveManualMatchResult(matchId, homeGoals, awayGoals, status, qualifiedTeam = null) {
     if (status === 'finished') {
         if (homeGoals === '' || awayGoals === '') {
             alert('Para finalizar un partido, debés ingresar los goles de ambos equipos.');
+            return;
+        }
+
+        // Validar si el partido es eliminatorio y terminó empatado
+        const match = matchesState.find(m => m.id === matchId);
+        if (match && match.stage !== 'groups') {
+            const hg = parseInt(homeGoals, 10);
+            const ag = parseInt(awayGoals, 10);
+            if (hg === ag && !qualifiedTeam) {
+                alert('Para finalizar un partido empatado en etapa de eliminación directa, debés seleccionar qué equipo clasifica.');
+                return;
+            }
+        }
+    }
+
+    if (isMock) {
+        const match = matchesState.find(m => m.id === matchId);
+        if (match) {
+            match.homeGoals = homeGoals;
+            match.awayGoals = awayGoals;
+            match.status = status;
+            if (match.stage !== 'groups') {
+                match.qualifiedTeam = qualifiedTeam;
+            }
+            alert('Partido (MOCK) actualizado correctamente.');
             return;
         }
     }
@@ -4437,7 +4474,8 @@ async function saveManualMatchResult(matchId, homeGoals, awayGoals, status) {
             p_match_id: matchId,
             p_home_goals: homeGoals,
             p_away_goals: awayGoals,
-            p_status: status
+            p_status: status,
+            p_qualified_team: qualifiedTeam
         });
 
         if (error) throw error;
@@ -4500,18 +4538,28 @@ if (btnAdminLoadSelectedMatch && selectAdminAllMatches && adminSelectedMatchEdit
         }
 
         adminSelectedMatchEditor.classList.remove("hidden");
+        const showQualifiedSelect = match.stage !== 'groups';
+        const qualifiedSelectHtml = showQualifiedSelect ? `
+            <select id="selected-qualified-${match.id}" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none w-28">
+                <option value="">Clasifica...</option>
+                <option value="${escapeHTML(match.homeTeam)}" ${match.qualifiedTeam === match.homeTeam ? 'selected' : ''}>${escapeHTML(match.homeTeam)}</option>
+                <option value="${escapeHTML(match.awayTeam)}" ${match.qualifiedTeam === match.awayTeam ? 'selected' : ''}>${escapeHTML(match.awayTeam)}</option>
+            </select>
+        ` : '';
+
         adminSelectedMatchEditor.innerHTML = `
             <div class="flex flex-col sm:flex-row items-center justify-between w-full gap-3">
                 <div class="flex items-center gap-2">
-                    <span class="font-bold text-white">${match.homeTeam} vs ${match.awayTeam}</span>
+                    <span class="font-bold text-white">${escapeHTML(match.homeTeam)} vs ${escapeHTML(match.awayTeam)}</span>
                     <span class="text-[10px] text-slate-500 font-mono">(${translateStage(match.stage)})</span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                     <div class="flex items-center gap-1">
                         <input type="number" min="0" placeholder="-" id="selected-home-${match.id}" class="w-12 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg text-center py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none" value="${match.homeGoals !== null && match.homeGoals !== undefined ? match.homeGoals : ''}">
                         <span class="text-slate-500 font-bold">-</span>
                         <input type="number" min="0" placeholder="-" id="selected-away-${match.id}" class="w-12 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg text-center py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none" value="${match.awayGoals !== null && match.awayGoals !== undefined ? match.awayGoals : ''}">
                     </div>
+                    ${qualifiedSelectHtml}
                     <select id="selected-status-${match.id}" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs focus:ring-1 focus:ring-brand-500 outline-none">
                         <option value="pending" ${match.status === 'pending' ? 'selected' : ''}>Pendiente</option>
                         <option value="finished" ${match.status === 'finished' ? 'selected' : ''}>Finalizado</option>
@@ -4530,14 +4578,16 @@ if (btnAdminLoadSelectedMatch && selectAdminAllMatches && adminSelectedMatchEdit
                 const homeInput = document.getElementById(`selected-home-${matchId}`);
                 const awayInput = document.getElementById(`selected-away-${matchId}`);
                 const statusSelect = document.getElementById(`selected-status-${matchId}`);
+                const qualifiedSelect = document.getElementById(`selected-qualified-${matchId}`);
 
                 if (!homeInput || !awayInput || !statusSelect) return;
 
                 const homeGoals = homeInput.value.trim();
                 const awayGoals = awayInput.value.trim();
                 const status = statusSelect.value;
+                const qualifiedTeam = qualifiedSelect ? qualifiedSelect.value : null;
 
-                await saveManualMatchResult(matchId, homeGoals, awayGoals, status);
+                await saveManualMatchResult(matchId, homeGoals, awayGoals, status, qualifiedTeam);
             });
         }
     });
