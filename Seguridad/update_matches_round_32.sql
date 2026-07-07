@@ -62,9 +62,9 @@ UPDATE public.matches
 SET match_date = '2026-07-02T00:00:00+00:00' 
 WHERE id = 'm81';
 
--- Match 82: 1º Grupo G vs 3º Grupo A/E/H/I/J
+-- Match 82: Bélgica vs Senegal (1ºG vs 3º A/E/H/I/J)
 UPDATE public.matches 
-SET match_date = '2026-07-01T20:00:00+00:00' 
+SET home_team = 'Bélgica', away_team = 'Senegal', home_flag = 'be', away_flag = 'sn', match_date = '2026-07-01T20:00:00+00:00', tbd = false 
 WHERE id = 'm82';
 
 -- Match 83: 2º Grupo K vs 2º Grupo L
@@ -82,17 +82,17 @@ UPDATE public.matches
 SET home_team = 'Suiza', home_flag = 'ch', match_date = '2026-07-03T03:00:00+00:00' 
 WHERE id = 'm85';
 
--- Match 86: Argentina vs 2º Grupo H (1ºJ vs 2ºH)
+-- Match 86: Argentina vs Cabo Verde (1ºJ vs 2ºH)
 UPDATE public.matches 
-SET home_team = 'Argentina', home_flag = 'ar', match_date = '2026-07-03T22:00:00+00:00' 
+SET home_team = 'Argentina', away_team = 'Cabo Verde', home_flag = 'ar', away_flag = 'cv', match_date = '2026-07-03T22:00:00+00:00', tbd = false 
 WHERE id = 'm86';
 
--- Match 87: 1º Grupo K vs 3º Grupo D/E/I/J/L
+-- Match 87: Colombia vs Ghana (1ºK vs 3º D/E/I/J/L)
 UPDATE public.matches 
-SET match_date = '2026-07-04T01:30:00+00:00' 
+SET home_team = 'Colombia', away_team = 'Ghana', home_flag = 'co', away_flag = 'gh', match_date = '2026-07-04T01:30:00+00:00', tbd = false 
 WHERE id = 'm87';
 
--- Match 88: 2º Grupo D vs 2º Grupo G
+-- Match 88: Australia vs Egipto (2ºD vs 2ºG)
 UPDATE public.matches 
-SET match_date = '2026-07-03T18:00:00+00:00' 
+SET home_team = 'Australia', away_team = 'Egipto', home_flag = 'au', away_flag = 'eg', match_date = '2026-07-03T18:00:00+00:00', tbd = false 
 WHERE id = 'm88';

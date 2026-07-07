@@ -18,85 +18,92 @@ export function resolveKnockoutBrackets(matches) {
         }
     });
 
+    let resolvedMatches = matches.map(m => ({ ...m }));
     const matchWinners = {};
     const matchLosers = {};
 
-    matches.forEach(m => {
-        if (m.status === 'finished' && m.homeGoals !== null && m.awayGoals !== null && m.homeGoals !== '' && m.awayGoals !== '') {
-            const hg = parseInt(m.homeGoals, 10);
-            const ag = parseInt(m.awayGoals, 10);
-            let winTeam = '', winFlag = '', loseTeam = '', loseFlag = '';
+    // We run 5 iterations/passes to propagate team names and winners through the tree (e.g. Round of 32 -> 16 -> Quarters -> Semis -> Finals)
+    for (let pass = 0; pass < 5; pass++) {
+        resolvedMatches = resolvedMatches.map(m => {
+            if (m.stage !== 'groups') {
+                let newHome = m.homeTeam;
+                let newAway = m.awayTeam;
+                let newHomeFlag = m.homeFlag;
+                let newAwayFlag = m.awayFlag;
+                let updated = false;
 
-            if (hg > ag) {
-                winTeam = m.homeTeam; winFlag = m.homeFlag;
-                loseTeam = m.awayTeam; loseFlag = m.awayFlag;
-            } else if (ag > hg) {
-                winTeam = m.awayTeam; winFlag = m.awayFlag;
-                loseTeam = m.homeTeam; loseFlag = m.homeFlag;
-            } else if (m.qualifiedTeam) {
-                if (m.qualifiedTeam === m.homeTeam) {
-                    winTeam = m.homeTeam; winFlag = m.homeFlag;
-                    loseTeam = m.awayTeam; loseFlag = m.awayFlag;
-                } else if (m.qualifiedTeam === m.awayTeam) {
-                    winTeam = m.awayTeam; winFlag = m.awayFlag;
-                    loseTeam = m.homeTeam; loseFlag = m.homeFlag;
+                if (winners[m.homeTeam] && winners[m.homeTeam].pj > 0) {
+                    newHome = winners[m.homeTeam].team; newHomeFlag = winners[m.homeTeam].flag; updated = true;
+                } else if (runnersUp[m.homeTeam] && runnersUp[m.homeTeam].pj > 0) {
+                    newHome = runnersUp[m.homeTeam].team; newHomeFlag = runnersUp[m.homeTeam].flag; updated = true;
+                }
+
+                if (winners[m.awayTeam] && winners[m.awayTeam].pj > 0) {
+                    newAway = winners[m.awayTeam].team; newAwayFlag = winners[m.awayTeam].flag; updated = true;
+                } else if (runnersUp[m.awayTeam] && runnersUp[m.awayTeam].pj > 0) {
+                    newAway = runnersUp[m.awayTeam].team; newAwayFlag = runnersUp[m.awayTeam].flag; updated = true;
+                }
+
+                if (matchWinners[m.homeTeam]) {
+                    newHome = matchWinners[m.homeTeam].team; newHomeFlag = matchWinners[m.homeTeam].flag; updated = true;
+                } else if (matchLosers[m.homeTeam]) {
+                    newHome = matchLosers[m.homeTeam].team; newHomeFlag = matchLosers[m.homeTeam].flag; updated = true;
+                }
+
+                if (matchWinners[m.awayTeam]) {
+                    newAway = matchWinners[m.awayTeam].team; newAwayFlag = matchWinners[m.awayTeam].flag; updated = true;
+                } else if (matchLosers[m.awayTeam]) {
+                    newAway = matchLosers[m.awayTeam].team; newAwayFlag = matchLosers[m.awayTeam].flag; updated = true;
+                }
+
+                if (updated) {
+                    const isStillTbd = newHome.includes('Grupo') || newAway.includes('Grupo') || newHome.includes('Partido') || newAway.includes('Partido');
+                    return {
+                        ...m,
+                        homeTeam: newHome,
+                        awayTeam: newAway,
+                        homeFlag: newHomeFlag,
+                        awayFlag: newAwayFlag,
+                        tbd: isStillTbd
+                    };
                 }
             }
+            return m;
+        });
 
-            if (winTeam) {
-                const num = m.id.replace('m', '');
-                matchWinners[`Ganador Partido ${num}`] = { team: winTeam, flag: winFlag };
-                matchLosers[`Perdedor Partido ${num}`] = { team: loseTeam, flag: loseFlag };
+        // Populate matchWinners and matchLosers based on newly resolved names in this pass
+        resolvedMatches.forEach(m => {
+            if (m.status === 'finished' && m.homeGoals !== null && m.awayGoals !== null && m.homeGoals !== '' && m.awayGoals !== '') {
+                const hg = parseInt(m.homeGoals, 10);
+                const ag = parseInt(m.awayGoals, 10);
+                let winTeam = '', winFlag = '', loseTeam = '', loseFlag = '';
+
+                if (hg > ag) {
+                    winTeam = m.homeTeam; winFlag = m.homeFlag;
+                    loseTeam = m.awayTeam; loseFlag = m.awayFlag;
+                } else if (ag > hg) {
+                    winTeam = m.awayTeam; winFlag = m.awayFlag;
+                    loseTeam = m.homeTeam; loseFlag = m.homeFlag;
+                } else if (m.qualifiedTeam) {
+                    if (m.qualifiedTeam === m.homeTeam) {
+                        winTeam = m.homeTeam; winFlag = m.homeFlag;
+                        loseTeam = m.awayTeam; loseFlag = m.awayFlag;
+                    } else if (m.qualifiedTeam === m.awayTeam) {
+                        winTeam = m.awayTeam; winFlag = m.awayFlag;
+                        loseTeam = m.homeTeam; loseFlag = m.homeFlag;
+                    }
+                }
+
+                if (winTeam) {
+                    const num = m.id.replace('m', '');
+                    matchWinners[`Ganador Partido ${num}`] = { team: winTeam, flag: winFlag };
+                    matchLosers[`Perdedor Partido ${num}`] = { team: loseTeam, flag: loseFlag };
+                }
             }
-        }
-    });
+        });
+    }
 
-    return matches.map(m => {
-        if (m.stage !== 'groups') {
-            let newHome = m.homeTeam;
-            let newAway = m.awayTeam;
-            let newHomeFlag = m.homeFlag;
-            let newAwayFlag = m.awayFlag;
-            let updated = false;
-
-            if (winners[m.homeTeam] && winners[m.homeTeam].pj > 0) {
-                newHome = winners[m.homeTeam].team; newHomeFlag = winners[m.homeTeam].flag; updated = true;
-            } else if (runnersUp[m.homeTeam] && runnersUp[m.homeTeam].pj > 0) {
-                newHome = runnersUp[m.homeTeam].team; newHomeFlag = runnersUp[m.homeTeam].flag; updated = true;
-            }
-
-            if (winners[m.awayTeam] && winners[m.awayTeam].pj > 0) {
-                newAway = winners[m.awayTeam].team; newAwayFlag = winners[m.awayTeam].flag; updated = true;
-            } else if (runnersUp[m.awayTeam] && runnersUp[m.awayTeam].pj > 0) {
-                newAway = runnersUp[m.awayTeam].team; newAwayFlag = runnersUp[m.awayTeam].flag; updated = true;
-            }
-
-            if (matchWinners[m.homeTeam]) {
-                newHome = matchWinners[m.homeTeam].team; newHomeFlag = matchWinners[m.homeTeam].flag; updated = true;
-            } else if (matchLosers[m.homeTeam]) {
-                newHome = matchLosers[m.homeTeam].team; newHomeFlag = matchLosers[m.homeTeam].flag; updated = true;
-            }
-
-            if (matchWinners[m.awayTeam]) {
-                newAway = matchWinners[m.awayTeam].team; newAwayFlag = matchWinners[m.awayTeam].flag; updated = true;
-            } else if (matchLosers[m.awayTeam]) {
-                newAway = matchLosers[m.awayTeam].team; newAwayFlag = matchLosers[m.awayTeam].flag; updated = true;
-            }
-
-            if (updated) {
-                const isStillTbd = newHome.includes('Grupo') || newAway.includes('Grupo') || newHome.includes('Partido') || newAway.includes('Partido');
-                return {
-                    ...m,
-                    homeTeam: newHome,
-                    awayTeam: newAway,
-                    homeFlag: newHomeFlag,
-                    awayFlag: newAwayFlag,
-                    tbd: isStillTbd
-                };
-            }
-        }
-        return m;
-    });
+    return resolvedMatches;
 }
 
 // Mock Data for the 2026 World Cup (Sample)
@@ -184,28 +191,28 @@ MOCK_MATCHES.push({ id: "m78", stage: "round_32", homeTeam: "Costa de Marfil", a
 MOCK_MATCHES.push({ id: "m79", stage: "round_32", homeTeam: "México", awayTeam: "Ecuador", matchDate: "2026-06-30T21:00:00-04:00", homeFlag: "mx", awayFlag: "ec", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m80", stage: "round_32", homeTeam: "Inglaterra", awayTeam: "RD Congo", matchDate: "2026-07-01T12:00:00-04:00", homeFlag: "gb-eng", awayFlag: "cd", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m81", stage: "round_32", homeTeam: "Estados Unidos", awayTeam: "Bosnia y Herzegovina", matchDate: "2026-07-01T20:00:00-04:00", homeFlag: "us", awayFlag: "ba", status: "pending", tbd: false });
-MOCK_MATCHES.push({ id: "m82", stage: "round_32", homeTeam: "Australia", awayTeam: "Egipto", matchDate: "2026-07-01T16:00:00-04:00", homeFlag: "au", awayFlag: "eg", status: "pending", tbd: false });
+MOCK_MATCHES.push({ id: "m82", stage: "round_32", homeTeam: "Bélgica", awayTeam: "Senegal", matchDate: "2026-07-01T16:00:00-04:00", homeFlag: "be", awayFlag: "sn", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m83", stage: "round_32", homeTeam: "Portugal", awayTeam: "Croacia", matchDate: "2026-07-02T19:00:00-04:00", homeFlag: "pt", awayFlag: "hr", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m84", stage: "round_32", homeTeam: "España", awayTeam: "Austria", matchDate: "2026-07-02T15:00:00-04:00", homeFlag: "es", awayFlag: "at", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m85", stage: "round_32", homeTeam: "Suiza", awayTeam: "Argelia", matchDate: "2026-07-02T23:00:00-04:00", homeFlag: "ch", awayFlag: "dz", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m86", stage: "round_32", homeTeam: "Argentina", awayTeam: "Cabo Verde", matchDate: "2026-07-03T18:00:00-04:00", homeFlag: "ar", awayFlag: "cv", status: "pending", tbd: false });
 MOCK_MATCHES.push({ id: "m87", stage: "round_32", homeTeam: "Colombia", awayTeam: "Ghana", matchDate: "2026-07-03T21:30:00-04:00", homeFlag: "co", awayFlag: "gh", status: "pending", tbd: false });
-MOCK_MATCHES.push({ id: "m88", stage: "round_32", homeTeam: "Bélgica", awayTeam: "Senegal", matchDate: "2026-07-03T14:00:00-04:00", homeFlag: "be", awayFlag: "sn", status: "pending", tbd: false });
-MOCK_MATCHES.push({ id: "m89", stage: "round_16", homeTeam: "Ganador Partido 74", awayTeam: "Ganador Partido 77", matchDate: "2026-07-03T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
-MOCK_MATCHES.push({ id: "m90", stage: "round_16", homeTeam: "Ganador Partido 73", awayTeam: "Ganador Partido 75", matchDate: "2026-07-03T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
-MOCK_MATCHES.push({ id: "m91", stage: "round_16", homeTeam: "Ganador Partido 76", awayTeam: "Ganador Partido 78", matchDate: "2026-07-05T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
-MOCK_MATCHES.push({ id: "m92", stage: "round_16", homeTeam: "Ganador Partido 79", awayTeam: "Ganador Partido 80", matchDate: "2026-07-05T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m88", stage: "round_32", homeTeam: "Australia", awayTeam: "Egipto", matchDate: "2026-07-03T14:00:00-04:00", homeFlag: "au", awayFlag: "eg", status: "pending", tbd: false });
+MOCK_MATCHES.push({ id: "m89", stage: "round_16", homeTeam: "Ganador Partido 74", awayTeam: "Ganador Partido 77", matchDate: "2026-07-04T17:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m90", stage: "round_16", homeTeam: "Ganador Partido 73", awayTeam: "Ganador Partido 75", matchDate: "2026-07-04T13:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m91", stage: "round_16", homeTeam: "Ganador Partido 76", awayTeam: "Ganador Partido 78", matchDate: "2026-07-05T16:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m92", stage: "round_16", homeTeam: "Ganador Partido 79", awayTeam: "Ganador Partido 80", matchDate: "2026-07-05T20:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
 MOCK_MATCHES.push({ id: "m93", stage: "round_16", homeTeam: "Ganador Partido 83", awayTeam: "Ganador Partido 84", matchDate: "2026-07-06T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
-MOCK_MATCHES.push({ id: "m94", stage: "round_16", homeTeam: "Ganador Partido 81", awayTeam: "Ganador Partido 82", matchDate: "2026-07-06T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
-MOCK_MATCHES.push({ id: "m95", stage: "round_16", homeTeam: "Ganador Partido 86", awayTeam: "Ganador Partido 88", matchDate: "2026-07-07T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
-MOCK_MATCHES.push({ id: "m96", stage: "round_16", homeTeam: "Ganador Partido 85", awayTeam: "Ganador Partido 87", matchDate: "2026-07-07T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
-MOCK_MATCHES.push({ id: "m97", stage: "quarter_finals", homeTeam: "Ganador Partido 89", awayTeam: "Ganador Partido 90", matchDate: "2026-07-09T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m94", stage: "round_16", homeTeam: "Ganador Partido 81", awayTeam: "Ganador Partido 82", matchDate: "2026-07-06T20:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m95", stage: "round_16", homeTeam: "Ganador Partido 86", awayTeam: "Ganador Partido 88", matchDate: "2026-07-07T12:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m96", stage: "round_16", homeTeam: "Ganador Partido 85", awayTeam: "Ganador Partido 87", matchDate: "2026-07-07T16:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m97", stage: "quarter_finals", homeTeam: "Ganador Partido 89", awayTeam: "Ganador Partido 90", matchDate: "2026-07-09T16:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
 MOCK_MATCHES.push({ id: "m98", stage: "quarter_finals", homeTeam: "Ganador Partido 93", awayTeam: "Ganador Partido 94", matchDate: "2026-07-10T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
-MOCK_MATCHES.push({ id: "m99", stage: "quarter_finals", homeTeam: "Ganador Partido 91", awayTeam: "Ganador Partido 92", matchDate: "2026-07-10T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
-MOCK_MATCHES.push({ id: "m100", stage: "quarter_finals", homeTeam: "Ganador Partido 95", awayTeam: "Ganador Partido 96", matchDate: "2026-07-10T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m99", stage: "quarter_finals", homeTeam: "Ganador Partido 91", awayTeam: "Ganador Partido 92", matchDate: "2026-07-11T17:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m100", stage: "quarter_finals", homeTeam: "Ganador Partido 95", awayTeam: "Ganador Partido 96", matchDate: "2026-07-11T21:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
 MOCK_MATCHES.push({ id: "m101", stage: "semi_finals", homeTeam: "Ganador Partido 97", awayTeam: "Ganador Partido 98", matchDate: "2026-07-14T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
-MOCK_MATCHES.push({ id: "m102", stage: "semi_finals", homeTeam: "Ganador Partido 99", awayTeam: "Ganador Partido 100", matchDate: "2026-07-14T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
-MOCK_MATCHES.push({ id: "m103", stage: "third_place", homeTeam: "Perdedor Partido 101", awayTeam: "Perdedor Partido 102", matchDate: "2026-07-14T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m102", stage: "semi_finals", homeTeam: "Ganador Partido 99", awayTeam: "Ganador Partido 100", matchDate: "2026-07-15T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
+MOCK_MATCHES.push({ id: "m103", stage: "third_place", homeTeam: "Perdedor Partido 101", awayTeam: "Perdedor Partido 102", matchDate: "2026-07-18T17:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
 MOCK_MATCHES.push({ id: "m104", stage: "final", homeTeam: "Ganador Partido 101", awayTeam: "Ganador Partido 102", matchDate: "2026-07-19T15:00:00-04:00", homeFlag: "un", awayFlag: "un", status: "pending", tbd: true });
 
 export function subscribeToMatches(callback) {
