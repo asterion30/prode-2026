@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sapate Projects Hub — Option 3: 1980s Retro Synthwave Terminal</title>
+  <meta name="description" content="1980s Synthwave & Arcade Terminal UI Design — Outrun Retro Minimalist UX for Sapate Hub">
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Share+Tech+Mono&family=VT323&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    :root {
+      --bg-dark: #120524;
+      --bg-card: #1d0a36;
+      --bg-card-hover: #29104d;
+      --neon-magenta: #ff007f;
+      --outrun-orange: #ff8800;
+      --cyan-glow: #00f0ff;
+      --hot-pink: #ff1493;
+      --arcade-yellow: #ffff00;
+      --text-white: #fce7f3;
+      --text-muted: #a78bfa;
+      --border-neon: rgba(255, 0, 127, 0.35);
+      --border-orange: rgba(255, 136, 0, 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* CRT Scanline Effect */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(
+        rgba(18, 5, 36, 0) 50%,
+        rgba(0, 0, 0, 0.35) 50%
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    /* Animated 80s Synthwave Grid Background */
+    .synth-grid-bg {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 45vh;
+      background-image: 
+        linear-gradient(90deg, rgba(255, 0, 127, 0.25) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 0, 127, 0.25) 1px, transparent 1px);
+      background-size: 50px 30px;
+      transform: perspective(400px) rotateX(60deg);
+      transform-origin: bottom center;
+      pointer-events: none;
+      z-index: 0;
+      animation: gridScroll 12s linear infinite;
+    }
+
+    @keyframes gridScroll {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 300px; }
+    }
+
+    /* Header Nav */
+    header {
+      background: rgba(18, 5, 36, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--neon-magenta);
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .nav-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-synth {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+
+    .synth-logo-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--neon-magenta), var(--outrun-orange));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Audiowide', cursive;
+      font-size: 22px;
+      color: #fff;
+      box-shadow: 0 0 15px var(--neon-magenta);
+    }
+
+    .brand-title-80s {
+      font-family: 'Audiowide', cursive;
+      font-size: 20px;
+      color: #fff;
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 10px var(--neon-magenta);
+    }
+
+    .arcade-coin-tag {
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      color: var(--arcade-yellow);
+      background: rgba(255, 255, 0, 0.1);
+      border: 1px solid var(--arcade-yellow);
+      padding: 4px 16px;
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Main Container */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Synth Hero Section */
+    .hero-synth {
+      background: linear-gradient(180deg, rgba(29, 10, 54, 0.95), rgba(18, 5, 36, 0.9));
+      border: 2px solid var(--neon-magenta);
+      border-radius: 16px;
+      padding: 48px;
+      margin-bottom: 48px;
+      position: relative;
+      box-shadow: 0 0 30px rgba(255, 0, 127, 0.25), inset 0 0 40px rgba(255, 136, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .hero-badge-80s {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      color: var(--cyan-glow);
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--cyan-glow);
+      padding: 4px 16px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+    }
+
+    .hero-synth-title {
+      font-family: 'Audiowide', cursive;
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 1.1;
+      margin-bottom: 18px;
+      background: linear-gradient(180deg, #ffffff 0%, var(--neon-magenta) 60%, var(--outrun-orange) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 15px rgba(255, 0, 127, 0.5));
+    }
+
+    .hero-synth-desc {
+      font-size: 17px;
+      color: var(--text-muted);
+      max-width: 680px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .arcade-scoreboard {
+      display: flex;
+      gap: 36px;
+      flex-wrap: wrap;
+      border-top: 1px dashed rgba(255, 0, 127, 0.3);
+      padding-top: 24px;
+      font-family: 'VT323', monospace;
+    }
+
+    .score-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .score-val {
+      font-size: 32px;
+      color: var(--outrun-orange);
+      text-shadow: 0 0 10px var(--outrun-orange);
+    }
+
+    .score-lbl {
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    /* Filter Controls */
+    .synth-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+
+    .synth-tabs {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-synth-tab {
+      background: rgba(29, 10, 54, 0.8);
+      border: 2px solid var(--border-neon);
+      color: var(--text-white);
+      font-family: 'Audiowide', cursive;
+      font-size: 13px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-synth-tab:hover, .btn-synth-tab.active {
+      background: var(--neon-magenta);
+      color: #fff;
+      border-color: var(--neon-magenta);
+      box-shadow: 0 0 20px var(--neon-magenta);
+    }
+
+    /* Cards Grid */
+    .grid-synth {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 28px;
+    }
+
+    .synth-card {
+      background: var(--bg-card);
+      border: 2px solid var(--card-accent, var(--border-neon));
+      border-radius: 16px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .synth-card::before {
+      content: 'CASSETTE TAPE // ST-2026';
+      position: absolute;
+      top: 10px; right: 16px;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      color: var(--card-accent, var(--neon-magenta));
+    }
+
+    .synth-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 0 30px var(--card-accent, var(--neon-magenta));
+      background: var(--bg-card-hover);
+    }
+
+    .card-synth-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .cassette-icon {
+      width: 54px;
+      height: 54px;
+      background: rgba(255, 0, 127, 0.1);
+      border: 2px solid var(--card-accent, var(--neon-magenta));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 0 12px var(--card-accent, var(--neon-magenta));
+    }
+
+    .badge-synth-status {
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      padding: 4px 12px;
+      border: 1px solid;
+      border-radius: 4px;
+    }
+
+    .badge-completed {
+      color: var(--cyan-glow);
+      border-color: var(--cyan-glow);
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+    }
+
+    .badge-active {
+      color: #00ffaa;
+      border-color: #00ffaa;
+      box-shadow: 0 0 8px rgba(0, 255, 170, 0.3);
+    }
+
+    .badge-live {
+      color: var(--neon-magenta);
+      border-color: var(--neon-magenta);
+      box-shadow: 0 0 8px rgba(255, 0, 127, 0.3);
+    }
+
+    .badge-dev {
+      color: var(--arcade-yellow);
+      border-color: var(--arcade-yellow);
+      box-shadow: 0 0 8px rgba(255, 255, 0, 0.3);
+    }
+
+    .card-synth-title {
+      font-family: 'Audiowide', cursive;
+      font-size: 22px;
+      color: #fff;
+      margin-bottom: 12px;
+      letter-spacing: 0.03em;
+    }
+
+    .card-synth-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .synth-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .synth-tag-pill {
+      font-family: 'VT323', monospace;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--outrun-orange);
+      padding: 2px 10px;
+      border-radius: 4px;
+    }
+
+    .btn-synth-action {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(90deg, var(--card-accent, var(--neon-magenta)), var(--outrun-orange));
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Audiowide', cursive;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 0 15px var(--card-accent, var(--neon-magenta));
+      transition: all 0.2s;
+    }
+
+    .btn-synth-action:hover {
+      filter: brightness(1.25);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px var(--card-accent, var(--outrun-orange));
+    }
+
+    /* Banner Synth */
+    .synth-banner {
+      margin-top: 56px;
+      background: linear-gradient(135deg, rgba(255, 0, 127, 0.2), rgba(255, 136, 0, 0.15));
+      border: 2px solid var(--outrun-orange);
+      border-radius: 16px;
+      padding: 36px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .banner-synth-title {
+      font-family: 'Audiowide', cursive;
+      font-size: 22px;
+      color: var(--outrun-orange);
+      margin-bottom: 8px;
+    }
+
+    .banner-synth-desc {
+      color: var(--text-muted);
+      font-size: 15px;
+      max-width: 650px;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 2px solid var(--neon-magenta);
+      background: #090214;
+      padding: 28px 24px;
+      text-align: center;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--text-muted);
+    }
+
+    footer a { color: var(--neon-magenta); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <div class="synth-grid-bg"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="nav-container">
+      <a href="/" class="brand-synth">
+        <div class="synth-logo-icon">80</div>
+        <span class="brand-title-80s">Sapate Retro Hub</span>
+      </a>
+      <div class="arcade-coin-tag">
+        <i class="ph-bold ph-game-controller"></i>
+        <span>INSERT COIN [02]</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- Synth Hero -->
+    <section class="hero-synth">
+      <div class="hero-badge-80s">
+        <i class="ph-bold ph-sparkle"></i>
+        <span>SYNTHWAVE ARCADE TERMINAL // 1980s EDITION</span>
+      </div>
+      <h1 class="hero-synth-title">Retro Outrun Hub</h1>
+      <p class="hero-synth-desc">
+        Catálogo interactivo con diseño synthwave ochentoso. Todas las aplicaciones del laboratorio presentadas con estética arcade vintage.
+      </p>
+
+      <div class="arcade-scoreboard">
+        <div class="score-card">
+          <span class="score-val">04</span>
+          <span class="score-lbl">GAMES / PROJECTS</span>
+        </div>
+        <div class="score-card">
+          <span class="score-val">999,990</span>
+          <span class="score-lbl">HIGH SCORE</span>
+        </div>
+        <div class="score-card">
+          <span class="score-val">READY</span>
+          <span class="score-lbl">PLAYER 1 STATUS</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toolbar -->
+    <div class="synth-toolbar">
+      <div class="synth-tabs">
+        <button class="btn-synth-tab active" onclick="filterSynth('all', this)">[ALL TAPES]</button>
+        <button class="btn-synth-tab" onclick="filterSynth('deporte', this)">[PRODE]</button>
+        <button class="btn-synth-tab" onclick="filterSynth('salud', this)">[SALUD]</button>
+        <button class="btn-synth-tab" onclick="filterSynth('social', this)">[RIFA]</button>
+        <button class="btn-synth-tab" onclick="filterSynth('ia', this)">[LAB IA]</button>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid-synth" id="synthGrid">
+
+      <!-- Card 1 -->
+      <article class="synth-card" data-cat="deporte" style="--card-accent: #ff007f;">
+        <div>
+          <div class="card-synth-top">
+            <div class="cassette-icon">⚽</div>
+            <span class="badge-synth-status badge-completed">FINALIZADO</span>
+          </div>
+          <h2 class="card-synth-title">Prode Deportivo 2026</h2>
+          <p class="card-synth-desc">
+            Plataforma interactiva de pronósticos deportivos para el Mundial de Fútbol. Incluye fixture en tiempo real, ligas privadas y posiciones.
+          </p>
+          <div class="synth-tags">
+            <span class="synth-tag-pill">#PRODE</span>
+            <span class="synth-tag-pill">#SUPABASE</span>
+            <span class="synth-tag-pill">#VITE</span>
+          </div>
+        </div>
+        <a href="/prode.html" class="btn-synth-action">
+          <span>PRESS START</span>
+          <i class="ph-bold ph-play"></i>
+        </a>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="synth-card" data-cat="salud" style="--card-accent: #00ffaa;">
+        <div>
+          <div class="card-synth-top">
+            <div class="cassette-icon">🏥</div>
+            <span class="badge-synth-status badge-active">OPERATIVO</span>
+          </div>
+          <h2 class="card-synth-title">Sección Salud</h2>
+          <p class="card-synth-desc">
+            Portal de gestión, seguimiento asistencial de salud y servicios de asistencia médica rápida con tecnología PWA.
+          </p>
+          <div class="synth-tags">
+            <span class="synth-tag-pill">#SALUD</span>
+            <span class="synth-tag-pill">#PWA</span>
+            <span class="synth-tag-pill">#ASISTENCIA</span>
+          </div>
+        </div>
+        <a href="/salud/index.html" class="btn-synth-action">
+          <span>LOAD TAPE</span>
+          <i class="ph-bold ph-play"></i>
+        </a>
+      </article>
+
+      <!-- Card 3 -->
+      <article class="synth-card" data-cat="social" style="--card-accent: #ff8800;">
+        <div>
+          <div class="card-synth-top">
+            <div class="cassette-icon">🎟️</div>
+            <span class="badge-synth-status badge-live">EN VIVO</span>
+          </div>
+          <h2 class="card-synth-title">Rifa Solidaria</h2>
+          <p class="card-synth-desc">
+            Plataforma web para la gestión de rifas benefactoras y financiamiento comunitario de causas benéficas e instituciones.
+          </p>
+          <div class="synth-tags">
+            <span class="synth-tag-pill">#SOLIDARIO</span>
+            <span class="synth-tag-pill">#RIFAS</span>
+            <span class="synth-tag-pill">#COMUNIDAD</span>
+          </div>
+        </div>
+        <a href="/rifasolidaria/index.html" class="btn-synth-action">
+          <span>ENTER GAME</span>
+          <i class="ph-bold ph-play"></i>
+        </a>
+      </article>
+
+      <!-- Card 4 -->
+      <article class="synth-card" data-cat="ia" style="--card-accent: #ffff00;">
+        <div>
+          <div class="card-synth-top">
+            <div class="cassette-icon">💡</div>
+            <span class="badge-synth-status badge-dev">LAB IA</span>
+          </div>
+          <h2 class="card-synth-title">Laboratorio de Ideas</h2>
+          <p class="card-synth-desc">
+            Espacio principal en Vercel dedicado al desarrollo, prueba y lanzamiento continuo de prototipos y experimentos con IA.
+          </p>
+          <div class="synth-tags">
+            <span class="synth-tag-pill">#IA</span>
+            <span class="synth-tag-pill">#VERCEL</span>
+            <span class="synth-tag-pill">#IDEAS</span>
+          </div>
+        </div>
+        <a href="https://sapate.net.ar" target="_blank" class="btn-synth-action">
+          <span>VISIT SAPATE.NET.AR</span>
+          <i class="ph-bold ph-arrow-up-right"></i>
+        </a>
+      </article>
+
+    </div>
+
+    <!-- Banner -->
+    <section class="synth-banner">
+      <div>
+        <h3 class="banner-synth-title">📼 CONTINUOUS RETRO STREAMING</h3>
+        <p class="banner-synth-desc">
+          Todos los desarrollos generados en <strong>sapate.net.ar</strong> son migrados progresivamente a esta consola retro.
+        </p>
+      </div>
+      <a href="https://sapate.net.ar" target="_blank" class="btn-synth-action" style="width: auto; padding: 14px 28px;">
+        <span>VISITAR SITIO PRINCIPAL</span>
+        <i class="ph-bold ph-globe"></i>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 <a href="https://sapate.net.ar" target="_blank">sapate.net.ar</a> — 1980s SYNTHWAVE TERMINAL ARCHITECTURE</p>
+  </footer>
+
+  <script>
+    function filterSynth(cat, btn) {
+      document.querySelectorAll('.btn-synth-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const cards = document.querySelectorAll('.synth-card');
+      cards.forEach(card => {
+        if (cat === 'all' || card.dataset.cat === cat) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

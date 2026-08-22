@@ -42,9 +42,9 @@ export default defineConfig({
       input: {
         main: './index.html',
         prode: './prode.html',
-        preview1: './preview-option1-glassmorphism.html',
-        preview2: './preview-option2-swiss-minimal.html',
-        preview3: './preview-option3-neobrutalist.html',
+        preview1: './preview-option1-behance-cyberpunk.html',
+        preview2: './preview-option2-anime-mecha.html',
+        preview3: './preview-option3-retro-80s.html',
       },
       output: {
         manualChunks: (id) => {

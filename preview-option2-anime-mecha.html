@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sapate Projects Hub — Option 2: Anime Cyber / Mecha Aesthetic</title>
+  <meta name="description" content="Anime Cyberpunk & Mecha Interface Aesthetic — Edgerunners & Ghost in the Shell Inspired UX for Sapate Hub">
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,600;0,800;0,900;1,800&family=Noto+Sans+JP:wght@400;700;900&family=Zen+Dots&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    :root {
+      --bg-dark: #12091f;
+      --bg-card: #1c1030;
+      --bg-card-hover: #261542;
+      --pink-sakura: #ff6699;
+      --violet-mecha: #9933ff;
+      --blue-neon: #00ccff;
+      --crimson-red: #ff2a6d;
+      --gold-warning: #ffcc00;
+      --text-white: #ffffff;
+      --text-lavender: #c4b5fd;
+      --text-muted: #8b7aa3;
+      --border-mecha: rgba(153, 51, 255, 0.35);
+      --border-pink: rgba(255, 102, 153, 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      font-family: 'Space Grotesk', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(153, 51, 255, 0.18) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(255, 102, 153, 0.15) 0%, transparent 45%);
+      background-attachment: fixed;
+    }
+
+    /* Top Hazard Warning Ribbon */
+    .hazard-stripe-top {
+      height: 6px;
+      width: 100%;
+      background: repeating-linear-gradient(
+        -45deg,
+        var(--gold-warning),
+        var(--gold-warning) 12px,
+        #000 12px,
+        #000 24px
+      );
+      box-shadow: 0 0 12px var(--gold-warning);
+    }
+
+    /* Header Nav */
+    header {
+      background: rgba(18, 9, 31, 0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 2px solid var(--violet-mecha);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .nav-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-mecha {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .mecha-badge-icon {
+      width: 46px;
+      height: 46px;
+      background: linear-gradient(135deg, var(--crimson-red), var(--violet-mecha));
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Zen Dots', cursive;
+      font-size: 20px;
+      color: #fff;
+      box-shadow: 0 0 15px var(--crimson-red);
+    }
+
+    .brand-titles {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-title {
+      font-family: 'Kanit', sans-serif;
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .jp-subtitle {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 11px;
+      color: var(--pink-sakura);
+      letter-spacing: 0.15em;
+      font-weight: 700;
+    }
+
+    .header-kanji-tag {
+      background: rgba(255, 102, 153, 0.12);
+      border: 1px solid var(--pink-sakura);
+      color: var(--pink-sakura);
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 16px;
+      clip-path: polygon(0 0, 90% 0, 100% 100%, 10% 100%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Mecha Hero Section */
+    .hero-mecha {
+      position: relative;
+      background: linear-gradient(135deg, rgba(28, 16, 48, 0.9), rgba(18, 9, 31, 0.95));
+      border: 2px solid var(--violet-mecha);
+      padding: 48px;
+      margin-bottom: 48px;
+      box-shadow: 0 0 30px rgba(153, 51, 255, 0.2);
+      overflow: hidden;
+    }
+
+    .hero-mecha::before {
+      content: 'EVA-UNIT // PROJECT HUB';
+      position: absolute;
+      top: 14px; right: 20px;
+      font-family: 'Zen Dots', cursive;
+      font-size: 11px;
+      color: var(--blue-neon);
+      letter-spacing: 0.15em;
+    }
+
+    .hero-kanji-header {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--gold-warning);
+      background: rgba(255, 204, 0, 0.12);
+      display: inline-block;
+      padding: 4px 12px;
+      margin-bottom: 16px;
+      border-left: 4px solid var(--gold-warning);
+    }
+
+    .hero-mecha-title {
+      font-family: 'Kanit', sans-serif;
+      font-size: clamp(36px, 5vw, 58px);
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 1.05;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #ffffff, var(--pink-sakura), var(--blue-neon));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 20px rgba(255, 102, 153, 0.4));
+    }
+
+    .hero-mecha-desc {
+      font-size: 17px;
+      color: var(--text-lavender);
+      max-width: 700px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .mecha-stats-row {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(153, 51, 255, 0.3);
+      padding-top: 24px;
+    }
+
+    .stat-mecha-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-num {
+      font-family: 'Zen Dots', cursive;
+      font-size: 26px;
+      color: var(--pink-sakura);
+      text-shadow: 0 0 10px var(--pink-sakura);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--text-muted);
+    }
+
+    /* Filter Controls */
+    .mecha-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+
+    .mecha-nav-tabs {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mecha-tab-btn {
+      background: rgba(28, 16, 48, 0.8);
+      border: 1px solid var(--border-mecha);
+      color: var(--text-lavender);
+      font-family: 'Kanit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 22px;
+      cursor: pointer;
+      transition: all 0.2s;
+      clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mecha-tab-btn:hover, .mecha-tab-btn.active {
+      background: var(--pink-sakura);
+      color: #000;
+      border-color: var(--pink-sakura);
+      box-shadow: 0 0 20px var(--pink-sakura);
+    }
+
+    /* Manga Grid */
+    .grid-mecha {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 28px;
+    }
+
+    .mecha-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-mecha);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .mecha-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      border-color: var(--pink-sakura);
+      box-shadow: 0 0 30px rgba(255, 102, 153, 0.35);
+      background: var(--bg-card-hover);
+    }
+
+    .mecha-sticker-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .mecha-icon {
+      width: 58px;
+      height: 58px;
+      background: rgba(153, 51, 255, 0.15);
+      border: 2px solid var(--card-mecha-accent, var(--violet-mecha));
+      clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 0 15px var(--card-mecha-accent, var(--violet-mecha));
+    }
+
+    .badge-mecha-status {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 4px 12px;
+      border: 1.5px solid;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-completed {
+      color: var(--blue-neon);
+      border-color: var(--blue-neon);
+      background: rgba(0, 204, 255, 0.1);
+    }
+
+    .badge-active {
+      color: #00ffaa;
+      border-color: #00ffaa;
+      background: rgba(0, 255, 170, 0.1);
+    }
+
+    .badge-live {
+      color: var(--crimson-red);
+      border-color: var(--crimson-red);
+      background: rgba(255, 42, 109, 0.15);
+    }
+
+    .badge-dev {
+      color: var(--gold-warning);
+      border-color: var(--gold-warning);
+      background: rgba(255, 204, 0, 0.15);
+    }
+
+    .jp-card-tag {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 12px;
+      color: var(--pink-sakura);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .card-mecha-title {
+      font-family: 'Kanit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .card-mecha-desc {
+      font-size: 15px;
+      color: var(--text-lavender);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .mecha-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .mecha-tag-pill {
+      font-family: 'Zen Dots', cursive;
+      font-size: 10px;
+      background: rgba(153, 51, 255, 0.15);
+      border: 1px solid var(--border-mecha);
+      color: var(--blue-neon);
+      padding: 4px 10px;
+    }
+
+    .btn-mecha-launch {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--card-mecha-accent, var(--violet-mecha)), var(--pink-sakura));
+      border: none;
+      color: #fff;
+      font-family: 'Kanit', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s;
+    }
+
+    .btn-mecha-launch:hover {
+      filter: brightness(1.2);
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px var(--card-mecha-accent, var(--pink-sakura));
+    }
+
+    /* Info Banner Mecha */
+    .mecha-banner {
+      margin-top: 56px;
+      background: linear-gradient(135deg, rgba(255, 42, 109, 0.15), rgba(153, 51, 255, 0.2));
+      border: 2px solid var(--crimson-red);
+      padding: 36px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .mecha-banner-title {
+      font-family: 'Kanit', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--crimson-red);
+      margin-bottom: 8px;
+    }
+
+    .mecha-banner-desc {
+      color: var(--text-lavender);
+      font-size: 15px;
+      max-width: 650px;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 2px solid var(--violet-mecha);
+      background: #0b0514;
+      padding: 28px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    footer a { color: var(--pink-sakura); text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <div class="hazard-stripe-top"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="nav-container">
+      <a href="/" class="brand-mecha">
+        <div class="mecha-badge-icon">S</div>
+        <div class="brand-titles">
+          <span class="main-title">Sapate Projects</span>
+          <span class="jp-subtitle">サパテ・プロジェクト・ハブ</span>
+        </div>
+      </a>
+      <div class="header-kanji-tag">
+        <i class="ph-bold ph-lightning"></i>
+        <span>ステータス: 稼働中 [ONLINE]</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Section -->
+  <main>
+
+    <!-- Mecha Hero -->
+    <section class="hero-mecha">
+      <div class="hero-kanji-header">【次世代ウェブ開発ラボ】 // SAPATE DIGITAL SYSTEM</div>
+      <h1 class="hero-mecha-title">Portafolio Cyber Mecha</h1>
+      <p class="hero-mecha-desc">
+        Arquitectura visual inspirada en la estética mecha y ciberpunk japonés. Descubre nuestras aplicaciones en producción y experimentos activos.
+      </p>
+
+      <div class="mecha-stats-row">
+        <div class="stat-mecha-card">
+          <span class="stat-num">04</span>
+          <span class="stat-label">プロジェクト (Proyectos)</span>
+        </div>
+        <div class="stat-mecha-card">
+          <span class="stat-num">100%</span>
+          <span class="stat-label">システム (Estabilidad)</span>
+        </div>
+        <div class="stat-mecha-card">
+          <span class="stat-num">2026</span>
+          <span class="stat-label">フェーズ (Fase Actual)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toolbar -->
+    <div class="mecha-toolbar">
+      <div class="mecha-nav-tabs">
+        <button class="mecha-tab-btn active" onclick="filterMecha('all', this)">
+          <span>すべて (TODOS)</span>
+        </button>
+        <button class="mecha-tab-btn" onclick="filterMecha('deporte', this)">
+          <span>スポーツ (DEPORTES)</span>
+        </button>
+        <button class="mecha-tab-btn" onclick="filterMecha('salud', this)">
+          <span>医療 (SALUD)</span>
+        </button>
+        <button class="mecha-tab-btn" onclick="filterMecha('social', this)">
+          <span>支援 (RIFAS)</span>
+        </button>
+        <button class="mecha-tab-btn" onclick="filterMecha('ia', this)">
+          <span>AI ラボ (LAB IA)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="grid-mecha" id="mechaGrid">
+
+      <!-- Card 1 -->
+      <article class="mecha-card" data-cat="deporte" style="--card-mecha-accent: #00ccff;">
+        <div>
+          <div class="mecha-sticker-top">
+            <div class="mecha-icon">⚽</div>
+            <span class="badge-mecha-status badge-completed">完了 (FINALIZADO)</span>
+          </div>
+          <div class="jp-card-tag">プロジェクト 01 // PRODE 2026</div>
+          <h2 class="card-mecha-title">Prode Deportivo 2026</h2>
+          <p class="card-mecha-desc">
+            Plataforma interactiva de pronósticos deportivos para el Mundial de Fútbol. Incluye fixture en tiempo real, ligas privadas y tabla de posiciones.
+          </p>
+          <div class="mecha-tags">
+            <span class="mecha-tag-pill">#PRODE</span>
+            <span class="mecha-tag-pill">#SUPABASE</span>
+            <span class="mecha-tag-pill">#VITE</span>
+          </div>
+        </div>
+        <a href="/prode.html" class="btn-mecha-launch">
+          <span>起動する (ABRIR PRODE)</span>
+          <i class="ph-bold ph-arrow-right"></i>
+        </a>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="mecha-card" data-cat="salud" style="--card-mecha-accent: #00ffaa;">
+        <div>
+          <div class="mecha-sticker-top">
+            <div class="mecha-icon">🏥</div>
+            <span class="badge-mecha-status badge-active">稼働中 (OPERATIVO)</span>
+          </div>
+          <div class="jp-card-tag">プロジェクト 02 // SECCIÓN SALUD</div>
+          <h2 class="card-mecha-title">Sección Salud</h2>
+          <p class="card-mecha-desc">
+            Portal de gestión, seguimiento asistencial de salud y servicios de asistencia médica rápida con soporte PWA.
+          </p>
+          <div class="mecha-tags">
+            <span class="mecha-tag-pill">#SALUD</span>
+            <span class="mecha-tag-pill">#PWA</span>
+            <span class="mecha-tag-pill">#ASISTENCIA</span>
+          </div>
+        </div>
+        <a href="/salud/index.html" class="btn-mecha-launch">
+          <span>アクセス (ABRIR SALUD)</span>
+          <i class="ph-bold ph-arrow-right"></i>
+        </a>
+      </article>
+
+      <!-- Card 3 -->
+      <article class="mecha-card" data-cat="social" style="--card-mecha-accent: #ff2a6d;">
+        <div>
+          <div class="mecha-sticker-top">
+            <div class="mecha-icon">🎟️</div>
+            <span class="badge-mecha-status badge-live">ライブ (EN VIVO)</span>
+          </div>
+          <div class="jp-card-tag">プロジェクト 03 // RIFA SOLIDARIA</div>
+          <h2 class="card-mecha-title">Rifa Solidaria</h2>
+          <p class="card-mecha-desc">
+            Plataforma web para la gestión de rifas benefactoras y financiamiento comunitario de causas benéficas e instituciones.
+          </p>
+          <div class="mecha-tags">
+            <span class="mecha-tag-pill">#SOLIDARIO</span>
+            <span class="mecha-tag-pill">#RIFAS</span>
+            <span class="mecha-tag-pill">#COMUNIDAD</span>
+          </div>
+        </div>
+        <a href="/rifasolidaria/index.html" class="btn-mecha-launch">
+          <span>参加する (VER RIFA)</span>
+          <i class="ph-bold ph-arrow-right"></i>
+        </a>
+      </article>
+
+      <!-- Card 4 -->
+      <article class="mecha-card" data-cat="ia" style="--card-mecha-accent: #ffcc00;">
+        <div>
+          <div class="mecha-sticker-top">
+            <div class="mecha-icon">💡</div>
+            <span class="badge-mecha-status badge-dev">AI 実験 (LAB IA)</span>
+          </div>
+          <div class="jp-card-tag">プロジェクト 04 // LAB DE IDEAS</div>
+          <h2 class="card-mecha-title">Laboratorio de Ideas</h2>
+          <p class="card-mecha-desc">
+            Espacio principal en Vercel dedicado al desarrollo, prueba y lanzamiento continuo de prototipos y experimentos con IA.
+          </p>
+          <div class="mecha-tags">
+            <span class="mecha-tag-pill">#IA</span>
+            <span class="mecha-tag-pill">#VERCEL</span>
+            <span class="mecha-tag-pill">#IDEAS</span>
+          </div>
+        </div>
+        <a href="https://sapate.net.ar" target="_blank" class="btn-mecha-launch">
+          <span>Web を見る (VISITAR LAB)</span>
+          <i class="ph-bold ph-arrow-up-right"></i>
+        </a>
+      </article>
+
+    </div>
+
+    <!-- Info Banner -->
+    <section class="mecha-banner">
+      <div>
+        <h3 class="mecha-banner-title">🚀 継続的な開発と公開 (Desarrollo Continuo)</h3>
+        <p class="mecha-banner-desc">
+          Cada nuevo prototipo probado en <strong>sapate.net.ar</strong> se sincroniza inmediatamente en este centro de proyectos.
+        </p>
+      </div>
+      <a href="https://sapate.net.ar" target="_blank" class="btn-mecha-launch" style="width: auto; padding: 14px 28px;">
+        <span>メインサイト (VER SITIO MAIN)</span>
+        <i class="ph-bold ph-globe"></i>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 <a href="https://sapate.net.ar" target="_blank">sapate.net.ar</a> — MECHA CYBER ARCHITECTURE // 全著作権所有</p>
+  </footer>
+
+  <script>
+    function filterMecha(cat, btn) {
+      document.querySelectorAll('.mecha-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const cards = document.querySelectorAll('.mecha-card');
+      cards.forEach(card => {
+        if (cat === 'all' || card.dataset.cat === cat) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
