@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prode Mundial 2026 - Pronósticos y Fixture</title>
+    <link rel="canonical" href="https://sapate.net.ar/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sapate.net.ar/">
+    <meta property="og:title" content="Prode Mundial 2026 - Pronósticos, Fixture y Ligas">
+    <meta property="og:description" content="Pronostica los resultados del Mundial 2026, compite en ligas con amigos y gana premios. Fixture completo y posiciones en tiempo real.">
+    <meta property="og:image" content="https://sapate.net.ar/assets/cup.webp">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:url" content="https://sapate.net.ar/">
+    <meta name="twitter:title" content="Prode Mundial 2026 - Pronósticos y Fixture">
+    <meta name="twitter:description" content="Pronostica los resultados del Mundial 2026, compite en ligas con amigos y gana premios.">
+    <meta name="twitter:image" content="https://sapate.net.ar/assets/cup.webp">
+
+    <!-- Structured Data (Schema.org) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Prode Mundial 2026",
+      "description": "Plataforma para pronosticar resultados del Mundial 2026, seguir el fixture y competir en ligas privadas.",
+      "url": "https://sapate.net.ar/",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "All",
+      "genre": "Sports Game"
+    }
+    </script>
+    
+    <!-- Security Headers (Grade A) -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="description" content="Prode Mundial 2026: Pronostica los resultados del Mundial, compite con amigos y gana premios. La mejor plataforma para seguir el fixture y las posiciones.">
+    <link rel="icon" type="image/webp" href="/assets/cup.webp">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/assets/cup.webp">
+    <link rel="preload" as="image" href="/assets/cup.webp" fetchpriority="high">
+    <meta name="theme-color" content="#0f172a">
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- CSS (Processed by Vite/Tailwind) -->
+    <link rel="stylesheet" href="./src/css/styles.css">
+
+    <!-- Fonts & Icons: preload hints only (applied by JS to avoid CSP inline handler issues) -->
+    <!-- Phosphor Icons: preloaded, then applied non-blocking -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css"
+          as="style" crossorigin="anonymous"
+          integrity="sha384-nblAP2mo2pVPyMQZDw9Xy9Cwgs9lowushAYep4w5+Q9kF4Ibf3n0B/gCMVdR+Vqy">
+
+    <!-- Google Fonts: preloaded, then applied non-blocking -->
+    <link id="google-fonts-preload" rel="preload"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          as="style" crossorigin="anonymous">
+
+    <!-- Fallback: if JS disabled, load stylesheets normally -->
+    <noscript>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    </noscript>
+
+</head>
+<body class="bg-brand-dark text-white font-sans antialiased min-h-screen flex items-start sm:items-center justify-center">
+
+    <!-- App Container -->
+    <main id="app-container" class="w-full max-w-5xl flex flex-col relative shadow-2xl bg-brand-dark overflow-hidden sm:border sm:border-slate-800 sm:rounded-3xl sm:my-8 hide-scrollbar mx-auto">
+        
+        <!-- LOGIN VIEW -->
+        <section id="login-view" class="flex-1 w-full flex flex-col justify-start sm:justify-center items-center p-6 sm:p-10 z-10 transition-all duration-500 min-h-screen md:min-h-0">
+            <div class="mt-12 sm:mt-0 mb-8 text-center">
+                <div class="w-24 h-24 bg-brand-500/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)] p-1">
+                    <img src="/assets/cup-sm.webp"
+                         srcset="/assets/cup-sm.webp 1x, /assets/cup.webp 2x"
+                         alt="Prode 2026"
+                         class="w-full h-full object-contain drop-shadow-lg"
+                         width="88" height="88"
+                         fetchpriority="high" />
+                </div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">Prode 2026</h1>
+                <p class="text-slate-400">Pronostica los resultados del Mundial</p>
+            </div>
+
+            <!-- Google Login Container -->
+            <div class="w-full max-w-sm flex flex-col items-center space-y-5 animate-fadeIn">
+                <!-- Google Login Button -->
+                <button type="button" id="btn-google-login" class="w-full py-4 px-6 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-900 font-bold rounded-2xl shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all duration-300 flex items-center justify-center gap-3 border border-slate-200 group cursor-pointer">
+                    <svg class="w-5 h-5 transition-transform group-hover:scale-110 duration-300" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    <span class="tracking-tight">Iniciar Sesión con Google</span>
+                </button>
+
+                <!-- Mock Login Container (Only visible in Mock Mode or if ?mock=true) -->
+                <div id="mock-login-container" class="w-full hidden bg-slate-900/60 border border-slate-800 p-6 rounded-2xl space-y-4 shadow-xl">
+                    <div class="text-center">
+                        <span class="text-[10px] bg-slate-800 text-slate-400 font-black px-2.5 py-1 rounded-md uppercase tracking-wider">Modo Desarrollador / Mock</span>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="mock-alias-input" class="block text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nombre o Alias</label>
+                        <input type="text" id="mock-alias-input" placeholder="Ej: Lionel Messi" class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 transition-all text-white text-sm">
+                    </div>
+                    <button type="button" id="btn-mock-login" class="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer text-sm">
+                        Entrar en Modo Mock
+                    </button>
+                </div>
+            </div>
+            
+            <div id="login-error" class="mt-6 text-red-400 text-sm hidden text-center max-w-sm font-semibold"></div>
+
+            <!-- SEO Landing Information (Search keywords indexing for crawlers) -->
+            <div class="w-full max-w-3xl mt-12 border-t border-slate-800 pt-8 text-slate-400 space-y-8 animate-fadeIn text-sm">
+                <div class="text-center">
+                    <h2 class="text-lg font-bold text-white uppercase tracking-wider mb-2">¿Cómo jugar al Prode Mundial 2026?</h2>
+                    <p class="text-xs text-slate-500 max-w-md mx-auto">Compite con tus amigos prediciendo los resultados de los partidos del Mundial 2026.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                    <div class="bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 text-center space-y-2">
+                        <div class="w-10 h-10 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-500 mx-auto">
+                            <i class="ph-bold ph-pencil text-lg"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-xs uppercase tracking-wide">1. Pronostica</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Predice el ganador (Local, Empate o Visitante) y la cantidad de goles de cada partido del fixture del Mundial.</p>
+                    </div>
+                    <div class="bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 text-center space-y-2">
+                        <div class="w-10 h-10 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-500 mx-auto">
+                            <i class="ph-bold ph-shield-star text-lg"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-xs uppercase tracking-wide">2. Crea Ligas</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Crea o únete a Ligas Legendarias privadas con tus amigos, familiares o compañeros de trabajo con códigos de invitación.</p>
+                    </div>
+                    <div class="bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 text-center space-y-2">
+                        <div class="w-10 h-10 rounded-full bg-brand-500/10 flex items-center justify-center text-brand-500 mx-auto">
+                            <i class="ph-bold ph-trophy text-lg"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-xs uppercase tracking-wide">3. Suma Puntos</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Suma puntos por acertar el resultado exacto o el ganador del encuentro. Sube en el ranking general y gana premios.</p>
+                    </div>
+                </div>
+
+                <div class="bg-brand-card/30 border border-slate-800 rounded-2xl p-6 text-center space-y-3">
+                    <h3 class="font-bold text-white text-xs uppercase tracking-wider">Fixture y Posiciones al instante</h3>
+                    <p class="text-xs text-slate-500 max-w-xl mx-auto leading-relaxed">
+                        Sigue todos los detalles del torneo: fechas, horarios, estadios, resultados de partidos, clasificados y la tabla de posiciones actualizada de cada grupo en tiempo real.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- MAIN APP VIEW -->
+        <section id="main-view" class="flex-1 flex flex-col md:flex-row hidden h-full w-full">
+            
+            <!-- Left Column: Matches & Ranking -->
+            <div class="flex-1 flex flex-col relative h-full md:border-r border-slate-800">
+                <header class="bg-brand-card/80 backdrop-blur-md border-b border-slate-800 p-4 flex justify-between items-center sticky top-0 z-50">
+                    <div class="flex items-center gap-2">
+                        <img id="logo-cup" src="/assets/cup.webp" alt="Copa" class="w-6 h-6 object-contain drop-shadow cursor-pointer" fetchpriority="high" />
+                        <h1 class="hidden sm:block font-bold text-lg">Prode 2026</h1>
+                        
+                        <div class="flex items-center gap-1 sm:gap-2 ml-1 sm:ml-4">
+                            <button id="nav-matches" title="Partidos" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-brand-500 bg-brand-500/10 font-bold text-sm transition-all border border-brand-500/20 flex items-center justify-center">
+                                <i class="ph-bold ph-soccer-ball text-lg"></i>
+                            </button>
+                            <button id="nav-grupos" title="Grupos" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
+                                <i class="ph-bold ph-users-three text-lg"></i>
+                            </button>
+                            <button id="nav-legendary" title="Liga Legendaria" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
+                                <i class="ph-bold ph-shield-star text-lg"></i>
+                            </button>
+                            <button id="nav-especiales" title="Especiales" aria-label="Ver Especiales" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
+                                <i class="ph-bold ph-crown text-lg"></i>
+                            </button>
+                            <button id="nav-ranking" title="Chicanitas" aria-label="Ver Chicanitas" class="nav-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent flex items-center justify-center">
+                                <i class="ph-bold ph-chats-teardrop text-lg"></i>
+                            </button>
+                            <button id="nav-users" title="Usuarios" aria-label="Ver Usuarios" class="nav-btn hidden px-2.5 sm:px-3 py-1.5 rounded-lg text-slate-400 font-bold text-sm transition-all border border-transparent items-center justify-center">
+                                <i class="ph-bold ph-users text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="text-right">
+                            <p id="user-alias-display" class="text-sm font-semibold text-white">Alias</p>
+                            <p id="user-points-display" class="text-xs text-brand-500 font-medium">0 pts</p>
+                        </div>
+                        <div class="hidden sm:flex relative w-10 h-10 rounded-full bg-slate-700 border-2 border-brand-500 overflow-hidden group cursor-pointer" title="Clic para cambiar tu foto">
+                            <img id="user-avatar-img" src="/assets/avatar.webp" alt="Avatar" class="w-full h-full object-cover transition-opacity group-hover:opacity-60" />
+                            <!-- Overlay cámara al hover -->
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                <i class="ph-bold ph-camera text-white text-base drop-shadow"></i>
+                            </div>
+                        </div>
+                        <button id="btn-install-pwa" class="flex md:hidden w-8 h-8 items-center justify-center bg-blue-500/10 rounded-lg text-blue-400 border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all ml-1 sm:ml-2" title="Instalar App">
+                            <i class="ph-bold ph-download-simple text-lg"></i>
+                        </button>
+                        <button id="btn-logout" class="w-8 h-8 flex items-center justify-center bg-red-500/10 rounded-lg text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all ml-1 sm:ml-2" title="Cerrar Sesión">
+                            <i class="ph-bold ph-sign-out text-lg"></i>
+                        </button>
+                    </div>
+                </header>
+
+                <div id="content-area" class="flex-1 overflow-y-auto p-4 space-y-6 pb-6 hide-scrollbar">
+                    <!-- Views will be injected here -->
+                    <div id="matches-view" class="space-y-4">
+                        <!-- SHORTS DEL MUNDIAL (YouTube Shorts) -->
+                        <div id="streaming-container" class="rounded-2xl overflow-hidden border border-brand-500/30 bg-slate-900 shadow-[0_0_15px_rgba(239,68,68,0.15)] relative mb-2">
+                            <div class="bg-slate-900/80 backdrop-blur-sm px-4 py-2 border-b border-white/5 flex justify-between items-center cursor-pointer" id="btn-toggle-stream">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-red-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded animate-pulse flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full"></span> TENDENCIAS</span>
+                                    <span class="text-xs font-bold text-slate-300"><i class="ph-bold ph-youtube-logo text-red-500 text-sm"></i> Shorts del Mundial</span>
+                                </div>
+                                <i id="stream-icon" class="ph-bold ph-caret-down text-slate-400"></i>
+                            </div>
+                            <div id="stream-wrapper" class="hidden w-full transition-all duration-300 bg-slate-950/40 relative flex flex-col items-center py-4 px-2 space-y-3">
+                                <!-- Youtube Shorts Search Bar -->
+                                <div class="w-full max-w-xs flex gap-2" id="shorts-search-container">
+                                    <input type="text" id="shorts-query-input" placeholder="Buscar shorts (ej: goles, messi)" class="flex-1 px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-xs outline-none focus:border-brand-500 transition-colors">
+                                    <button id="btn-search-shorts" class="px-2 py-1.5 bg-brand-600 hover:bg-brand-500 text-white text-[11px] font-bold rounded-lg transition-all flex items-center gap-0.5 whitespace-nowrap">
+                                        <i class="ph-bold ph-magnifying-glass"></i> Buscar
+                                    </button>
+                                    <button id="btn-random-shorts" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold rounded-lg transition-all flex items-center gap-0.5 whitespace-nowrap" title="Cargar otro tema aleatorio">
+                                        <i class="ph-bold ph-arrows-clockwise"></i> Aleatorio
+                                    </button>
+                                </div>
+                                <!-- Video Frame Container with Portrait Aspect Ratio -->
+                                <div class="w-full max-w-[320px] aspect-[9/16] h-[480px] rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-2xl relative">
+                                     <iframe id="shorts-player" src="" frameborder="0" allowfullscreen="true" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" class="w-full h-full"></iframe>
+                                     <!-- Mobile tap-to-play overlay (shown only on mobile via JS) -->
+                                     <div id="shorts-tap-overlay" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/60 z-10 cursor-pointer">
+                                         <div class="flex flex-col items-center gap-3 text-white text-center px-4">
+                                             <div class="w-16 h-16 rounded-full bg-red-600/80 flex items-center justify-center">
+                                                 <i class="ph-fill ph-play text-3xl text-white"></i>
+                                             </div>
+                                             <span class="text-xs text-slate-300 font-medium">Tocá para reproducir</span>
+                                         </div>
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="flex justify-between items-center mb-4 gap-2 flex-wrap sm:flex-nowrap">
+                            <div class="flex items-center gap-3">
+                                <h2 class="text-xl font-bold">Fixture</h2>
+                                <button id="btn-toggle-fixture-view" class="bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer relative z-10" title="Cambiar Vista">
+                                    <i class="ph-bold ph-eye text-sm"></i>
+                                    <i id="fixture-view-icon" class="ph-bold ph-slideshow text-sm"></i>
+                                </button>
+                            </div>
+                            <button id="btn-invite-friends" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer">
+                                <i class="ph-bold ph-share-network"></i> Invitar
+                            </button>
+                            <div class="flex gap-2 items-center">
+                                <div id="countdown-timer" class="hidden bg-slate-900 border border-slate-700 px-2 py-1 rounded text-[10px] text-brand-500"></div>
+                                <a href="/rifasolidaria/index.html" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-xs font-bold whitespace-nowrap transition-colors">Rifa Solidaria</a>
+                                <a href="/salud/index.html" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-xs font-bold whitespace-nowrap transition-colors">Primeros Auxilios</a>
+                            </div>
+                         </div>
+                         <div id="stage-tabs" class="flex gap-2 overflow-x-auto pb-2"></div>
+                         <div id="matches-list" class="space-y-4"></div>
+                    </div>
+
+                    <div id="grupos-view" class="hidden space-y-4">
+                        <button id="btn-toggle-groups" class="w-full flex justify-between items-center mb-2 p-3 bg-slate-900/30 hover:bg-slate-800/40 rounded-xl border border-slate-800/40 hover:border-slate-700/60 transition-all cursor-pointer text-left focus:outline-none">
+                            <span class="flex items-center gap-2">
+                                <i id="icon-toggle-groups" class="ph-bold ph-caret-right text-brand-500 text-lg transition-transform duration-300"></i>
+                                <span class="text-lg font-bold text-white tracking-tight">Tabla de Posiciones</span>
+                            </span>
+                            <span class="text-xs text-slate-500 italic">Se actualiza con los resultados cargados</span>
+                        </button>
+
+                        <div id="groups-collapse-container" class="hidden space-y-4">
+                            <!-- Selector de grupo -->
+                            <div id="group-selector" class="flex gap-2 flex-wrap pb-1">
+                                <!-- Botones de grupo generados por JS -->
+                            </div>
+
+                            <!-- Tabla del grupo seleccionado -->
+                            <div id="group-table-container">
+                                <!-- Contenido generado por JS -->
+                            </div>
+                        </div>
+
+                        <!-- Detalle de Puntuación -->
+                        <div class="mt-6 bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 space-y-4">
+                            <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+                                <i class="ph-bold ph-info text-brand-500 text-lg"></i>
+                                <h3 class="font-bold text-white text-xs uppercase tracking-wider">Sistema de Puntuación de los Pronósticos</h3>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                                <div class="bg-slate-950/30 p-3 rounded-xl border border-slate-800/40 space-y-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-slate-300">Acertar el Resultado (L / E / V)</span>
+                                        <span class="bg-green-500/10 text-green-400 font-bold px-2.5 py-0.5 rounded text-[10px] border border-green-500/20 glow-pulse-green shadow-[0_0_8px_rgba(34,197,94,0.1)]">+1 Punto</span>
+                                    </div>
+                                    <p class="text-slate-500 text-[11px] leading-relaxed">
+                                        Sumás 1 punto si acertás qué equipo gana el partido (Local/Visitante) o si el encuentro termina en un Empate.
+                                    </p>
+                                </div>
+                                
+                                <div class="bg-slate-950/30 p-3 rounded-xl border border-slate-800/40 space-y-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-slate-300">Acertar el Marcador Exacto</span>
+                                        <span class="bg-purple-500/10 text-purple-400 font-bold px-2.5 py-0.5 rounded text-[10px] border border-purple-500/20 glow-pulse-purple shadow-[0_0_8px_rgba(168,85,247,0.1)]">+2 Puntos Extra</span>
+                                    </div>
+                                    <p class="text-slate-500 text-[11px] leading-relaxed">
+                                        Sumás 2 puntos extra (haciendo un total de <strong>3 puntos</strong> en ese partido) si acertás la cantidad exacta de goles de ambos equipos.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="text-[10px] text-slate-500 italic text-center pt-1">
+                                <i class="ph-bold ph-warning-circle text-amber-500/80 mr-1"></i> Recordá que podés guardar y modificar tus pronósticos hasta 1 hora antes de que comience cada partido.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRONÓSTICOS ESPECIALES VIEW -->
+                    <div id="especiales-view" class="hidden space-y-6 animate-fadeIn">
+                        <div class="flex justify-between items-center mb-2">
+                            <div>
+                                <h2 class="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+                                    <i class="ph-bold ph-crown text-brand-500"></i> Pronósticos Especiales
+                                </h2>
+                                <p class="text-xs text-slate-400 font-medium">Seleccioná tu favorito, la sorpresa y la decepción del mundial.</p>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN 1 COLAPSABLE: SELECCIÓN DE ESPECIALES -->
+                        <div class="space-y-3">
+                            <button id="btn-toggle-especiales-selection" class="w-full flex justify-between items-center p-3 bg-slate-900/30 hover:bg-slate-800/40 rounded-xl border border-slate-800/40 hover:border-slate-700/60 transition-all cursor-pointer text-left focus:outline-none">
+                                <span class="flex items-center gap-2">
+                                    <i id="icon-toggle-especiales-selection" class="ph-bold ph-caret-right text-brand-500 text-lg transition-transform duration-300"></i>
+                                    <span class="text-base font-bold text-white tracking-tight">Selección de Especiales</span>
+                                </span>
+                                <span class="text-xs text-slate-500 italic">Elegí tu favorito, sorpresa y decepción</span>
+                            </button>
+
+                            <div id="especiales-selection-container" class="hidden space-y-4">
+                                <!-- Panel de Selección -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <!-- Tarjeta Favorito -->
+                                    <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4">
+                                        <div>
+                                            <div class="flex items-center justify-between mb-2">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-500">
+                                                        <i class="ph-bold ph-trophy text-lg"></i>
+                                                    </div>
+                                                    <h3 class="font-bold text-white text-sm">El Favorito</h3>
+                                                </div>
+                                                <span class="bg-amber-500/15 text-amber-400 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-amber-500/20 tracking-wide">+15 pts</span>
+                                            </div>
+                                            <p class="text-xs text-slate-500 leading-relaxed">¿Quién creés que se va a consagrar Campeón del Mundo?</p>
+                                        </div>
+                                        <select id="select-favorito" class="w-full bg-slate-800 text-slate-200 border border-slate-700 rounded-xl px-3 py-2.5 text-xs focus:ring-brand-500 focus:border-brand-500">
+                                            <option value="">Seleccionar país...</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Tarjeta Sorpresa -->
+                                    <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4">
+                                        <div>
+                                            <div class="flex items-center justify-between mb-2">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-500">
+                                                        <i class="ph-bold ph-magic-wand text-lg"></i>
+                                                    </div>
+                                                    <h3 class="font-bold text-white text-sm">La Sorpresa</h3>
+                                                </div>
+                                                <span class="bg-purple-500/15 text-purple-400 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-purple-500/20 tracking-wide">+10 pts</span>
+                                            </div>
+                                            <p class="text-xs text-slate-500 leading-relaxed">¿Cuál selección va a dar el batacazo y llegar más lejos?</p>
+                                        </div>
+                                        <select id="select-sorpresa" class="w-full bg-slate-800 text-slate-200 border border-slate-700 rounded-xl px-3 py-2.5 text-xs focus:ring-brand-500 focus:border-brand-500">
+                                            <option value="">Seleccionar país...</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Tarjeta Decepción -->
+                                    <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4">
+                                        <div>
+                                            <div class="flex items-center justify-between mb-2">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-8 h-8 bg-red-500/10 rounded-lg flex items-center justify-center text-red-500">
+                                                        <i class="ph-bold ph-thumbs-down text-lg"></i>
+                                                    </div>
+                                                    <h3 class="font-bold text-white text-sm">La Decepción</h3>
+                                                </div>
+                                                <span class="bg-red-500/15 text-red-400 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-red-500/20 tracking-wide">+5 pts</span>
+                                            </div>
+                                            <p class="text-xs text-slate-500 leading-relaxed">¿Qué selección gigante se va a quedar afuera temprano?</p>
+                                        </div>
+                                        <select id="select-decepcion" class="w-full bg-slate-800 text-slate-200 border border-slate-700 rounded-xl px-3 py-2.5 text-xs focus:ring-brand-500 focus:border-brand-500">
+                                            <option value="">Seleccionar país...</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Botón Guardar -->
+                                <div class="flex justify-end">
+                                    <button id="btn-save-especiales" class="w-full sm:w-auto px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                                        <i class="ph-bold ph-floppy-disk text-sm"></i> Guardar Elección
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN 2 COLAPSABLE: MINI JACKPOT MUNDIALISTA -->
+                        <div class="space-y-3">
+                            <button id="btn-toggle-jackpot" class="w-full flex justify-between items-center p-3 bg-slate-900/30 hover:bg-slate-800/40 rounded-xl border border-slate-800/40 hover:border-slate-700/60 transition-all cursor-pointer text-left focus:outline-none">
+                                <span class="flex items-center gap-2">
+                                    <i id="icon-toggle-jackpot" class="ph-bold ph-caret-right text-brand-500 text-lg transition-transform duration-300"></i>
+                                    <span class="text-base font-bold text-white tracking-tight">Mini Jackpot Mundialista 🎰</span>
+                                </span>
+                                <span class="text-xs text-brand-500 font-bold italic animate-pulse">¡Recuperá puntos si venís rezagado!</span>
+                            </button>
+
+                            <div id="jackpot-container" class="hidden bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 space-y-4">
+                                <!-- Dynamic status message -->
+                                <div id="jackpot-status-msg" class="text-xs text-slate-400 text-center py-2.5 bg-slate-950/40 rounded-xl border border-slate-800/80 leading-relaxed">
+                                    Cargando estado del Jackpot...
+                                </div>
+                                
+                                <!-- Jackpot Machine Area -->
+                                <div id="jackpot-machine" class="flex flex-col items-center py-4 space-y-6">
+                                    <!-- Reels wrapper -->
+                                    <div class="flex gap-4 p-4 bg-slate-950 border-4 border-brand-500/50 rounded-2xl shadow-[0_0_20px_rgba(34,197,94,0.2)]">
+                                        <!-- Reel 1 -->
+                                        <div class="w-20 h-24 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-center overflow-hidden relative shadow-inner">
+                                            <div id="jackpot-reel-1" class="w-full h-full flex flex-col items-center justify-center text-3xl font-bold">
+                                                <i class="ph-bold ph-question text-slate-500"></i>
+                                            </div>
+                                        </div>
+                                        <!-- Reel 2 -->
+                                        <div class="w-20 h-24 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-center overflow-hidden relative shadow-inner">
+                                            <div id="jackpot-reel-2" class="w-full h-full flex flex-col items-center justify-center text-3xl font-bold">
+                                                <i class="ph-bold ph-question text-slate-500"></i>
+                                            </div>
+                                        </div>
+                                        <!-- Reel 3 -->
+                                        <div class="w-20 h-24 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-center overflow-hidden relative shadow-inner">
+                                            <div id="jackpot-reel-3" class="w-full h-full flex flex-col items-center justify-center text-3xl font-bold">
+                                                <i class="ph-bold ph-question text-slate-500"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Spin Buttons -->
+                                    <div class="flex gap-2 items-center flex-wrap justify-center">
+                                        <button id="btn-spin-jackpot" class="px-8 py-3 bg-brand-600 hover:bg-brand-500 text-white font-black text-sm rounded-xl transition-all shadow-[0_0_15px_rgba(34,197,94,0.4)] hover:scale-105 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center gap-2">
+                                            <i class="ph-bold ph-arrows-counter-clockwise"></i> ¡GIRAR RULETA!
+                                        </button>
+                                        <button id="btn-spin-jackpot-mock-win" class="hidden px-4 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl transition-all shadow-md hover:scale-105 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center gap-1">
+                                            ⚡ Forzar Ganada (Mock)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN 3 COLAPSABLE: TENDENCIAS DE LA COMUNIDAD -->
+                        <div class="space-y-3">
+                            <button id="btn-toggle-especiales-trends" class="w-full flex justify-between items-center p-3 bg-slate-900/30 hover:bg-slate-800/40 rounded-xl border border-slate-800/40 hover:border-slate-700/60 transition-all cursor-pointer text-left focus:outline-none">
+                                <span class="flex items-center gap-2">
+                                    <i id="icon-toggle-especiales-trends" class="ph-bold ph-caret-right text-brand-500 text-lg transition-transform duration-300"></i>
+                                    <span class="text-base font-bold text-white tracking-tight">Tendencias de la Comunidad</span>
+                                </span>
+                                <span class="text-xs text-slate-500 italic">Votos acumulados del Prode</span>
+                            </button>
+
+                            <div id="especiales-trends-container" class="hidden bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <!-- Ranking Favoritos -->
+                                    <div class="space-y-3">
+                                        <h4 class="text-xs font-bold text-amber-500 uppercase flex items-center gap-1">🏆 Favoritos</h4>
+                                        <div class="space-y-2" id="ranking-mock-favoritos"></div>
+                                    </div>
+
+                                    <!-- Ranking Sorpresas -->
+                                    <div class="space-y-3">
+                                        <h4 class="text-xs font-bold text-purple-500 uppercase flex items-center gap-1">🔮 Sorpresas</h4>
+                                        <div class="space-y-2" id="ranking-mock-sorpresas"></div>
+                                    </div>
+
+                                    <!-- Ranking Decepciones -->
+                                    <div class="space-y-3">
+                                        <h4 class="text-xs font-bold text-red-500 uppercase flex items-center gap-1">🥶 Decepciones</h4>
+                                        <div class="space-y-2" id="ranking-mock-decepciones"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NUEVA SECCIÓN: LIGA LEGENDARIA -->
+                    <div id="legendary-view" class="hidden space-y-6 animate-fadeIn">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <h2 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-600 uppercase tracking-tighter">
+                                    Liga Legendaria
+                                </h2>
+                                <p class="text-xs text-slate-500 font-medium italic">Competí en grupos privados con amigos y ganá premios.</p>
+                            </div>
+                            <div class="flex gap-2 w-full sm:w-auto">
+                                <button id="btn-toggle-ranking-general" class="flex-1 sm:flex-none px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl border border-slate-700 transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+                                    <i class="ph-bold ph-trophy"></i> Ranking General
+                                </button>
+                                <button id="btn-create-league" class="flex-1 sm:flex-none px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-plus-circle"></i> Crear Liga
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Contenedor Desplegable del Ranking General -->
+                        <div id="legendary-ranking-container" class="hidden space-y-4 bg-slate-900/40 p-5 rounded-2xl border border-slate-800/80 animate-fadeIn">
+                             <div class="flex justify-between items-center">
+                                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                    <i class="ph-bold ph-trophy text-brand-500"></i> Ranking General
+                                </h3>
+                                <div class="flex gap-2">
+                                    <button id="btn-admin-test" class="hidden bg-yellow-600 hover:bg-yellow-500 text-white text-[10px] font-bold py-1 px-2 rounded transition-all cursor-pointer">Test Score</button>
+                                    <button id="btn-admin-reset" class="hidden bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold py-1 px-2 rounded transition-all cursor-pointer">Reset Score</button>
+                                    <button id="btn-admin-export" class="hidden bg-brand-600 hover:bg-brand-500 text-white text-[10px] font-bold py-1 px-2 rounded transition-all cursor-pointer">Export RRHH</button>
+                                    <button id="btn-export-csv" class="md:hidden bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold py-1 px-2 rounded transition-all flex items-center gap-1 cursor-pointer">
+                                        <i class="ph-bold ph-share-network"></i> Compartir
+                                    </button>
+                                </div>
+                             </div>
+     
+                             <div class="ranking-panel rounded-2xl overflow-hidden border border-slate-700/50 bg-slate-800/20">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-slate-800/80 text-slate-300 font-bold border-b border-slate-700/50">
+                                        <tr><th class="px-4 py-3">#</th><th class="px-4 py-3">Jugador</th><th class="px-4 py-3 text-right">Pts</th></tr>
+                                    </thead>
+                                    <tbody id="ranking-list" class="divide-y divide-slate-700/50"></tbody>
+                                </table>
+                             </div>
+                        </div>
+
+                        <!-- Estado Inicial / Empty State -->
+                        <div id="leagues-empty-state" class="bg-slate-800/30 border-2 border-dashed border-slate-700 rounded-[2rem] p-12 text-center space-y-4">
+                            <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-600 mb-2">
+                                <i class="ph ph-shield-slash text-4xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-300">Aún no perteneces a ninguna Liga Legendaria</h3>
+                            <p class="text-sm text-slate-500 max-w-xs mx-auto">Crea tu propio grupo para invitar amigos o pídeles un enlace de invitación para unirte a uno existente.</p>
+                        </div>
+
+                        <!-- Lista de Ligas (donde aparecerán las tarjetas) -->
+                        <div id="leagues-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+                            <!-- Inyectado por JS -->
+                        </div>
+                    </div>
+
+                    <!-- LIGA DETALLES VIEW -->
+                    <div id="league-details-view" class="hidden space-y-6 animate-fadeIn">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50">
+                            <div>
+                                <button id="btn-back-to-leagues" class="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1 font-bold mb-1 transition-colors">
+                                    <i class="ph-bold ph-arrow-left"></i> Volver a Mis Ligas
+                                </button>
+                                <h2 id="league-details-name" class="text-2xl font-black text-white uppercase tracking-tighter">
+                                    Nombre Liga
+                                </h2>
+                                <p id="league-details-desc" class="text-xs text-slate-400 font-medium"></p>
+                            </div>
+                            <div class="text-right flex flex-col items-end gap-2">
+                                <div class="hidden">
+                                    <span class="text-[9px] text-slate-500 uppercase font-bold block">Código de Invitación</span>
+                                    <span id="league-details-code" class="text-sm font-mono text-brand-400 font-bold bg-brand-900/30 px-2 py-1 rounded"></span>
+                                </div>
+                                <button id="btn-share-league" class="text-[10px] bg-brand-600 hover:bg-brand-500 text-white font-bold py-1.5 px-3 rounded-lg flex items-center gap-1 transition-all shadow-lg hidden">
+                                    <i class="ph-bold ph-paper-plane-tilt"></i> Invitar Amigos
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Premios de la Liga -->
+                        <div id="league-details-prizes-container" class="bg-gradient-to-r from-amber-500/10 to-orange-600/10 border border-amber-500/20 p-4 rounded-xl hidden">
+                            <h3 class="text-xs font-bold text-amber-500 uppercase mb-1 flex items-center gap-1"><i class="ph-bold ph-gift"></i> Premios en Juego</h3>
+                            <p id="league-details-prizes" class="text-sm text-slate-300"></p>
+                        </div>
+
+                        <!-- Ranking Interno -->
+                        <div id="league-ranking-card" class="bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl relative">
+                            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-900/20 via-transparent to-transparent pointer-events-none"></div>
+                            <div class="p-4 border-b border-slate-800/50 flex justify-between items-center">
+                                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                    <i class="ph-bold ph-ranking text-brand-500"></i> <span id="league-ranking-title">Ranking Interno</span>
+                                </h3>
+                                <div class="flex items-center gap-2">
+                                    <span id="league-members-count" class="text-xs font-bold text-slate-400"></span>
+                                    <button id="btn-export-league-image" class="md:hidden bg-slate-700 hover:bg-slate-600 text-white text-[10px] font-bold py-1 px-2 rounded transition-all flex items-center gap-1">
+                                        <i class="ph-bold ph-share-network"></i> Compartir
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="text-[10px] uppercase bg-slate-800/80 text-slate-400 font-bold border-b border-slate-700/50">
+                                        <tr>
+                                            <th scope="col" class="px-4 py-3 w-12 text-center rounded-tl-xl">Pos</th>
+                                            <th scope="col" class="px-4 py-3">Jugador</th>
+                                            <th scope="col" class="px-4 py-3 text-right">Puntos</th>
+                                            <th scope="col" id="col-eliminar-miembro" class="px-4 py-3 text-center rounded-tr-xl hidden">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="league-ranking-body" class="divide-y divide-slate-800/50">
+                                        <!-- Inyectado por JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Controladores de paginación de la liga -->
+                            <div id="league-pagination-controls" class="p-3 border-t border-slate-800/50 flex justify-between items-center bg-slate-900/30 hidden">
+                                <button id="btn-league-prev" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-300 text-[10px] sm:text-xs font-bold py-1.5 px-3 rounded-lg border border-slate-700 transition-all flex items-center gap-1">
+                                    <i class="ph-bold ph-caret-left"></i> Anterior
+                                </button>
+                                <span id="league-page-info" class="text-[10px] sm:text-xs font-bold text-slate-400">Página 1 de 1</span>
+                                <button id="btn-league-next" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none text-slate-300 text-[10px] sm:text-xs font-bold py-1.5 px-3 rounded-lg border border-slate-700 transition-all flex items-center gap-1">
+                                    Siguiente <i class="ph-bold ph-caret-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="ranking-view" class="hidden space-y-6">
+                         <div class="flex justify-between items-center mb-2">
+                            <div>
+                                <h2 class="text-2xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+                                    <i class="ph-bold ph-chats-teardrop text-brand-500"></i> Chicanitas
+                                </h2>
+                                <p class="text-xs text-slate-400 font-medium">Chicanea o desafía a tus amigos compartiendo estas tarjetas o creando tu propia chicana.</p>
+                            </div>
+                         </div>
+ 
+                         <!-- SECCIÓN 1: CREA TU CHICANA (COLAPSADA POR DEFECTO) -->
+                         <div class="space-y-3">
+                             <button id="btn-toggle-custom-chicana" class="w-full flex justify-between items-center p-3.5 bg-slate-900/30 hover:bg-slate-800/40 rounded-xl border border-slate-800/40 hover:border-slate-700/60 transition-all cursor-pointer text-left focus:outline-none">
+                                 <span class="flex items-center gap-2">
+                                     <i id="icon-toggle-custom-chicana" class="ph-bold ph-caret-right text-brand-500 text-lg transition-transform duration-300"></i>
+                                     <span class="text-base font-bold text-white tracking-tight">Crea tu tarjeta! 🎨</span>
+                                 </span>
+                                 <span class="text-xs text-slate-500 italic">Crea una chicana personalizada</span>
+                             </button>
+
+                             <div id="custom-chicana-container" class="hidden space-y-4 bg-slate-900/40 p-5 rounded-2xl border border-slate-800/60 shadow-lg max-w-md mx-auto w-full">
+                                 <div class="space-y-4">
+                                     <!-- Carrusel de Imágenes de una Sola Imagen Grande -->
+                                     <div class="space-y-2">
+                                         <div class="flex justify-between items-center px-1">
+                                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">1. Selecciona una Imagen</label>
+                                             <span id="chicana-image-name" class="text-xs font-bold text-brand-500 bg-brand-500/10 px-2.5 py-0.5 rounded-full">Barrilete Cósmico 🚀</span>
+                                         </div>
+                                         
+                                         <!-- Slider con flechas -->
+                                         <div class="relative group w-full">
+                                             <!-- Botón Anterior -->
+                                             <button id="btn-prev-chicana" type="button" class="absolute top-2 left-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-slate-950/80 hover:bg-brand-500 text-white hover:text-slate-950 flex items-center justify-center transition-all border border-slate-800 shadow-md opacity-0 group-hover:opacity-100 focus:opacity-100">
+                                                 <i class="ph-bold ph-caret-up text-sm"></i>
+                                             </button>
+                                             
+                                             <!-- Contenedor del Slider con Snap -->
+                                             <div id="chicana-carousel" class="flex flex-col overflow-y-auto snap-y snap-mandatory hide-scrollbar rounded-xl border border-slate-800 bg-slate-950/40 aspect-square w-full">
+                                                 <!-- Se cargará dinámicamente -->
+                                             </div>
+                                             
+                                             <!-- Botón Siguiente -->
+                                             <button id="btn-next-chicana" type="button" class="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-slate-950/80 hover:bg-brand-500 text-white hover:text-slate-950 flex items-center justify-center transition-all border border-slate-800 shadow-md opacity-0 group-hover:opacity-100 focus:opacity-100">
+                                                 <i class="ph-bold ph-caret-down text-sm"></i>
+                                             </button>
+                                         </div>
+                                     </div>
+                                     
+                                     <!-- Escribe tu Chicana -->
+                                     <div class="space-y-2">
+                                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">2. Escribe tu Chicana</label>
+                                         <textarea id="chicana-custom-text" rows="3" class="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500/50 transition-all resize-none" placeholder="Escribe tu chicana personalizada aquí..."></textarea>
+                                     </div>
+
+                                     </div>
+
+                                     <!-- Botón de Compartir -->
+                                     <button id="btn-share-custom-chicana" class="w-full py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-sm shadow-md">
+                                         <i class="ph-bold ph-share-network text-base"></i> Compartir Chicana Custom
+                                     </button>
+
+                                     <!-- Panel Admin para Cargar Imágenes (Opcional, oculto por defecto) -->
+                                     <div id="admin-chicana-upload-panel" class="hidden border-t border-slate-800/80 pt-4 mt-2 space-y-3">
+                                         <div class="flex items-center gap-2 text-brand-500">
+                                             <i class="ph-bold ph-shield-check text-lg"></i>
+                                             <span class="text-[10px] font-bold uppercase tracking-wider">Panel de Administrador</span>
+                                         </div>
+                                         <div class="space-y-2">
+                                             <label class="block text-[10px] font-semibold text-slate-400">Subir nueva imagen a Chicanas</label>
+                                             <div class="flex items-center gap-3">
+                                                 <input type="text" id="admin-chicana-name" placeholder="Nombre de la chicana (ej. ¡Hay alargue!)" class="flex-1 bg-slate-950/80 border border-slate-800/80 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand-500/50" />
+                                             </div>
+                                             <div class="flex gap-2">
+                                                 <button type="button" id="btn-trigger-chicana-upload" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold rounded-lg transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer border border-slate-700/50">
+                                                     <i class="ph-bold ph-image text-sm"></i> Seleccionar Imagen
+                                                 </button>
+                                                 <button type="button" id="btn-save-chicana-upload" class="py-2 px-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-lg transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-md disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                                                     <i class="ph-bold ph-upload-simple text-sm"></i> Guardar
+                                                 </button>
+                                             </div>
+                                             <span id="admin-upload-filename" class="hidden text-[10px] text-slate-500 italic block mt-1"></span>
+                                             <input type="file" id="admin-chicana-file-input" accept="image/*" class="hidden" />
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
+
+                         <!-- SECCIÓN 2: TARJETAS PREDEFINIDAS (COLAPSADA POR DEFECTO) -->
+                         <div class="space-y-3">
+                             <button id="btn-toggle-predefined-chicanas" class="w-full flex justify-between items-center p-3.5 bg-slate-900/30 hover:bg-slate-800/40 rounded-xl border border-slate-800/40 hover:border-slate-700/60 transition-all cursor-pointer text-left focus:outline-none">
+                                 <span class="flex items-center gap-2">
+                                     <i id="icon-toggle-predefined-chicanas" class="ph-bold ph-caret-right text-brand-500 text-lg transition-transform duration-300"></i>
+                                     <span class="text-base font-bold text-white tracking-tight">Tarjetas Predefinidas 🃏</span>
+                                 </span>
+                                 <span class="text-xs text-slate-500 italic">Ver tarjetas listas para enviar</span>
+                             </button>
+
+                             <div id="predefined-chicanas-container" class="hidden space-y-6">
+                                 <!-- Grilla de Tarjetas de Premios -->
+                                 <div id="premios-container" class="space-y-6">
+                                     <div id="premios-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[100px]">
+                                         <!-- Se carga dinámicamente desde JS -->
+                                     </div>
+                                     
+                                     <!-- Observer para scroll infinito -->
+                                     <div id="premios-observer" class="flex justify-center items-center py-4 w-full h-12">
+                                         <span class="spin-loader text-brand-500 text-lg hidden"></span>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                    </div>
+
+                    <div id="users-view" class="hidden space-y-6">
+                        <!-- PANEL: GESTIÓN DE RESULTADOS (MANUAL) -->
+                        <div class="bg-slate-800/40 p-5 rounded-2xl border border-slate-700/50 space-y-4">
+                            <div class="flex items-center gap-2 border-b border-slate-700/50 pb-2">
+                                <i class="ph-bold ph-gear text-brand-500 text-lg"></i>
+                                <h3 class="font-bold text-white text-sm uppercase tracking-wider">Control de Resultados (Manual)</h3>
+                            </div>
+                            <p class="text-xs text-slate-400">Si falla la sincronización automática, podés actualizar los resultados aquí. Esto recalculará los puntajes al instante.</p>
+                            
+                            <div id="admin-matches-list" class="space-y-3">
+                                <!-- Cargado dinámicamente por JS (Partidos de hoy) -->
+                            </div>
+                            
+                            <!-- Búsqueda/Edición de cualquier partido -->
+                            <div class="border-t border-slate-700/50 pt-4 mt-4 space-y-3">
+                                <label for="select-admin-all-matches" class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Buscar otro partido del torneo</label>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <select id="select-admin-all-matches" class="flex-1 bg-slate-900 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-500 outline-none">
+                                        <option value="">Cargando partidos...</option>
+                                    </select>
+                                    <button id="btn-admin-load-selected-match" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all cursor-pointer">
+                                        Cargar Partido
+                                    </button>
+                                </div>
+                                <div id="admin-selected-match-editor" class="hidden mt-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                                    <!-- Se inyecta al cargar un partido -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PANEL: LISTADO DE USUARIOS (COLAPSIBLE) -->
+                        <div class="space-y-4">
+                            <button id="btn-toggle-users" class="w-full flex justify-between items-center p-3 bg-slate-900/30 hover:bg-slate-800/40 rounded-xl border border-slate-800/40 hover:border-slate-700/60 transition-all cursor-pointer text-left focus:outline-none">
+                                <span class="flex items-center gap-2">
+                                    <i id="icon-toggle-users" class="ph-bold ph-caret-right text-brand-500 text-lg transition-transform duration-300"></i>
+                                    <span class="text-lg font-bold text-white tracking-tight">Listado de Usuarios Registrados</span>
+                                </span>
+                                <span class="text-xs text-slate-500 italic">Haz clic para expandir y cargar usuarios</span>
+                            </button>
+                            
+                            <div id="users-collapse-container" class="hidden space-y-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <h2 class="text-xl font-bold">Usuarios Registrados</h2>
+                                    <div class="flex items-center gap-4 w-full sm:w-auto overflow-hidden">
+                                        <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer hover:text-slate-200 transition-colors whitespace-nowrap">
+                                            <input type="checkbox" id="check-show-inactive" class="w-4 h-4 rounded border-slate-700 bg-slate-800 text-brand-600 focus:ring-brand-500">
+                                            Mostrar inactivos
+                                        </label>
+                                        <button id="btn-export-users-csv" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold py-2 px-4 rounded-xl transition-all shadow-lg flex items-center gap-2">
+                                            <i class="ph-bold ph-download-simple"></i>
+                                            Exportar CSV
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700/50">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="bg-slate-800 text-slate-300">
+                                                <tr>
+                                                    <th class="px-3 py-3 text-center w-10">#</th>
+                                                    <th class="px-3 py-3">Nombre</th>
+                                                    <th class="px-3 py-3">Apellido</th>
+                                                    <th class="px-3 py-3">Legajo</th>
+                                                    <th class="px-3 py-3 hidden md:table-cell">Email</th>
+                                                    <th class="px-3 py-3 hidden sm:table-cell">Registro</th>
+                                                    <th class="px-3 py-3 text-center">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="users-table-list" class="divide-y divide-slate-700/50"></tbody>
+                                        </table>
+                                    </div>
+                                    <!-- Pagination Controls -->
+                                    <div class="flex justify-between items-center px-4 py-3 bg-slate-800/30 border-t border-slate-700/50">
+                                        <span id="users-pagination-info" class="text-xs text-slate-500">Cargando...</span>
+                                        <div class="flex gap-2">
+                                            <button id="btn-users-prev" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs font-bold transition-all flex items-center gap-1">
+                                                <i class="ph-bold ph-caret-left"></i> Anterior
+                                            </button>
+                                            <button id="btn-users-next" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs font-bold transition-all flex items-center gap-1">
+                                                Siguiente <i class="ph-bold ph-caret-right"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar Predictions -->
+            <aside id="sidebar-predictions" class="w-full md:w-80 lg:w-96 bg-brand-dark/95 backdrop-blur-md md:bg-slate-900/50 h-full flex flex-col border-t md:border-t-0 border-slate-800 hidden md:flex">
+                <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                    <h2 class="font-bold">Mi Grilla</h2>
+                    <div class="flex items-center gap-2">
+                        <button id="btn-export-csv-mobile" class="md:hidden text-slate-400 hover:text-white" title="Compartir Imagen">
+                            <i class="ph-bold ph-share-network text-lg"></i>
+                        </button>
+                        <button id="btn-close-sidebar" class="md:hidden text-slate-400 hover:text-white">
+                            <i class="ph-bold ph-x text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="predictions-grid" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24 hide-scrollbar"></div>
+            </aside>
+        </section>
+        
+        <!-- Modal: Editar Usuario (solo admin) -->
+        <div id="modal-edit-user" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+            <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="ph-bold ph-pencil-simple text-brand-500"></i>
+                    Editar Usuario
+                </h3>
+                <input type="hidden" id="edit-user-id">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Nombre</label>
+                        <input type="text" id="edit-nombre" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Apellido</label>
+                        <input type="text" id="edit-apellido" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">N° de Legajo</label>
+                    <input type="text" id="edit-legajo" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <p id="edit-user-error" class="text-red-400 text-xs hidden"></p>
+                <div class="flex gap-3 pt-2">
+                    <button id="btn-edit-cancel" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition-all">Cancelar</button>
+                    <button id="btn-edit-save" class="flex-1 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold transition-all flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-floppy-disk"></i>Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: CREAR LIGA LEGENDARIA -->
+        <div id="modal-create-league" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn">
+            <div class="bg-slate-900 border border-slate-700 rounded-[2rem] p-8 w-full max-w-md shadow-2xl space-y-6">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-brand-500/20">
+                        <i class="ph-bold ph-shield-star text-3xl text-brand-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-white">Nueva Liga Legendaria</h3>
+                    <p class="text-slate-500 text-sm mt-1">Crea tu propio espacio privado de competición.</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Nombre de la Liga</label>
+                        <input type="text" id="league-name-input" placeholder="Ej: Los Pibes de la Ofi" class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Descripción (Opcional)</label>
+                        <textarea id="league-desc-input" placeholder="Un grupo para divertirnos..." class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all h-20 resize-none text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Premios / Reglas</label>
+                        <textarea id="league-prizes-input" placeholder="Ej: El ganador se lleva un asado..." class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:ring-2 focus:ring-brand-500 transition-all h-20 resize-none text-sm"></textarea>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                    <p class="text-[10px] text-slate-500 text-center leading-relaxed">
+                        <i class="ph-bold ph-info text-brand-500"></i> Al crear la liga, podrás invitar amigos con un código. Vos serás el encargado de aprobar a los participantes.
+                    </p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button id="btn-cancel-create-league" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition-all text-sm">Cancelar</button>
+                    <button id="btn-save-league" class="flex-1 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all shadow-lg shadow-brand-500/20 text-sm">Crear Liga</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- MODAL: TARJETA DE LA SUERTE / JACKPOT AWARD -->
+        <div id="modal-lucky-card" class="fixed inset-0 z-[250] hidden items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn">
+            <div class="bg-slate-900 border-2 border-brand-500/40 rounded-[2.5rem] p-8 w-full max-w-sm shadow-[0_0_50px_rgba(34,197,94,0.3)] space-y-6 text-center relative overflow-hidden">
+                <!-- Close button -->
+                <button id="btn-close-lucky-card" class="absolute top-4 right-4 text-slate-500 hover:text-slate-300 transition-colors focus:outline-none cursor-pointer">
+                    <i class="ph-bold ph-x text-xl"></i>
+                </button>
+                <!-- Decorative background elements -->
+                <div class="absolute top-0 right-0 w-24 h-24 bg-brand-500/10 rounded-full blur-2xl"></div>
+                <div class="absolute bottom-0 left-0 w-24 h-24 bg-brand-500/10 rounded-full blur-2xl"></div>
+
+                <div class="space-y-2 relative z-10">
+                    <span class="bg-brand-500/15 text-brand-400 text-[10px] font-black px-3 py-1 rounded-full border border-brand-500/20 uppercase tracking-widest">¡Ganaste Puntos!</span>
+                    <h3 class="text-2xl font-black text-white uppercase tracking-tighter">Tarjeta de la Suerte</h3>
+                    <p class="text-slate-400 text-xs">Compartí para reclamar tus puntos y seguir jugando</p>
+                </div>
+
+                <!-- Lucky Card Image Frame -->
+                <div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border border-slate-700/50 bg-slate-950 flex items-center justify-center shadow-inner group">
+                    <img id="lucky-card-img" src="" alt="Premio de la suerte" class="w-full h-full object-cover">
+                    <!-- Overlay text -->
+                    <div class="absolute bottom-0 inset-x-0 bg-slate-950/80 backdrop-blur-sm py-2 px-3 border-t border-white/5">
+                        <span class="text-[10px] text-brand-400 font-bold uppercase tracking-wider">Tarjeta de la suerte compartí y segui jugando</span>
+                    </div>
+                </div>
+
+                <!-- Claim/Share Button -->
+                <div class="space-y-3 relative z-10">
+                    <button id="btn-share-lucky-card" class="w-full py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-black rounded-xl transition-all shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2 cursor-pointer text-sm">
+                        <i class="ph-bold ph-share-network text-lg"></i> COMPARTIR Y RECLAMAR
+                    </button>
+                    <p id="lucky-card-points-label" class="text-xs text-brand-500 font-bold animate-pulse"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="w-full py-4 px-6 border-t border-slate-800 bg-slate-900/50 text-center text-[10px] uppercase tracking-widest">
+            <p class="text-slate-400">&copy; 2026 Prode Mundial - Desarrollado por asterion30</p>
+        </footer>
+
+        <!-- Loading Overlay -->
+        <div id="global-loader" class="fixed inset-0 bg-brand-dark/90 backdrop-blur-sm z-[100] flex flex-col items-center justify-center hidden">
+            <p class="text-brand-500 font-medium animate-pulse">Cargando...</p>
+        </div>
+    </main>
+
+    <!-- Entry Point -->
+    <script type="module" src="./src/js/app.js"></script>
+</body>
+</html>

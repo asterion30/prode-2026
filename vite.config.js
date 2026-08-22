@@ -39,6 +39,10 @@ export default defineConfig({
     modulePreload: { polyfill: false },
     // Separar vendors del código de la app (mejora caché) — función para Vite 8/rolldown
     rollupOptions: {
+      input: {
+        main: './index.html',
+        prode: './prode.html',
+      },
       output: {
         manualChunks: (id) => {
           if (id.includes('@supabase')) return 'vendor-supabase';
