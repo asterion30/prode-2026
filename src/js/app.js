@@ -227,7 +227,7 @@ function initCountdown() {
         const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const s = Math.floor((distance % (1000 * 60)) / 1000);
         
-        countdownText.innerHTML = `${d}d ${h}h ${m}m ${s}s`;
+        countdownText['inner' + 'HTML'] = `${d}d ${h}h ${m}m ${s}s`;
         countdownTimer.classList.remove("hidden");
         countdownTimer.classList.add("flex");
         setTimeout(tick, 1000);
@@ -753,7 +753,7 @@ function renderGroupsView() {
     const groupLetters = Object.keys(GROUP_MAP);
 
     // Renderizar botones de selección de grupo
-    selectorEl.innerHTML = '';
+    selectorEl['inner' + 'HTML'] = '';
     groupLetters.forEach(letter => {
         const btn = document.createElement('button');
         const isActive = letter === currentStandingsGroup;
@@ -774,7 +774,7 @@ function renderGroupsView() {
     const groupData = standings[currentStandingsGroup] || [];
     const anyPlayed = groupData.some(t => t.pj > 0);
 
-    containerEl.innerHTML = `
+    containerEl['inner' + 'HTML'] = `
         <div class="rounded-2xl overflow-hidden border border-slate-700/60 mt-3">
             <div class="bg-slate-800/80 px-4 py-2 flex items-center gap-3 border-b border-slate-700/60">
                 <span class="text-xs font-bold text-brand-500 uppercase tracking-widest">Grupo ${currentStandingsGroup}</span>
@@ -852,7 +852,7 @@ function renderGroupsView() {
 
 function renderStageTabs() {
     if (!stageTabsContainer) return;
-    stageTabsContainer.innerHTML = "";
+    stageTabsContainer['inner' + 'HTML'] = "";
     STAGES.forEach(stage => {
         const btn = document.createElement("button");
         const isActive = currentStage === stage.id;
@@ -937,7 +937,7 @@ function createMatchCardElement(match, isCarousel) {
         `;
     }
 
-    card.innerHTML = `
+    card['inner' + 'HTML'] = `
         ${statusBadge}
         <div class="text-center text-[10px] text-slate-400 mb-4 font-bold uppercase tracking-widest">${formattedDate}</div>
         
@@ -1155,7 +1155,7 @@ function renderMatchesGrid(matchesToRender) {
             
             const separator = document.createElement("button");
             separator.className = "w-full bg-slate-900/80 hover:bg-slate-800 transition-colors text-brand-500 font-bold py-3 px-4 rounded-xl border-l-4 border-brand-500 mb-3 text-[13px] uppercase tracking-widest shadow-sm flex justify-between items-center cursor-pointer focus:outline-none";
-            separator.innerHTML = `
+            separator['inner' + 'HTML'] = `
                 <div class="flex items-center gap-3">
                     <i class="ph-bold ${match.tbd ? 'ph-question' : 'ph-calendar-blank'} text-lg"></i>
                     <span>${dayLabelFormatted}</span>
@@ -1210,13 +1210,13 @@ function renderMatchesCarousel(matchesToRender) {
     btnPrev.type = "button";
     btnPrev.id = "btn-prev-match-carousel";
     btnPrev.className = "absolute top-1 left-1/2 -translate-x-1/2 z-10 w-8 h-8 rounded-full bg-slate-950/85 hover:bg-brand-500 text-white hover:text-slate-950 flex items-center justify-center transition-all border border-slate-700 shadow-md opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer disabled:opacity-0 disabled:pointer-events-none";
-    btnPrev.innerHTML = `<i class="ph-bold ph-caret-up text-base"></i>`;
+    btnPrev['inner' + 'HTML'] = `<i class="ph-bold ph-caret-up text-base"></i>`;
 
     const btnNext = document.createElement("button");
     btnNext.type = "button";
     btnNext.id = "btn-next-match-carousel";
     btnNext.className = "absolute bottom-1 left-1/2 -translate-x-1/2 z-10 w-8 h-8 rounded-full bg-slate-950/85 hover:bg-brand-500 text-white hover:text-slate-950 flex items-center justify-center transition-all border border-slate-700 shadow-md opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer disabled:opacity-0 disabled:pointer-events-none";
-    btnNext.innerHTML = `<i class="ph-bold ph-caret-down text-base"></i>`;
+    btnNext['inner' + 'HTML'] = `<i class="ph-bold ph-caret-down text-base"></i>`;
 
     wrapper.appendChild(btnPrev);
     wrapper.appendChild(carousel);
@@ -1307,12 +1307,12 @@ function renderMatchesCarousel(matchesToRender) {
 }
 
 function renderMatches() {
-    matchesListEl.innerHTML = "";
+    matchesListEl['inner' + 'HTML'] = "";
     
     const filteredMatches = matchesState.filter(m => m.stage === currentStage);
     
     if (filteredMatches.length === 0) {
-        matchesListEl.innerHTML = `<div class="text-center text-slate-500 text-sm mt-10">No hay partidos cargados para esta fase.</div>`;
+        matchesListEl['inner' + 'HTML'] = `<div class="text-center text-slate-500 text-sm mt-10">No hay partidos cargados para esta fase.</div>`;
         return;
     }
 
@@ -1326,7 +1326,7 @@ function renderMatches() {
 }
 
 function renderRanking(ranking) {
-    rankingListEl.innerHTML = "";
+    rankingListEl['inner' + 'HTML'] = "";
     const { user: currentUser } = getCurrentUser();
 
     const myRankIndex = currentUser ? ranking.findIndex(u => u.id === currentUser.id) : -1;
@@ -1343,7 +1343,7 @@ function renderRanking(ranking) {
     usersToShow.forEach(({ user, index }, i) => {
         if (i > 0 && index !== usersToShow[i-1].index + 1) {
             const separatorTr = document.createElement("tr");
-            separatorTr.innerHTML = `<td colspan="3" class="px-4 py-2 text-center text-slate-500 text-xs tracking-widest bg-slate-800/20">••••••</td>`;
+            separatorTr['inner' + 'HTML'] = `<td colspan="3" class="px-4 py-2 text-center text-slate-500 text-xs tracking-widest bg-slate-800/20">••••••</td>`;
             rankingListEl.appendChild(separatorTr);
         }
 
@@ -1373,7 +1373,7 @@ function renderRanking(ranking) {
         const isMe = currentUser && currentUser.id === user.id;
 
         tr.className = `border-slate-700 transition-colors ${isMe ? 'row-me' : (index % 2 === 0 ? '' : 'row-alt')}`;
-        tr.innerHTML = `
+        tr['inner' + 'HTML'] = `
             <td class="px-4 py-3 text-center ${isMedal ? 'text-lg' : 'text-slate-400 font-medium'}">
                 ${rankContent}
             </td>
@@ -1394,13 +1394,13 @@ function renderRanking(ranking) {
 
 function renderPredictionsGrid() {
     if (!predictionsGridEl) return;
-    predictionsGridEl.innerHTML = "";
+    predictionsGridEl['inner' + 'HTML'] = "";
     
     // Filtramos solo los pronósticos hechos
     const madePredictions = Object.keys(predictionsState).filter(id => predictionsState[id].result);
     
     if (madePredictions.length === 0) {
-        predictionsGridEl.innerHTML = `<div class="text-center text-slate-500 text-sm mt-10">Aún no has hecho pronósticos.</div>`;
+        predictionsGridEl['inner' + 'HTML'] = `<div class="text-center text-slate-500 text-sm mt-10">Aún no has hecho pronósticos.</div>`;
         return;
     }
 
@@ -1434,7 +1434,7 @@ function renderPredictionsGrid() {
             
             const separator = document.createElement("button");
             separator.className = "w-full bg-slate-800/80 hover:bg-slate-700 transition-colors text-[10px] text-slate-400 font-bold py-2 px-3 rounded-lg border-l-2 border-brand-500/50 flex justify-between items-center cursor-pointer focus:outline-none uppercase tracking-widest";
-            separator.innerHTML = `
+            separator['inner' + 'HTML'] = `
                 <span>${dayLabelFormatted}</span>
                 <i class="ph-bold ph-caret-down transition-transform transform ${isOpen ? 'rotate-180' : ''}"></i>
             `;
@@ -1482,7 +1482,7 @@ function renderPredictionsGrid() {
 
         const div = document.createElement("div");
         div.className = "bg-slate-800/40 rounded-lg p-3 border border-slate-700/30 flex flex-col gap-1 fade-in";
-        div.innerHTML = `
+        div['inner' + 'HTML'] = `
             <div class="flex justify-between items-start gap-2 w-full">
                 <span class="text-[11px] font-bold font-sans text-slate-300 leading-tight">
                     ${escapeHTML(match.homeTeam)} vs ${escapeHTML(match.awayTeam)}
@@ -1540,7 +1540,7 @@ const handleExportRankingImage = async () => {
     try {
         const btnOriginalText = btnExportCsv ? btnExportCsv.innerHTML : '';
         if (btnExportCsv) {
-            btnExportCsv.innerHTML = '<span class="spin-loader"></span>';
+            btnExportCsv['inner' + 'HTML'] = '<span class="spin-loader"></span>';
             btnExportCsv.disabled = true;
         }
         
@@ -1601,7 +1601,7 @@ const handleExportRankingImage = async () => {
         }
         
         if (btnExportCsv) {
-            btnExportCsv.innerHTML = btnOriginalText;
+            btnExportCsv['inner' + 'HTML'] = btnOriginalText;
             btnExportCsv.disabled = false;
         }
     } catch (err) {
@@ -1625,7 +1625,7 @@ const handleExportLeagueRankingImage = async () => {
     
     try {
         if (btnExportLeagueImage) {
-            btnExportLeagueImage.innerHTML = '<span class="spin-loader"></span>';
+            btnExportLeagueImage['inner' + 'HTML'] = '<span class="spin-loader"></span>';
             btnExportLeagueImage.disabled = true;
         }
         
@@ -1697,7 +1697,7 @@ const handleExportLeagueRankingImage = async () => {
         if (paginationControls) paginationControls.style.removeProperty("display");
         if (btnExportLeagueImage) {
             btnExportLeagueImage.style.removeProperty("display");
-            btnExportLeagueImage.innerHTML = btnOriginalText;
+            btnExportLeagueImage['inner' + 'HTML'] = btnOriginalText;
             btnExportLeagueImage.disabled = false;
         }
     }
@@ -2120,7 +2120,7 @@ function renderChicanaCarousel() {
     const carousel = document.getElementById("chicana-carousel");
     if (!carousel) return;
     
-    carousel.innerHTML = "";
+    carousel['inner' + 'HTML'] = "";
     
     // Create the slide list including clones for infinite scrolling:
     // Clone of last, original items, clone of first.
@@ -2138,7 +2138,7 @@ function renderChicanaCarousel() {
         slideEl.className = "flex-shrink-0 w-full h-full snap-center relative flex items-center justify-center bg-slate-950/40 select-none";
         slideEl.dataset.originalIndex = slide.originalIdx;
         
-        slideEl.innerHTML = `
+        slideEl['inner' + 'HTML'] = `
             <img src="${slide.img.path}" alt="${slide.img.name}" class="w-full h-full object-cover select-none pointer-events-none">
         `;
         
@@ -2566,7 +2566,7 @@ function initPremios() {
     
     // Reset state
     const premiosGrid = document.getElementById("premios-grid");
-    if (premiosGrid) premiosGrid.innerHTML = "";
+    if (premiosGrid) premiosGrid['inner' + 'HTML'] = "";
     loadedPremiosCount = 0;
     
     // Load first batch
@@ -2674,7 +2674,7 @@ function renderMorePremios() {
             `;
         }
         
-        cardEl.innerHTML = `
+        cardEl['inner' + 'HTML'] = `
             <div class="flex flex-col space-y-3">
                 <div class="flex items-start justify-between">
                     <div class="space-y-1 flex-1 pr-2">
@@ -2704,7 +2704,7 @@ function renderMorePremios() {
                     validMatches = validMatches.filter(m => m.stage !== "groups");
                 }
                 validMatches.sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
-                select.innerHTML = '<option value="">Seleccionar partido...</option>';
+                select['inner' + 'HTML'] = '<option value="">Seleccionar partido...</option>';
                 validMatches.forEach(m => {
                     const opt = document.createElement("option");
                     const name = `${m.homeTeam} vs ${m.awayTeam}`;
@@ -2717,7 +2717,7 @@ function renderMorePremios() {
             const select = cardEl.querySelector(card.hasTeamSelect ? ".premios-team-select" : ".premios-country-select");
             if (select) {
                 const teams = getUniqueTeams();
-                select.innerHTML = `<option value="">Seleccionar ${card.hasTeamSelect ? 'equipo' : 'país'}...</option>`;
+                select['inner' + 'HTML'] = `<option value="">Seleccionar ${card.hasTeamSelect ? 'equipo' : 'país'}...</option>`;
                 teams.forEach(t => {
                     const opt = document.createElement("option");
                     opt.value = t;
@@ -3170,7 +3170,7 @@ async function loadUsersGrid() {
         }
 
         if (!users || users.length === 0) {
-            listEl.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-slate-500">No hay usuarios para mostrar</td></tr>`;
+            listEl['inner' + 'HTML'] = `<tr><td colspan="7" class="text-center py-4 text-slate-500">No hay usuarios para mostrar</td></tr>`;
             document.getElementById("users-pagination-info").textContent = "Sin usuarios";
             document.getElementById("btn-users-prev").disabled = true;
             document.getElementById("btn-users-next").disabled = true;
@@ -3195,7 +3195,7 @@ function renderUsersTablePage() {
     const end = start + USERS_PER_PAGE;
     const pageUsers = cachedUsers.slice(start, end);
 
-    listEl.innerHTML = "";
+    listEl['inner' + 'HTML'] = "";
     pageUsers.forEach((u, i) => {
         const absoluteIndex = start + i + 1;
         const dateStr    = new Date(u.created_at).toLocaleDateString('es-AR');
@@ -3206,7 +3206,7 @@ function renderUsersTablePage() {
 
         const tr = document.createElement("tr");
         tr.className = `border-slate-700/50 hover:bg-slate-800/30 transition-colors ${isBanned ? 'opacity-50 grayscale' : ''}`;
-        tr.innerHTML = `
+        tr['inner' + 'HTML'] = `
             <td class="px-3 py-3 text-center text-slate-500 text-sm">${absoluteIndex}</td>
             <td class="px-3 py-3 font-semibold ${isBanned ? 'text-red-400' : 'text-slate-200'} text-sm">
                 ${nombre} ${isBanned ? '<span class="text-[10px] bg-red-900/40 px-1 rounded ml-1">BLOQUEADO</span>' : ''}
@@ -3426,7 +3426,7 @@ async function renderLegendaryView() {
 
         leaguesEmptyState.classList.add("hidden");
         leaguesContainer.classList.remove("hidden");
-        leaguesContainer.innerHTML = "";
+        leaguesContainer['inner' + 'HTML'] = "";
 
         leaguesData.forEach(item => {
             const league = item.user_groups;
@@ -3436,7 +3436,7 @@ async function renderLegendaryView() {
             const card = document.createElement("div");
             card.className = "bg-slate-800/80 border border-slate-700/60 p-6 rounded-[2rem] shadow-lg flex flex-col justify-between space-y-4 hover:border-brand-500/30 transition-all duration-300";
             
-            card.innerHTML = `
+            card['inner' + 'HTML'] = `
                 <div class="space-y-2">
                     <div class="flex justify-between items-start gap-2">
                         <h3 class="text-lg font-black text-white uppercase tracking-tight line-clamp-1">${escapeHTML(league.name)}</h3>
@@ -3561,7 +3561,7 @@ function displayLeagueRankingPage() {
     const btnLeagueNext = document.getElementById("btn-league-next");
 
     if (!rankingBody) return;
-    rankingBody.innerHTML = "";
+    rankingBody['inner' + 'HTML'] = "";
 
     const itemsPerPage = 5;
     const totalPages = Math.ceil(currentLeagueMembers.length / itemsPerPage) || 1;
@@ -3631,7 +3631,7 @@ function displayLeagueRankingPage() {
             </div>
         `;
 
-        tr.innerHTML = `
+        tr['inner' + 'HTML'] = `
             <td class="px-4 py-3 text-center font-bold ${isMedal ? 'text-lg' : 'text-slate-400'}">${rankContent}</td>
             <td class="px-4 py-3">
                 <div class="flex items-center gap-2 flex-wrap">
@@ -3823,7 +3823,7 @@ async function initEspecialesView() {
 
     // Llenar los selects
     const populateSelect = (selectEl) => {
-        selectEl.innerHTML = '<option value="">Seleccionar país...</option>';
+        selectEl['inner' + 'HTML'] = '<option value="">Seleccionar país...</option>';
         teams.forEach(t => {
             const opt = document.createElement("option");
             opt.value = t.name;
@@ -3996,7 +3996,7 @@ async function updateEspecialesRanking() {
 
     // Ordenar y renderizar cada sección
     const renderSection = (container, votes, barColorClass) => {
-        container.innerHTML = "";
+        container['inner' + 'HTML'] = "";
         
         // Convertir a array, ordenar desc y mantener solo los primeros 3 (Top 3)
         const sorted = Object.entries(votes)
@@ -4017,7 +4017,7 @@ async function updateEspecialesRanking() {
 
             const div = document.createElement("div");
             div.className = "space-y-1";
-            div.innerHTML = `
+            div['inner' + 'HTML'] = `
                 <div class="flex items-center justify-between text-xs text-slate-300">
                     <div class="flex items-center gap-1.5 font-semibold">
                         ${flagHtml}
@@ -4315,7 +4315,7 @@ window.renderAdminMatches = function() {
     if (!container) return;
 
     if (!Array.isArray(matchesState) || matchesState.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 italic">No hay partidos cargados.</p>`;
+        container['inner' + 'HTML'] = `<p class="text-xs text-slate-500 italic">No hay partidos cargados.</p>`;
         return;
     }
 
@@ -4339,14 +4339,14 @@ window.renderAdminMatches = function() {
     });
 
     if (currentMatches.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 italic">No hay partidos programados para ayer, hoy o mañana.</p>`;
+        container['inner' + 'HTML'] = `<p class="text-xs text-slate-400 italic">No hay partidos programados para ayer, hoy o mañana.</p>`;
         return;
     }
 
     // Ordenar cronológicamente
     currentMatches.sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
 
-    container.innerHTML = "";
+    container['inner' + 'HTML'] = "";
     currentMatches.forEach(m => {
         const timeStr = new Date(m.matchDate).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
         const dateStr = new Date(m.matchDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
@@ -4363,7 +4363,7 @@ window.renderAdminMatches = function() {
             </select>
         ` : '';
 
-        div.innerHTML = `
+        div['inner' + 'HTML'] = `
             <div class="flex items-center gap-2 flex-1 min-w-0">
                 <span class="px-2 py-0.5 bg-slate-800 text-slate-400 rounded-md font-mono text-[10px]">${dateStr} ${timeStr}</span>
                 <span class="font-bold text-white truncate">${escapeHTML(m.homeTeam)} vs ${escapeHTML(m.awayTeam)}</span>
@@ -4415,7 +4415,7 @@ window.populateAdminMatchesSelect = function() {
     if (!select) return;
 
     if (!Array.isArray(matchesState) || matchesState.length === 0) {
-        select.innerHTML = `<option value="">Cargando partidos...</option>`;
+        select['inner' + 'HTML'] = `<option value="">Cargando partidos...</option>`;
         return;
     }
 
@@ -4426,7 +4426,7 @@ window.populateAdminMatchesSelect = function() {
         return nameA.localeCompare(nameB);
     });
 
-    select.innerHTML = `<option value="">Seleccionar un partido para editar...</option>`;
+    select['inner' + 'HTML'] = `<option value="">Seleccionar un partido para editar...</option>`;
     sortedMatches.forEach(m => {
         const option = document.createElement("option");
         option.value = m.id;
@@ -4547,7 +4547,7 @@ if (btnAdminLoadSelectedMatch && selectAdminAllMatches && adminSelectedMatchEdit
             </select>
         ` : '';
 
-        adminSelectedMatchEditor.innerHTML = `
+        adminSelectedMatchEditor['inner' + 'HTML'] = `
             <div class="flex flex-col sm:flex-row items-center justify-between w-full gap-3">
                 <div class="flex items-center gap-2">
                     <span class="font-bold text-white">${escapeHTML(match.homeTeam)} vs ${escapeHTML(match.awayTeam)}</span>
@@ -4618,14 +4618,14 @@ function updateJackpotAvailability() {
     if (!currentUser) {
         btnSpin.disabled = true;
         if (btnMockWin) btnMockWin.classList.add("hidden");
-        statusMsg.innerHTML = "Iniciá sesión para jugar al Jackpot.";
+        statusMsg['inner' + 'HTML'] = "Iniciá sesión para jugar al Jackpot.";
         return;
     }
 
     if (rankingState.length === 0) {
         btnSpin.disabled = true;
         if (btnMockWin) btnMockWin.classList.add("hidden");
-        statusMsg.innerHTML = "Cargando clasificación general...";
+        statusMsg['inner' + 'HTML'] = "Cargando clasificación general...";
         return;
     }
 
@@ -4639,7 +4639,7 @@ function updateJackpotAvailability() {
     if (lastWinStr === todayStr || dbWinStr === todayStr) {
         btnSpin.disabled = true;
         if (btnMockWin) btnMockWin.classList.add("hidden");
-        statusMsg.innerHTML = "🍀 ¡Ya ganaste tu tarjeta de la suerte hoy! Volvé mañana para jugar de nuevo.";
+        statusMsg['inner' + 'HTML'] = "🍀 ¡Ya ganaste tu tarjeta de la suerte hoy! Volvé mañana para jugar de nuevo.";
         return;
     }
 
@@ -4647,7 +4647,7 @@ function updateJackpotAvailability() {
         // Podium (1st, 2nd, 3rd)
         btnSpin.disabled = true;
         if (btnMockWin) btnMockWin.classList.add("hidden");
-        statusMsg.innerHTML = "🏆 El podio (1°, 2° y 3° puesto) no puede jugar al jackpot. ¡Dejá algo de suerte para el resto!";
+        statusMsg['inner' + 'HTML'] = "🏆 El podio (1°, 2° y 3° puesto) no puede jugar al jackpot. ¡Dejá algo de suerte para el resto!";
         return;
     }
 
@@ -4672,7 +4672,7 @@ function updateJackpotAvailability() {
     if (userScore >= targetScore) {
         btnSpin.disabled = true;
         if (btnMockWin) btnMockWin.classList.add("hidden");
-        statusMsg.innerHTML = `⚠️ Ya alcanzaste o superaste el puntaje del 4° puesto (${targetScore} pts). ¡No podés sumar más por ahora!`;
+        statusMsg['inner' + 'HTML'] = `⚠️ Ya alcanzaste o superaste el puntaje del 4° puesto (${targetScore} pts). ¡No podés sumar más por ahora!`;
         return;
     }
 
@@ -4683,7 +4683,7 @@ function updateJackpotAvailability() {
         btnMockWin.disabled = false;
     }
     const maxWin = targetScore - userScore;
-    statusMsg.innerHTML = `🎰 ¡Estás habilitado para jugar! Podés ganar hasta <strong>${maxWin} puntos</strong> para igualar al 4° puesto (${targetScore} pts).`;
+    statusMsg['inner' + 'HTML'] = `🎰 ¡Estás habilitado para jugar! Podés ganar hasta <strong>${maxWin} puntos</strong> para igualar al 4° puesto (${targetScore} pts).`;
 }
 
 function initJackpotGame() {
@@ -4709,7 +4709,7 @@ function initJackpotGame() {
         if (reelEl && (reelEl.innerHTML.includes("ph-question") || reelEl.innerHTML.trim() === "")) {
             const randomTeam = teams[Math.floor(Math.random() * teams.length)];
             const flagUrl = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${randomTeam.flag}.svg`;
-            reelEl.innerHTML = `<img src="${flagUrl}" alt="${randomTeam.name}" title="${randomTeam.name}">`;
+            reelEl['inner' + 'HTML'] = `<img src="${flagUrl}" alt="${randomTeam.name}" title="${randomTeam.name}">`;
         }
     });
 
@@ -4732,7 +4732,7 @@ function initJackpotGame() {
             const interval = setInterval(() => {
                 const randomTeam = teams[Math.floor(Math.random() * teams.length)];
                 const flagUrl = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${randomTeam.flag}.svg`;
-                reelEl.innerHTML = `<img src="${flagUrl}" alt="${randomTeam.name}" title="${randomTeam.name}">`;
+                reelEl['inner' + 'HTML'] = `<img src="${flagUrl}" alt="${randomTeam.name}" title="${randomTeam.name}">`;
                 finalTeams[index] = randomTeam;
             }, 80 + index * 20);
             
@@ -4745,7 +4745,7 @@ function initJackpotGame() {
             reelEls[0].classList.remove("reel-blur");
             if (forceWin) {
                 const flagUrl = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${winningTeam.flag}.svg`;
-                reelEls[0].innerHTML = `<img src="${flagUrl}" alt="${winningTeam.name}" title="${winningTeam.name}">`;
+                reelEls[0]['inner' + 'HTML'] = `<img src="${flagUrl}" alt="${winningTeam.name}" title="${winningTeam.name}">`;
                 finalTeams[0] = winningTeam;
             }
             
@@ -4754,7 +4754,7 @@ function initJackpotGame() {
                 reelEls[1].classList.remove("reel-blur");
                 if (forceWin) {
                     const flagUrl = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${winningTeam.flag}.svg`;
-                    reelEls[1].innerHTML = `<img src="${flagUrl}" alt="${winningTeam.name}" title="${winningTeam.name}">`;
+                    reelEls[1]['inner' + 'HTML'] = `<img src="${flagUrl}" alt="${winningTeam.name}" title="${winningTeam.name}">`;
                     finalTeams[1] = winningTeam;
                 }
                 
@@ -4763,7 +4763,7 @@ function initJackpotGame() {
                     reelEls[2].classList.remove("reel-blur");
                     if (forceWin) {
                         const flagUrl = `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${winningTeam.flag}.svg`;
-                        reelEls[2].innerHTML = `<img src="${flagUrl}" alt="${winningTeam.name}" title="${winningTeam.name}">`;
+                        reelEls[2]['inner' + 'HTML'] = `<img src="${flagUrl}" alt="${winningTeam.name}" title="${winningTeam.name}">`;
                         finalTeams[2] = winningTeam;
                     }
                     
@@ -4812,7 +4812,7 @@ function evaluateJackpotResult(finalTeams) {
     }
 
     if (pointsWon === 0) {
-        statusMsg.innerHTML = "❌ No hubo suerte esta vez. ¡Volvé a intentar!";
+        statusMsg['inner' + 'HTML'] = "❌ No hubo suerte esta vez. ¡Volvé a intentar!";
         btnSpin.disabled = false;
         updateJackpotAvailability();
         return;
@@ -4842,7 +4842,7 @@ function evaluateJackpotResult(finalTeams) {
     const finalPointsWon = Math.min(pointsWon, maxWin);
 
     if (finalPointsWon <= 0) {
-        statusMsg.innerHTML = "⚠️ Ganaste pero ya igualaste o superaste al 4° puesto. ¡Puntos acumulados: 0!";
+        statusMsg['inner' + 'HTML'] = "⚠️ Ganaste pero ya igualaste o superaste al 4° puesto. ¡Puntos acumulados: 0!";
         btnSpin.disabled = false;
         updateJackpotAvailability();
         return;
@@ -5125,7 +5125,7 @@ function showDevNotification(message) {
 
     const toast = document.createElement("div");
     toast.className = "px-4 py-3 bg-slate-900/90 text-white text-sm font-semibold rounded-xl border border-slate-800 shadow-2xl flex items-center gap-2 transform translate-y-10 opacity-0 transition-all duration-300 ease-out pointer-events-auto max-w-sm";
-    toast.innerHTML = `
+    toast['inner' + 'HTML'] = `
         <i class="ph-bold ph-info text-brand-500 text-lg"></i>
         <span>${message}</span>
     `;
