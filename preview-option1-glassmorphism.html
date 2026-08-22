@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview Opción 1 — Cyber Glassmorphism | Sapate Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(15, 23, 42, 0.65);
+      --card-border: rgba(0, 229, 255, 0.2);
+      --cyan: #00e5ff;
+      --purple: #a855f7;
+      --text: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 229, 255, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.12) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+    .preview-header {
+      background: rgba(9, 13, 22, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 32px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .hero { text-align: center; padding: 60px 20px 40px; }
+    .hero h1 { font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; background: linear-gradient(135deg, #00e5ff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 18px; color: var(--text-sub); margin-top: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; }
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px; padding: 28px;
+      transition: all 0.3s;
+    }
+    .card:hover { border-color: var(--cyan); box-shadow: 0 0 30px rgba(0, 229, 255, 0.25); transform: translateY(-4px); }
+    .btn { display: block; text-align: center; background: linear-gradient(135deg, var(--cyan), var(--purple)); color: #000; font-weight: 700; padding: 12px; border-radius: 12px; text-decoration: none; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="preview-header">
+    <div style="font-family: 'Syne'; font-weight: 800; color: var(--cyan);">OPCIÓN 1: CYBER GLASSMORPHISM</div>
+    <span style="font-family: 'JetBrains Mono'; font-size: 12px; color: var(--purple);">[PREVIEW MOCKUP]</span>
+  </div>
+  <div class="hero">
+    <h1>Sapate Projects Hub</h1>
+    <p>Portafolio futurista Cyberpunk con resplandores neón y cristal esmerilado</p>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <div style="font-size: 32px; margin-bottom: 12px;">⚽</div>
+      <h3 style="font-family: 'Syne'; font-size: 24px;">Prode 2026</h3>
+      <p style="color: var(--text-sub); margin-top: 8px; font-size: 14px;">Plataforma interactiva de pronósticos deportivos y fixture.</p>
+      <a href="/prode.html" class="btn">Abrir Prode</a>
+    </div>
+    <div class="card">
+      <div style="font-size: 32px; margin-bottom: 12px;">🏥</div>
+      <h3 style="font-family: 'Syne'; font-size: 24px;">Sección Salud</h3>
+      <p style="color: var(--text-sub); margin-top: 8px; font-size: 14px;">Gestión de salud y seguimiento asistencial médico.</p>
+      <a href="/salud/index.html" class="btn">Abrir Salud</a>
+    </div>
+    <div class="card">
+      <div style="font-size: 32px; margin-bottom: 12px;">🎟️</div>
+      <h3 style="font-family: 'Syne'; font-size: 24px;">Rifa Solidaria</h3>
+      <p style="color: var(--text-sub); margin-top: 8px; font-size: 14px;">Rifas benefactoras e iniciativas comunitarias.</p>
+      <a href="/rifasolidaria/index.html" class="btn">Abrir Rifas</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -42,6 +42,9 @@ export default defineConfig({
       input: {
         main: './index.html',
         prode: './prode.html',
+        preview1: './preview-option1-glassmorphism.html',
+        preview2: './preview-option2-swiss-minimal.html',
+        preview3: './preview-option3-neobrutalist.html',
       },
       output: {
         manualChunks: (id) => {

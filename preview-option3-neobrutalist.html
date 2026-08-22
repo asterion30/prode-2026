@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview Opción 3 — Neo-Brutalist Sports Hub | Sapate Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Grotesk:wght@700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #facc15;
+      --card-bg: #ffffff;
+      --border: #0f172a;
+      --pink: #ec4899;
+      --green: #84cc16;
+      --text: #0f172a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+    }
+    .preview-header {
+      background: #ffffff;
+      border-bottom: 3px solid var(--border);
+      padding: 16px 32px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .hero { text-align: center; padding: 50px 20px 30px; }
+    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 58px; font-weight: 800; text-transform: uppercase; background: #ffffff; display: inline-block; padding: 8px 24px; border: 3px solid #0f172a; box-shadow: 6px 6px 0 #0f172a; }
+    .hero p { font-size: 18px; font-weight: 700; margin-top: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; }
+    .card {
+      background: var(--card-bg);
+      border: 3px solid var(--border);
+      border-radius: 16px; padding: 28px;
+      box-shadow: 6px 6px 0 #0f172a;
+      transition: all 0.15s;
+    }
+    .card:hover { transform: translate(-3px, -3px); box-shadow: 10px 10px 0 #0f172a; }
+    .btn { display: block; text-align: center; background: var(--pink); color: #ffffff; font-family: 'Space Mono'; font-weight: 700; padding: 12px; border: 2.5px solid #0f172a; border-radius: 10px; text-decoration: none; margin-top: 20px; box-shadow: 3px 3px 0 #0f172a; }
+    .btn:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 #0f172a; }
+  </style>
+</head>
+<body>
+  <div class="preview-header">
+    <div style="font-family: 'Space Grotesk'; font-weight: 800; font-size: 20px; text-transform: uppercase;">OPCIÓN 3: NEO-BRUTALIST TACTICAL</div>
+    <span style="font-family: 'Space Mono'; font-size: 12px; background: var(--green); padding: 4px 8px; border: 2px solid #0f172a;">[PREVIEW MOCKUP]</span>
+  </div>
+  <div class="hero">
+    <h1>Sapate Projects Hub</h1>
+    <p>⚡ Estilo Táctico Expresivo con sombras duras, amarillo cyber y alta energía</p>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <div style="font-size: 36px; margin-bottom: 12px;">⚽</div>
+      <h3 style="font-family: 'Space Grotesk'; font-size: 26px;">PRODE 2026</h3>
+      <p style="margin-top: 8px; font-size: 14px; font-weight: 500;">Plataforma interactiva de pronósticos deportivos y fixture.</p>
+      <a href="/prode.html" class="btn">ABRIR PRODE ➔</a>
+    </div>
+    <div class="card">
+      <div style="font-size: 36px; margin-bottom: 12px;">🏥</div>
+      <h3 style="font-family: 'Space Grotesk'; font-size: 26px;">SECCIÓN SALUD</h3>
+      <p style="margin-top: 8px; font-size: 14px; font-weight: 500;">Gestión de salud y seguimiento asistencial médico.</p>
+      <a href="/salud/index.html" class="btn" style="background: var(--green); color: #000;">ABRIR SALUD ➔</a>
+    </div>
+    <div class="card">
+      <div style="font-size: 36px; margin-bottom: 12px;">🎟️</div>
+      <h3 style="font-family: 'Space Grotesk'; font-size: 26px;">RIFA SOLIDARIA</h3>
+      <p style="margin-top: 8px; font-size: 14px; font-weight: 500;">Rifas benefactoras e iniciativas comunitarias.</p>
+      <a href="/rifasolidaria/index.html" class="btn" style="background: #3b82f6; color: #fff;">ABRIR RIFAS ➔</a>
+    </div>
+  </div>
+</body>
+</html>

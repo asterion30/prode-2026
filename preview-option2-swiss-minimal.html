@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview Opción 2 — Swiss Minimalist Editorial | Sapate Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --primary: #4f46e5;
+      --text: #0f172a;
+      --text-sub: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+    .preview-header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .hero { max-width: 900px; margin: 60px auto 40px; padding: 0 24px; text-align: left; }
+    .hero h1 { font-family: 'Outfit', sans-serif; font-size: 56px; font-weight: 800; letter-spacing: -0.03em; color: var(--text); }
+    .hero p { font-size: 20px; color: var(--text-sub); margin-top: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 28px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.2s;
+    }
+    .card:hover { border-color: var(--primary); box-shadow: 0 10px 25px rgba(79, 70, 229, 0.1); transform: translateY(-2px); }
+    .btn { display: inline-block; background: var(--primary); color: #ffffff; font-weight: 600; padding: 10px 20px; border-radius: 8px; text-decoration: none; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="preview-header">
+    <div style="font-family: 'Outfit'; font-weight: 700; color: var(--primary);">OPCIÓN 2: SWISS MINIMALIST EDITORIAL</div>
+    <span style="font-family: 'Space Mono'; font-size: 12px; color: var(--text-sub);">[PREVIEW MOCKUP]</span>
+  </div>
+  <div class="hero">
+    <h1>Sapate Projects Hub</h1>
+    <p>Diseño limpio de alta precisión estilo Linear / Stripe en modo claro</p>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <div style="font-size: 32px; margin-bottom: 12px;">⚽</div>
+      <h3 style="font-family: 'Outfit'; font-size: 24px;">Prode 2026</h3>
+      <p style="color: var(--text-sub); margin-top: 8px; font-size: 14px;">Plataforma interactiva de pronósticos deportivos y fixture.</p>
+      <a href="/prode.html" class="btn">Abrir Prode</a>
+    </div>
+    <div class="card">
+      <div style="font-size: 32px; margin-bottom: 12px;">🏥</div>
+      <h3 style="font-family: 'Outfit'; font-size: 24px;">Sección Salud</h3>
+      <p style="color: var(--text-sub); margin-top: 8px; font-size: 14px;">Gestión de salud y seguimiento asistencial médico.</p>
+      <a href="/salud/index.html" class="btn">Abrir Salud</a>
+    </div>
+    <div class="card">
+      <div style="font-size: 32px; margin-bottom: 12px;">🎟️</div>
+      <h3 style="font-family: 'Outfit'; font-size: 24px;">Rifa Solidaria</h3>
+      <p style="color: var(--text-sub); margin-top: 8px; font-size: 14px;">Rifas benefactoras e iniciativas comunitarias.</p>
+      <a href="/rifasolidaria/index.html" class="btn">Abrir Rifas</a>
+    </div>
+  </div>
+</body>
+</html>
