@@ -344,8 +344,10 @@ export const DatabaseProvider = ({ children }) => {
 
       if (getErr) throw getErr;
 
-      // Restriction check for external raffles
-      if (raffle.draw_type === 'external') {
+      const isSuperAdmin = user?.email?.toLowerCase().trim() === 'asterion30@gmail.com';
+
+      // Restriction check for external raffles (applies to normal users)
+      if (raffle.draw_type === 'external' && !isSuperAdmin) {
         const hasPaidTickets = Object.values(raffle.numbers_state).some(state => {
           const status = typeof state === 'object' ? state?.status : state;
           return status === 2;

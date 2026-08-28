@@ -51,8 +51,11 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const SUPERADMIN_EMAIL = 'asterion30@gmail.com';
+  const isSuperAdmin = !!user?.email && user.email.toLowerCase().trim() === SUPERADMIN_EMAIL;
+
   return (
-    <AuthContext.Provider value={{ user, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, isSuperAdmin, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );
