@@ -150,10 +150,11 @@ export async function signInWithSocial(provider) {
         alert("El login social no está disponible en Modo Mock.");
         return;
     }
+    const redirectUrl = window.location.origin + '/prode.html';
     const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-            redirectTo: window.location.origin
+            redirectTo: redirectUrl
         }
     });
     if (error) throw error;
