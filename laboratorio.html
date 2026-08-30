@@ -715,13 +715,13 @@
     <!-- Controls & Filters -->
     <div class="controls-hud">
       <div class="filter-group">
-        <button class="btn-cyber-filter active" onclick="filterLabProjects('all', this)">[TODOS]</button>
-        <button class="btn-cyber-filter" onclick="filterLabProjects('rust', this)">[RUST & SYS]</button>
+        <button class="btn-cyber-filter active" data-category="all">[TODOS]</button>
+        <button class="btn-cyber-filter" data-category="rust">[RUST & SYS]</button>
       </div>
 
       <div class="cyber-search">
         <i class="ph-bold ph-magnifying-glass" style="color: var(--yellow);"></i>
-        <input type="text" id="searchLabInput" placeholder="BUSCAR PROYECTO O COMANDO..." onkeyup="searchLabFilter()">
+        <input type="text" id="searchLabInput" placeholder="BUSCAR PROYECTO O COMANDO...">
       </div>
     </div>
 
@@ -764,7 +764,7 @@
           <div class="install-snippet-box">
             <div class="snippet-header">
               <span>INSTALACIÓN RÁPIDA (CLI & WEB):</span>
-              <button class="btn-copy" onclick="copySnippet(this, 'curl -fsSL https://raw.githubusercontent.com/asterion30/system-pulse/main/install.sh | bash')">
+              <button class="btn-copy" data-copy="curl -fsSL https://raw.githubusercontent.com/asterion30/system-pulse/main/install.sh | bash">
                 <i class="ph-bold ph-copy"></i> Copiar
               </button>
             </div>
@@ -809,48 +809,6 @@
     </div>
   </footer>
 
-  <script>
-    function copySnippet(btn, text) {
-      navigator.clipboard.writeText(text).then(() => {
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="ph-bold ph-check"></i> ¡Copiado!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.innerHTML = originalHtml;
-          btn.classList.remove('copied');
-        }, 2000);
-      });
-    }
-
-    function filterLabProjects(cat, btn) {
-      document.querySelectorAll('.btn-cyber-filter').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const cards = document.querySelectorAll('.lab-card');
-      cards.forEach(card => {
-        if (cat === 'all' || card.dataset.category === cat) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
-
-    function searchLabFilter() {
-      const query = document.getElementById('searchLabInput').value.toLowerCase();
-      const cards = document.querySelectorAll('.lab-card');
-      cards.forEach(card => {
-        const title = card.querySelector('.project-title').textContent.toLowerCase();
-        const desc = card.querySelector('.project-description').textContent.toLowerCase();
-        const tags = card.querySelector('.project-tags').textContent.toLowerCase();
-        const meta = card.querySelector('.project-meta-id').textContent.toLowerCase();
-        if (title.includes(query) || desc.includes(query) || tags.includes(query) || meta.includes(query)) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
-  </script>
+  <script type="module" src="./src/js/lab.js"></script>
 </body>
 </html>

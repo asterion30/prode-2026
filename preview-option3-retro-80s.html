@@ -496,11 +496,11 @@
     <!-- Toolbar -->
     <div class="synth-toolbar">
       <div class="synth-tabs">
-        <button class="btn-synth-tab active" onclick="filterSynth('all', this)">[ALL TAPES]</button>
-        <button class="btn-synth-tab" onclick="filterSynth('deporte', this)">[PRODE]</button>
-        <button class="btn-synth-tab" onclick="filterSynth('salud', this)">[SALUD]</button>
-        <button class="btn-synth-tab" onclick="filterSynth('social', this)">[RIFA]</button>
-        <button class="btn-synth-tab" onclick="filterSynth('ia', this)">[LAB IA]</button>
+        <button class="btn-synth-tab active" data-cat="all">[ALL TAPES]</button>
+        <button class="btn-synth-tab" data-cat="deporte">[PRODE]</button>
+        <button class="btn-synth-tab" data-cat="salud">[SALUD]</button>
+        <button class="btn-synth-tab" data-cat="social">[RIFA]</button>
+        <button class="btn-synth-tab" data-cat="ia">[LAB IA]</button>
       </div>
     </div>
 
@@ -622,20 +622,6 @@
     <p>© 2026 <a href="https://sapate.net.ar" target="_blank">sapate.net.ar</a> — 1980s SYNTHWAVE TERMINAL ARCHITECTURE</p>
   </footer>
 
-  <script>
-    function filterSynth(cat, btn) {
-      document.querySelectorAll('.btn-synth-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const cards = document.querySelectorAll('.synth-card');
-      cards.forEach(card => {
-        if (cat === 'all' || card.dataset.cat === cat) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
-  </script>
+  <script type="module" src="./src/js/preview3.js"></script>
 </body>
 </html>

@@ -500,19 +500,19 @@
     <!-- Toolbar -->
     <div class="mecha-toolbar">
       <div class="mecha-nav-tabs">
-        <button class="mecha-tab-btn active" onclick="filterMecha('all', this)">
+        <button class="mecha-tab-btn active" data-cat="all">
           <span>すべて (TODOS)</span>
         </button>
-        <button class="mecha-tab-btn" onclick="filterMecha('deporte', this)">
+        <button class="mecha-tab-btn" data-cat="deporte">
           <span>スポーツ (DEPORTES)</span>
         </button>
-        <button class="mecha-tab-btn" onclick="filterMecha('salud', this)">
+        <button class="mecha-tab-btn" data-cat="salud">
           <span>医療 (SALUD)</span>
         </button>
-        <button class="mecha-tab-btn" onclick="filterMecha('social', this)">
+        <button class="mecha-tab-btn" data-cat="social">
           <span>支援 (RIFAS)</span>
         </button>
-        <button class="mecha-tab-btn" onclick="filterMecha('ia', this)">
+        <button class="mecha-tab-btn" data-cat="ia">
           <span>AI ラボ (LAB IA)</span>
         </button>
       </div>
@@ -640,20 +640,6 @@
     <p>© 2026 <a href="https://sapate.net.ar" target="_blank">sapate.net.ar</a> — MECHA CYBER ARCHITECTURE // 全著作権所有</p>
   </footer>
 
-  <script>
-    function filterMecha(cat, btn) {
-      document.querySelectorAll('.mecha-tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const cards = document.querySelectorAll('.mecha-card');
-      cards.forEach(card => {
-        if (cat === 'all' || card.dataset.cat === cat) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
-  </script>
+  <script type="module" src="./src/js/preview2.js"></script>
 </body>
 </html>

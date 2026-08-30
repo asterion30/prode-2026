@@ -632,16 +632,16 @@
     <!-- Controls & Filters -->
     <div class="controls-hud">
       <div class="filter-group">
-        <button class="btn-cyber-filter active" onclick="filterProjects('all', this)">[TODOS]</button>
-        <button class="btn-cyber-filter" onclick="filterProjects('deporte', this)">[DEPORTES]</button>
-        <button class="btn-cyber-filter" onclick="filterProjects('salud', this)">[SALUD]</button>
-        <button class="btn-cyber-filter" onclick="filterProjects('social', this)">[SOLIDARIO]</button>
-        <button class="btn-cyber-filter" onclick="filterProjects('ia', this)">[LAB IA]</button>
+        <button class="btn-cyber-filter active" data-category="all">[TODOS]</button>
+        <button class="btn-cyber-filter" data-category="deporte">[DEPORTES]</button>
+        <button class="btn-cyber-filter" data-category="salud">[SALUD]</button>
+        <button class="btn-cyber-filter" data-category="social">[SOLIDARIO]</button>
+        <button class="btn-cyber-filter" data-category="ia">[LAB IA]</button>
       </div>
 
       <div class="cyber-search">
         <i class="ph-bold ph-magnifying-glass" style="color: var(--cyan);"></i>
-        <input type="text" id="searchInput" placeholder="FILTRAR PROYECTO..." onkeyup="searchFilter()">
+        <input type="text" id="searchInput" placeholder="FILTRAR PROYECTO...">
       </div>
     </div>
 
@@ -771,34 +771,6 @@
     </div>
   </footer>
 
-  <script>
-    function filterProjects(cat, btn) {
-      document.querySelectorAll('.btn-cyber-filter').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const cards = document.querySelectorAll('.cyber-card');
-      cards.forEach(card => {
-        if (cat === 'all' || card.dataset.category === cat) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
-
-    function searchFilter() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const cards = document.querySelectorAll('.cyber-card');
-      cards.forEach(card => {
-        const title = card.querySelector('.card-title').textContent.toLowerCase();
-        const desc = card.querySelector('.card-desc').textContent.toLowerCase();
-        if (title.includes(query) || desc.includes(query)) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
-  </script>
+  <script type="module" src="./src/js/hub.js"></script>
 </body>
 </html>
