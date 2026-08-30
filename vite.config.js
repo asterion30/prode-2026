@@ -41,6 +41,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: './index.html',
+        laboratorio: './laboratorio.html',
         prode: './prode.html',
         preview1: './preview-option1-behance-cyberpunk.html',
         preview2: './preview-option2-anime-mecha.html',

@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorio de Ideas // SAPATE LAB — Proyectos Experimentales (Rust, Docker, IA)</title>
+  <meta name="description" content="Laboratorio de experimentación técnica, herramientas de alto rendimiento en Rust, contenedores Docker y prototipos de IA por sapate.net.ar">
+  
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Orbitron:wght@500;700;800;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    :root {
+      --bg-dark: #05070f;
+      --bg-card: #0a0f1d;
+      --bg-card-hover: #0f172a;
+      --cyan: #00f0ff;
+      --cyan-dim: rgba(0, 240, 255, 0.15);
+      --magenta: #ff0055;
+      --yellow: #ffe600;
+      --green: #00ff66;
+      --orange: #ff9900;
+      --text-main: #f1f5f9;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --border-cyan: rgba(0, 240, 255, 0.25);
+      --border-yellow: rgba(255, 230, 0, 0.3);
+      --glow-cyan: rgba(0, 240, 255, 0.4);
+      --glow-yellow: rgba(255, 230, 0, 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Cyber Scanline & Grid Background */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: 
+        linear-gradient(rgba(5, 7, 15, 0.94), rgba(5, 7, 15, 0.94)),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+      background-size: 100% 100%, 40px 40px, 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .scanline {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0, 0, 0, 0.3) 50%,
+        rgba(0, 0, 0, 0.3)
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 99;
+      opacity: 0.6;
+    }
+
+    /* Header Nav */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(5, 7, 15, 0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-cyan);
+      box-shadow: 0 4px 25px rgba(0, 240, 255, 0.15);
+    }
+
+    .nav-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+    }
+
+    .brand-hud-logo {
+      width: 44px;
+      height: 44px;
+      background: rgba(255, 230, 0, 0.1);
+      border: 2px solid var(--yellow);
+      clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      color: var(--yellow);
+      font-size: 22px;
+      text-shadow: 0 0 10px var(--yellow);
+      position: relative;
+    }
+
+    .brand-hud-logo::after {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px;
+      width: 8px; height: 8px;
+      background: var(--cyan);
+    }
+
+    .brand-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .brand-subtitle {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--yellow);
+      letter-spacing: 0.08em;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-back-hub {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      text-decoration: none;
+      transition: all 0.2s;
+      clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+    }
+
+    .btn-back-hub:hover {
+      background: var(--cyan);
+      color: #000;
+      box-shadow: 0 0 12px var(--glow-cyan);
+    }
+
+    /* Main Container */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 36px 24px 80px;
+      width: 100%;
+    }
+
+    /* Hero HUD */
+    .hero-hud {
+      position: relative;
+      background: rgba(10, 15, 29, 0.75);
+      border: 1px solid var(--border-yellow);
+      clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px));
+      padding: 40px 36px;
+      margin-bottom: 40px;
+      box-shadow: inset 0 0 40px rgba(255, 230, 0, 0.04), 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-hud::before {
+      content: '[SYS_NODE // SAPATE_LAB_INCUBATOR]';
+      position: absolute;
+      top: 12px; right: 24px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--yellow);
+      letter-spacing: 0.1em;
+    }
+
+    .hero-hud::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; width: 60px; height: 3px;
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--yellow);
+      background: rgba(255, 230, 0, 0.1);
+      border: 1px solid rgba(255, 230, 0, 0.3);
+      padding: 4px 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(30px, 4.5vw, 50px);
+      font-weight: 900;
+      line-height: 1.15;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--yellow) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(255, 230, 0, 0.25);
+    }
+
+    .hero-subtitle {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 17px;
+      color: var(--text-dim);
+      max-width: 800px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 18px;
+      padding-top: 20px;
+      border-top: 1px dashed rgba(255, 230, 0, 0.2);
+    }
+
+    .metric-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .metric-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--yellow);
+      text-shadow: 0 0 10px var(--glow-yellow);
+    }
+
+    .metric-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Controls & Filters */
+    .controls-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 32px;
+      background: rgba(10, 15, 29, 0.6);
+      border: 1px solid var(--border-cyan);
+      padding: 16px 20px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-cyber-filter {
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      color: var(--text-dim);
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 8px 16px;
+      clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-cyber-filter:hover, .btn-cyber-filter.active {
+      background: var(--yellow);
+      color: #000;
+      font-weight: 700;
+      box-shadow: 0 0 15px var(--glow-yellow);
+      border-color: var(--yellow);
+    }
+
+    .cyber-search {
+      display: flex;
+      align-items: center;
+      background: rgba(5, 7, 15, 0.85);
+      border: 1px solid var(--border-cyan);
+      padding: 8px 14px;
+      gap: 10px;
+      width: 280px;
+    }
+
+    .cyber-search input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      width: 100%;
+    }
+
+    /* Lab Cards Grid */
+    .grid-lab-projects {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 28px;
+    }
+
+    .lab-card {
+      background: linear-gradient(180deg, rgba(8, 16, 32, 0.9) 0%, rgba(4, 8, 18, 0.95) 100%);
+      border: 1px solid var(--card-border, rgba(0, 242, 254, 0.25));
+      border-radius: 12px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .lab-card:hover {
+      border-color: var(--card-accent, #00f0ff);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 35px rgba(0, 240, 255, 0.18);
+    }
+
+    .card-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .project-icon-box {
+      width: 46px;
+      height: 46px;
+      border: 1px solid var(--card-accent, rgba(0, 242, 254, 0.4));
+      background: rgba(0, 242, 254, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      border-radius: 8px;
+    }
+
+    .category-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      letter-spacing: 1px;
+      font-family: 'Share Tech Mono', monospace;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .badge-yellow {
+      border: 1px solid #eab308;
+      color: #eab308;
+      background: rgba(234, 179, 8, 0.08);
+    }
+
+    .badge-cyan {
+      border: 1px solid #00f0ff;
+      color: #00f0ff;
+      background: rgba(0, 240, 255, 0.08);
+    }
+
+    .badge-magenta {
+      border: 1px solid #ff0055;
+      color: #ff0055;
+      background: rgba(255, 0, 85, 0.08);
+    }
+
+    .project-meta-id {
+      font-size: 11px;
+      font-family: 'Share Tech Mono', monospace;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+
+    .project-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 21px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .project-description {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #94a3b8;
+      margin-bottom: 18px;
+    }
+
+    .security-badges-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .sec-badge {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .sec-badge-cyan {
+      background: rgba(0, 240, 255, 0.1);
+      color: #00f0ff;
+      border-color: rgba(0, 240, 255, 0.3);
+    }
+
+    .project-tags {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--card-accent, #00f0ff);
+    }
+
+    /* Fast Snippet Box */
+    .install-snippet-box {
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px dashed rgba(0, 242, 254, 0.35);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+
+    .snippet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'Share Tech Mono', monospace;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    .btn-copy {
+      background: rgba(0, 242, 254, 0.15);
+      color: #00f0ff;
+      border: 1px solid rgba(0, 242, 254, 0.4);
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: 'Share Tech Mono', monospace;
+      padding: 3px 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-copy:hover {
+      background: #00f0ff;
+      color: #000;
+      box-shadow: 0 0 10px var(--glow-cyan);
+    }
+
+    .btn-copy.copied {
+      background: #10b981;
+      color: #000;
+      border-color: #10b981;
+    }
+
+    .cmd-text {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: #38bdf8;
+      display: block;
+      word-break: break-all;
+      user-select: all;
+      padding: 4px 0;
+    }
+
+    /* Card Action Buttons */
+    .card-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .btn-primary-cyber {
+      background: transparent;
+      border: 1px solid var(--card-accent, #00f0ff);
+      color: var(--card-accent, #00f0ff);
+      text-align: center;
+      padding: 10px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: 'Orbitron', sans-serif;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary-cyber:hover {
+      background: var(--card-accent, #00f0ff);
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+    }
+
+    .btn-secondary-cyber {
+      background: transparent;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      text-align: center;
+      padding: 10px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: 'Orbitron', sans-serif;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-secondary-cyber:hover {
+      border-color: #cbd5e1;
+      color: #fff;
+    }
+
+    /* Info Banner */
+    .cyber-banner {
+      margin-top: 56px;
+      background: rgba(10, 15, 29, 0.85);
+      border: 1px solid var(--border-yellow);
+      padding: 32px 40px;
+      clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .banner-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      color: var(--yellow);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .banner-text {
+      font-family: 'Chakra Petch', sans-serif;
+      color: var(--text-dim);
+      font-size: 15px;
+      max-width: 680px;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-cyan);
+      background: #03050a;
+      padding: 24px;
+      margin-top: auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .footer-content {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+      .hero-hud { padding: 28px 20px; }
+      .hero-title { font-size: 28px; }
+      .grid-lab-projects { grid-template-columns: 1fr; }
+      .controls-hud { flex-direction: column; align-items: stretch; }
+      .cyber-search { width: 100%; }
+      .card-actions-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="scanline"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="nav-container">
+      <a href="/" class="brand">
+        <div class="brand-hud-logo">⚡</div>
+        <div class="brand-info">
+          <span class="brand-title">Sapate Lab</span>
+          <span class="brand-subtitle">INCUBATOR // RUST & DOCKER MATRIX</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <a href="/" class="btn-back-hub">
+          <i class="ph-bold ph-arrow-left"></i>
+          <span>VOLVER AL HUB</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- Cyber Hero Banner -->
+    <section class="hero-hud">
+      <div class="hero-tag">
+        <i class="ph-bold ph-flask"></i>
+        <span>RUST / DOCKER / IA // EXPERIMENTAL INCUBATOR</span>
+      </div>
+      <h1 class="hero-title">Laboratorio de Ideas</h1>
+      <p class="hero-subtitle">
+        Espacio dedicado al prototipado rápido, herramientas de sistemas en Rust de alto rendimiento, microservicios en contenedores Docker y algoritmos predictivos listos para producción.
+      </p>
+
+      <div class="hero-metrics">
+        <div class="metric-item">
+          <span class="metric-value">01</span>
+          <span class="metric-label">Binarios Rust Nativos</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-value">02</span>
+          <span class="metric-label">Contenedores Docker & Cloud</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-value">01</span>
+          <span class="metric-label">Prototipos IA / Edge</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-value">100%</span>
+          <span class="metric-label">Open Source / MIT</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls & Filters -->
+    <div class="controls-hud">
+      <div class="filter-group">
+        <button class="btn-cyber-filter active" onclick="filterLabProjects('all', this)">[TODOS]</button>
+        <button class="btn-cyber-filter" onclick="filterLabProjects('rust', this)">[RUST & SYS]</button>
+        <button class="btn-cyber-filter" onclick="filterLabProjects('docker', this)">[DOCKER & CLOUD]</button>
+        <button class="btn-cyber-filter" onclick="filterLabProjects('ia', this)">[IA & PREDICTIVO]</button>
+      </div>
+
+      <div class="cyber-search">
+        <i class="ph-bold ph-magnifying-glass" style="color: var(--yellow);"></i>
+        <input type="text" id="searchLabInput" placeholder="BUSCAR PROYECTO O COMANDO..." onkeyup="searchLabFilter()">
+      </div>
+    </div>
+
+    <!-- Lab Projects Grid -->
+    <div class="grid-lab-projects" id="labProjectsGrid">
+
+      <!-- =========================================================================
+           Project 1: System Pulse (PRJ-05_SYSPULSE) - Rust CLI & Web Telemetry
+           ========================================================================= -->
+      <article class="lab-card" data-category="rust" style="--card-accent: #00f0ff; --card-border: rgba(0, 240, 255, 0.3);">
+        <div>
+          <div class="card-top-bar">
+            <div class="project-icon-box">⚡</div>
+            <span class="category-badge badge-yellow">SYS TELEMETRY & IA LAB</span>
+          </div>
+
+          <div class="project-meta-id">[ID // PRJ-05_SYSPULSE]</div>
+          <h2 class="project-title">System Pulse</h2>
+
+          <p class="project-description">
+            Monitor de telemetría de alto rendimiento en tiempo real (CPU, RAM, I/O diferencial) y motor predictivo de fin de vida útil SSD/HDD (SMART/EOL). Empaquetado estático sin dependencias para Debian, Fedora, Arch y DietPi.
+          </p>
+
+          <!-- Security Badges -->
+          <div class="security-badges-row">
+            <span class="sec-badge">🔒 Rust Musl Static</span>
+            <span class="sec-badge">🛡️ SHA-256 Verificado</span>
+            <span class="sec-badge sec-badge-cyan">⚡ Zero Dependencies</span>
+          </div>
+
+          <!-- Tags -->
+          <div class="project-tags">
+            <span class="tag">#RUST</span>
+            <span class="tag">#LINUX</span>
+            <span class="tag">#SMART_EOL</span>
+            <span class="tag">#OPEN_SOURCE</span>
+          </div>
+
+          <!-- Fast 1-Line Snippet Box -->
+          <div class="install-snippet-box">
+            <div class="snippet-header">
+              <span>INSTALACIÓN RÁPIDA (CLI & WEB):</span>
+              <button class="btn-copy" onclick="copySnippet(this, 'curl -fsSL https://raw.githubusercontent.com/asterion30/system-pulse/main/install.sh | bash')">
+                <i class="ph-bold ph-copy"></i> Copiar
+              </button>
+            </div>
+            <code class="cmd-text">curl -fsSL https://raw.githubusercontent.com/asterion30/system-pulse/main/install.sh | bash</code>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card-actions-grid">
+          <a href="https://github.com/asterion30/system-pulse/releases/latest" target="_blank" rel="noopener noreferrer" class="btn-primary-cyber">
+            <i class="ph-bold ph-download-simple"></i> DESCARGAR (.tar.gz)
+          </a>
+          <a href="https://github.com/asterion30/system-pulse" target="_blank" rel="noopener noreferrer" class="btn-secondary-cyber">
+            <i class="ph-bold ph-github-logo"></i> GITHUB
+          </a>
+        </div>
+      </article>
+
+      <!-- =========================================================================
+           Project 2: Microservices Audit & Docker Sandbox (PRJ-06_DOCKER_AUDIT)
+           ========================================================================= -->
+      <article class="lab-card" data-category="docker" style="--card-accent: #00ff66; --card-border: rgba(0, 255, 102, 0.3);">
+        <div>
+          <div class="card-top-bar">
+            <div class="project-icon-box" style="border-color: rgba(0, 255, 102, 0.4); background: rgba(0, 255, 102, 0.06);">🐳</div>
+            <span class="category-badge badge-cyan">CONTAINER & SECURITY</span>
+          </div>
+
+          <div class="project-meta-id">[ID // PRJ-06_DOCKER_AUDIT]</div>
+          <h2 class="project-title">Microservices Demo & Audit</h2>
+
+          <p class="project-description">
+            Entorno distribuido de microservicios contenerizados para pruebas de carga, análisis dinámico de seguridad OCI (ZAP & Google Audit) y observabilidad de latencias en redes gRPC/HTTP.
+          </p>
+
+          <!-- Security Badges -->
+          <div class="security-badges-row">
+            <span class="sec-badge" style="color: #00ff66; border-color: rgba(0, 255, 102, 0.4); background: rgba(0, 255, 102, 0.1);">🐳 Docker Multi-Arch</span>
+            <span class="sec-badge">🛡️ Rootless OCI</span>
+            <span class="sec-badge sec-badge-cyan">⚡ gRPC / REST</span>
+          </div>
+
+          <!-- Tags -->
+          <div class="project-tags">
+            <span class="tag" style="color: #00ff66;">#DOCKER</span>
+            <span class="tag" style="color: #00ff66;">#K8S</span>
+            <span class="tag" style="color: #00ff66;">#MICROSERVICES</span>
+            <span class="tag" style="color: #00ff66;">#AUDIT</span>
+          </div>
+
+          <!-- Fast 1-Line Snippet Box -->
+          <div class="install-snippet-box" style="border-color: rgba(0, 255, 102, 0.35);">
+            <div class="snippet-header">
+              <span>EJECUTAR CONTENEDOR LOCAL:</span>
+              <button class="btn-copy" onclick="copySnippet(this, 'docker compose -f docker-compose.yml up -d')">
+                <i class="ph-bold ph-copy"></i> Copiar
+              </button>
+            </div>
+            <code class="cmd-text" style="color: #4ade80;">docker compose -f docker-compose.yml up -d</code>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card-actions-grid">
+          <a href="https://github.com/asterion30" target="_blank" rel="noopener noreferrer" class="btn-primary-cyber" style="border-color: #00ff66; color: #00ff66;">
+            <i class="ph-bold ph-cube"></i> VER DOCKERFILE
+          </a>
+          <a href="https://github.com/asterion30" target="_blank" rel="noopener noreferrer" class="btn-secondary-cyber">
+            <i class="ph-bold ph-github-logo"></i> REPOSITORIO
+          </a>
+        </div>
+      </article>
+
+      <!-- =========================================================================
+           Project 3: Edge AI & Predictive Analytics (PRJ-07_GENAI_EDGE)
+           ========================================================================= -->
+      <article class="lab-card" data-category="ia" style="--card-accent: #ffe600; --card-border: rgba(255, 230, 0, 0.3);">
+        <div>
+          <div class="card-top-bar">
+            <div class="project-icon-box" style="border-color: rgba(255, 230, 0, 0.4); background: rgba(255, 230, 0, 0.06);">🧠</div>
+            <span class="category-badge badge-yellow">GENAI & EDGE INFERENCE</span>
+          </div>
+
+          <div class="project-meta-id">[ID // PRJ-07_GENAI_EDGE]</div>
+          <h2 class="project-title">Edge AI Predictive Lab</h2>
+
+          <p class="project-description">
+            Pipelines de inferencia ligera y streaming de modelos de lenguaje pequeños (SLMs) y algoritmos de series temporales ejecutados localmente para predicción de anomalías y generación asistida.
+          </p>
+
+          <!-- Security Badges -->
+          <div class="security-badges-row">
+            <span class="sec-badge">🔒 On-Premise Execution</span>
+            <span class="sec-badge sec-badge-cyan">⚡ Streaming WebSockets</span>
+          </div>
+
+          <!-- Tags -->
+          <div class="project-tags">
+            <span class="tag" style="color: #ffe600;">#IA_GENERATIVA</span>
+            <span class="tag" style="color: #ffe600;">#OLLAMA</span>
+            <span class="tag" style="color: #ffe600;">#ONNX</span>
+            <span class="tag" style="color: #ffe600;">#PREDICTION</span>
+          </div>
+
+          <!-- Fast 1-Line Snippet Box -->
+          <div class="install-snippet-box" style="border-color: rgba(255, 230, 0, 0.35);">
+            <div class="snippet-header">
+              <span>INFERENCIA RÁPIDA VÍA CLI:</span>
+              <button class="btn-copy" onclick="copySnippet(this, 'ollama run mistral')">
+                <i class="ph-bold ph-copy"></i> Copiar
+              </button>
+            </div>
+            <code class="cmd-text" style="color: #fde047;">ollama run mistral</code>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card-actions-grid">
+          <a href="https://sapate.net.ar" target="_blank" rel="noopener noreferrer" class="btn-primary-cyber" style="border-color: #ffe600; color: #ffe600;">
+            <i class="ph-bold ph-sparkle"></i> EXPLORAR DEMO
+          </a>
+          <a href="https://github.com/asterion30" target="_blank" rel="noopener noreferrer" class="btn-secondary-cyber">
+            <i class="ph-bold ph-github-logo"></i> GITHUB
+          </a>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- Info Banner -->
+    <section class="cyber-banner">
+      <div>
+        <h3 class="banner-title">⚡ INCUBADORA DE NUEVOS EXPERIMENTOS</h3>
+        <p class="banner-text">
+          ¿Tienes una idea o necesitas un microservicio a medida en <strong>Rust</strong> o <strong>Docker</strong>? Explora nuestro ecosistema en producción o colabora directamente en nuestros repositorios.
+        </p>
+      </div>
+      <a href="/" class="btn-primary-cyber" style="width: auto; padding: 14px 28px; border-color: var(--yellow); color: var(--yellow);">
+        <i class="ph-bold ph-house-line"></i>
+        <span>EXPLORAR HUB CENTRAL</span>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <span>SYS.STATUS: LAB PROTOCOLS OPERATIONAL // © 2026 SAPATE.NET.AR</span>
+      <span>DESIGN PROTOCOL: CYBERPUNK HUD LAB EDITION</span>
+    </div>
+  </footer>
+
+  <script>
+    function copySnippet(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="ph-bold ph-check"></i> ¡Copiado!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = originalHtml;
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    function filterLabProjects(cat, btn) {
+      document.querySelectorAll('.btn-cyber-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const cards = document.querySelectorAll('.lab-card');
+      cards.forEach(card => {
+        if (cat === 'all' || card.dataset.category === cat) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function searchLabFilter() {
+      const query = document.getElementById('searchLabInput').value.toLowerCase();
+      const cards = document.querySelectorAll('.lab-card');
+      cards.forEach(card => {
+        const title = card.querySelector('.project-title').textContent.toLowerCase();
+        const desc = card.querySelector('.project-description').textContent.toLowerCase();
+        const tags = card.querySelector('.project-tags').textContent.toLowerCase();
+        const meta = card.querySelector('.project-meta-id').textContent.toLowerCase();
+        if (title.includes(query) || desc.includes(query) || tags.includes(query) || meta.includes(query)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
