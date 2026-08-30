@@ -695,15 +695,15 @@
       <div class="hero-metrics">
         <div class="metric-item">
           <span class="metric-value">01</span>
-          <span class="metric-label">Binarios Rust Nativos</span>
+          <span class="metric-label">Proyecto Activo en Lab</span>
         </div>
         <div class="metric-item">
-          <span class="metric-value">02</span>
-          <span class="metric-label">Contenedores Docker & Cloud</span>
+          <span class="metric-value">100%</span>
+          <span class="metric-label">Rust Musl Static</span>
         </div>
         <div class="metric-item">
-          <span class="metric-value">01</span>
-          <span class="metric-label">Prototipos IA / Edge</span>
+          <span class="metric-value">Zero</span>
+          <span class="metric-label">Dependencias Externas</span>
         </div>
         <div class="metric-item">
           <span class="metric-value">100%</span>
@@ -717,8 +717,6 @@
       <div class="filter-group">
         <button class="btn-cyber-filter active" onclick="filterLabProjects('all', this)">[TODOS]</button>
         <button class="btn-cyber-filter" onclick="filterLabProjects('rust', this)">[RUST & SYS]</button>
-        <button class="btn-cyber-filter" onclick="filterLabProjects('docker', this)">[DOCKER & CLOUD]</button>
-        <button class="btn-cyber-filter" onclick="filterLabProjects('ia', this)">[IA & PREDICTIVO]</button>
       </div>
 
       <div class="cyber-search">
@@ -780,115 +778,6 @@
             <i class="ph-bold ph-download-simple"></i> DESCARGAR (.tar.gz)
           </a>
           <a href="https://github.com/asterion30/system-pulse" target="_blank" rel="noopener noreferrer" class="btn-secondary-cyber">
-            <i class="ph-bold ph-github-logo"></i> GITHUB
-          </a>
-        </div>
-      </article>
-
-      <!-- =========================================================================
-           Project 2: Microservices Audit & Docker Sandbox (PRJ-06_DOCKER_AUDIT)
-           ========================================================================= -->
-      <article class="lab-card" data-category="docker" style="--card-accent: #00ff66; --card-border: rgba(0, 255, 102, 0.3);">
-        <div>
-          <div class="card-top-bar">
-            <div class="project-icon-box" style="border-color: rgba(0, 255, 102, 0.4); background: rgba(0, 255, 102, 0.06);">🐳</div>
-            <span class="category-badge badge-cyan">CONTAINER & SECURITY</span>
-          </div>
-
-          <div class="project-meta-id">[ID // PRJ-06_DOCKER_AUDIT]</div>
-          <h2 class="project-title">Microservices Demo & Audit</h2>
-
-          <p class="project-description">
-            Entorno distribuido de microservicios contenerizados para pruebas de carga, análisis dinámico de seguridad OCI (ZAP & Google Audit) y observabilidad de latencias en redes gRPC/HTTP.
-          </p>
-
-          <!-- Security Badges -->
-          <div class="security-badges-row">
-            <span class="sec-badge" style="color: #00ff66; border-color: rgba(0, 255, 102, 0.4); background: rgba(0, 255, 102, 0.1);">🐳 Docker Multi-Arch</span>
-            <span class="sec-badge">🛡️ Rootless OCI</span>
-            <span class="sec-badge sec-badge-cyan">⚡ gRPC / REST</span>
-          </div>
-
-          <!-- Tags -->
-          <div class="project-tags">
-            <span class="tag" style="color: #00ff66;">#DOCKER</span>
-            <span class="tag" style="color: #00ff66;">#K8S</span>
-            <span class="tag" style="color: #00ff66;">#MICROSERVICES</span>
-            <span class="tag" style="color: #00ff66;">#AUDIT</span>
-          </div>
-
-          <!-- Fast 1-Line Snippet Box -->
-          <div class="install-snippet-box" style="border-color: rgba(0, 255, 102, 0.35);">
-            <div class="snippet-header">
-              <span>EJECUTAR CONTENEDOR LOCAL:</span>
-              <button class="btn-copy" onclick="copySnippet(this, 'docker compose -f docker-compose.yml up -d')">
-                <i class="ph-bold ph-copy"></i> Copiar
-              </button>
-            </div>
-            <code class="cmd-text" style="color: #4ade80;">docker compose -f docker-compose.yml up -d</code>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="card-actions-grid">
-          <a href="https://github.com/asterion30" target="_blank" rel="noopener noreferrer" class="btn-primary-cyber" style="border-color: #00ff66; color: #00ff66;">
-            <i class="ph-bold ph-cube"></i> VER DOCKERFILE
-          </a>
-          <a href="https://github.com/asterion30" target="_blank" rel="noopener noreferrer" class="btn-secondary-cyber">
-            <i class="ph-bold ph-github-logo"></i> REPOSITORIO
-          </a>
-        </div>
-      </article>
-
-      <!-- =========================================================================
-           Project 3: Edge AI & Predictive Analytics (PRJ-07_GENAI_EDGE)
-           ========================================================================= -->
-      <article class="lab-card" data-category="ia" style="--card-accent: #ffe600; --card-border: rgba(255, 230, 0, 0.3);">
-        <div>
-          <div class="card-top-bar">
-            <div class="project-icon-box" style="border-color: rgba(255, 230, 0, 0.4); background: rgba(255, 230, 0, 0.06);">🧠</div>
-            <span class="category-badge badge-yellow">GENAI & EDGE INFERENCE</span>
-          </div>
-
-          <div class="project-meta-id">[ID // PRJ-07_GENAI_EDGE]</div>
-          <h2 class="project-title">Edge AI Predictive Lab</h2>
-
-          <p class="project-description">
-            Pipelines de inferencia ligera y streaming de modelos de lenguaje pequeños (SLMs) y algoritmos de series temporales ejecutados localmente para predicción de anomalías y generación asistida.
-          </p>
-
-          <!-- Security Badges -->
-          <div class="security-badges-row">
-            <span class="sec-badge">🔒 On-Premise Execution</span>
-            <span class="sec-badge sec-badge-cyan">⚡ Streaming WebSockets</span>
-          </div>
-
-          <!-- Tags -->
-          <div class="project-tags">
-            <span class="tag" style="color: #ffe600;">#IA_GENERATIVA</span>
-            <span class="tag" style="color: #ffe600;">#OLLAMA</span>
-            <span class="tag" style="color: #ffe600;">#ONNX</span>
-            <span class="tag" style="color: #ffe600;">#PREDICTION</span>
-          </div>
-
-          <!-- Fast 1-Line Snippet Box -->
-          <div class="install-snippet-box" style="border-color: rgba(255, 230, 0, 0.35);">
-            <div class="snippet-header">
-              <span>INFERENCIA RÁPIDA VÍA CLI:</span>
-              <button class="btn-copy" onclick="copySnippet(this, 'ollama run mistral')">
-                <i class="ph-bold ph-copy"></i> Copiar
-              </button>
-            </div>
-            <code class="cmd-text" style="color: #fde047;">ollama run mistral</code>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="card-actions-grid">
-          <a href="https://sapate.net.ar" target="_blank" rel="noopener noreferrer" class="btn-primary-cyber" style="border-color: #ffe600; color: #ffe600;">
-            <i class="ph-bold ph-sparkle"></i> EXPLORAR DEMO
-          </a>
-          <a href="https://github.com/asterion30" target="_blank" rel="noopener noreferrer" class="btn-secondary-cyber">
             <i class="ph-bold ph-github-logo"></i> GITHUB
           </a>
         </div>
