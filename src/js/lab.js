@@ -52,4 +52,44 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', applyLabFilters);
     searchInput.addEventListener('keyup', applyLabFilters);
   }
+
+  // Modal SophosQuick
+  const openSophosBtn = document.getElementById('btnOpenSophosModal');
+  const closeSophosBtn = document.getElementById('btnCloseSophosModal');
+  const closeSophosBottomBtn = document.getElementById('btnCloseSophosModalBottom');
+  const sophosModal = document.getElementById('sophosModal');
+
+  if (sophosModal) {
+    const openModal = () => sophosModal.classList.add('active');
+    const closeModal = () => sophosModal.classList.remove('active');
+
+    openSophosBtn?.addEventListener('click', openModal);
+    closeSophosBtn?.addEventListener('click', closeModal);
+    closeSophosBottomBtn?.addEventListener('click', closeModal);
+
+    sophosModal.addEventListener('click', (e) => {
+      if (e.target === sophosModal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sophosModal.classList.contains('active')) {
+        closeModal();
+      }
+    });
+  }
+
+  // Opcional: Fetch dinámico a GitHub API para mantener siempre el último tag
+  const sophosBadge = document.getElementById('sophosVersionBadge');
+  if (sophosBadge) {
+    fetch('https://api.github.com/repos/asterion30/SophosQuick/releases/latest')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && data.tag_name) {
+          sophosBadge.textContent = `${data.tag_name} (Latest)`;
+        }
+      })
+      .catch(() => {
+        // Silencioso fallback
+      });
+  }
 });

@@ -645,13 +645,259 @@
       color: var(--text-muted);
     }
 
-    @media (max-width: 768px) {
-      .hero-hud { padding: 28px 20px; }
-      .hero-title { font-size: 28px; }
-      .grid-lab-projects { grid-template-columns: 1fr; }
-      .controls-hud { flex-direction: column; align-items: stretch; }
-      .cyber-search { width: 100%; }
-      .card-actions-grid { grid-template-columns: 1fr; }
+    /* Glowing Download Buttons */
+    .glow-download-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-neon-zip {
+      display: flex;
+      align-items: center;
+      background: rgba(0, 240, 255, 0.08);
+      border: 1.5px solid var(--cyan);
+      border-radius: 30px;
+      padding: 4px 6px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+    }
+
+    .btn-neon-zip:hover {
+      background: rgba(0, 240, 255, 0.2);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.6), inset 0 0 10px rgba(0, 240, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .neon-pill-tag {
+      background: var(--cyan);
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    .neon-pill-text {
+      flex: 1;
+      text-align: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .btn-neon-exe {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 230, 0, 0.06);
+      border: 1.5px solid var(--yellow);
+      border-radius: 30px;
+      padding: 4px 6px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 16px rgba(255, 230, 0, 0.2);
+    }
+
+    .btn-neon-exe:hover {
+      background: rgba(255, 230, 0, 0.18);
+      box-shadow: 0 0 25px rgba(255, 230, 0, 0.5), inset 0 0 10px rgba(255, 230, 0, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .neon-pill-tag-yellow {
+      background: var(--yellow);
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 10px var(--yellow);
+    }
+
+    /* Cyber Modal */
+    .cyber-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 5, 12, 0.88);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .cyber-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .cyber-modal-container {
+      background: #0a0f1d;
+      border: 1.5px solid var(--cyan);
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.25), inset 0 0 20px rgba(0, 240, 255, 0.05);
+      border-radius: 12px;
+      max-width: 780px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+
+    .cyber-modal-overlay.active .cyber-modal-container {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      background: rgba(0, 240, 255, 0.04);
+    }
+
+    .modal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 17px;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-modal-close {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 24px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .btn-modal-close:hover {
+      color: var(--magenta);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .step-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 3px solid var(--cyan);
+      border-radius: 6px;
+      padding: 14px 18px;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .step-num {
+      width: 22px;
+      height: 22px;
+      background: var(--cyan);
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 11px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .step-desc {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.5;
+      padding-left: 32px;
+    }
+
+    .step-desc code {
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--yellow);
+      background: rgba(255, 230, 0, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .tech-specs-box {
+      background: rgba(5, 7, 15, 0.9);
+      border: 1px solid var(--border-yellow);
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+    }
+
+    .tech-specs-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--yellow);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .specs-list {
+      list-style: none;
+      font-size: 12px;
+      color: #cbd5e1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .specs-list li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(5, 7, 15, 0.6);
     }
   </style>
 </head>
@@ -694,12 +940,12 @@
 
       <div class="hero-metrics">
         <div class="metric-item">
-          <span class="metric-value">01</span>
-          <span class="metric-label">Proyecto Activo en Lab</span>
+          <span class="metric-value">02</span>
+          <span class="metric-label">Proyectos Activos en Lab</span>
         </div>
         <div class="metric-item">
           <span class="metric-value">100%</span>
-          <span class="metric-label">Rust Musl Static</span>
+          <span class="metric-label">Binarios Nativos</span>
         </div>
         <div class="metric-item">
           <span class="metric-value">Zero</span>
@@ -717,6 +963,7 @@
       <div class="filter-group">
         <button class="btn-cyber-filter active" data-category="all">[TODOS]</button>
         <button class="btn-cyber-filter" data-category="rust">[RUST & SYS]</button>
+        <button class="btn-cyber-filter" data-category="cybersec">[CYBERSEC & GO]</button>
       </div>
 
       <div class="cyber-search">
@@ -783,6 +1030,72 @@
         </div>
       </article>
 
+      <!-- =========================================================================
+           Project 2: SophosQuick (PRJ-06_SOPHOSQUICK) - Secure VPN Launcher
+           ========================================================================= -->
+      <article class="lab-card" data-category="cybersec" style="--card-accent: #00f0ff; --card-border: rgba(0, 240, 255, 0.35);">
+        <div>
+          <div class="card-top-bar">
+            <div class="project-icon-box" style="border-color: var(--cyan); color: var(--cyan);">🛡️</div>
+            <span class="category-badge badge-cyan">CYBERSEC & GO / WIN32</span>
+          </div>
+
+          <div class="project-meta-id">[ID // PRJ-06_SOPHOSQUICK]</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h2 class="project-title" style="margin-bottom: 0;">SophosQuick</h2>
+            <span style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--green); background: rgba(0, 255, 102, 0.1); border: 1px solid rgba(0, 255, 102, 0.3); padding: 2px 8px; border-radius: 4px;" id="sophosVersionBadge">v1.0.3 (Latest)</span>
+          </div>
+
+          <p class="project-description">
+            Lanzador nativo ultraliviano (~3.5 MB) para Sophos Connect VPN. Cifrado DPAPI en reposo, UI pura Win32 GDI (0% consumo OpenGL), mitigación de alertas en EDR corporativos y conexión en milisegundos con 1 clic o Enter.
+          </p>
+
+          <!-- Security Badges -->
+          <div class="security-badges-row">
+            <span class="sec-badge">🔒 Win32 GDI Nativo</span>
+            <span class="sec-badge">🛡️ DPAPI Vault</span>
+            <span class="sec-badge sec-badge-cyan">⚡ 0% GPU / OpenGL</span>
+          </div>
+
+          <!-- Tags -->
+          <div class="project-tags">
+            <span class="tag">#GOLANG</span>
+            <span class="tag">#WINDOWS</span>
+            <span class="tag">#SOPHOS_VPN</span>
+            <span class="tag">#CYBERSECURITY</span>
+          </div>
+
+          <!-- Glowing Download Buttons (Direct to Latest GitHub Release) -->
+          <div class="glow-download-stack" style="margin-bottom: 20px;">
+            <a href="https://github.com/asterion30/SophosQuick/releases/latest/download/sophosquick-windows-amd64.zip" target="_blank" rel="noopener noreferrer" class="btn-neon-zip">
+              <div class="neon-pill-tag">.ZIP</div>
+              <div class="neon-pill-text">
+                <i class="ph-bold ph-file-zip"></i>
+                <span>DESCARGAR v1.0.3 [ZIP]</span>
+              </div>
+            </a>
+
+            <a href="https://github.com/asterion30/SophosQuick/releases/latest/download/sophosquick.exe" target="_blank" rel="noopener noreferrer" class="btn-neon-exe">
+              <div class="neon-pill-tag-yellow">.EXE</div>
+              <div class="neon-pill-text">
+                <i class="ph-bold ph-download-simple"></i>
+                <span>EJECUTABLE DIRECTO [.EXE]</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card-actions-grid">
+          <button class="btn-primary-cyber" id="btnOpenSophosModal" style="cursor: pointer; background: rgba(0, 240, 255, 0.08);">
+            <i class="ph-bold ph-book-open-text"></i> MINI-INSTRUCTIVO
+          </button>
+          <a href="https://github.com/asterion30/SophosQuick" target="_blank" rel="noopener noreferrer" class="btn-secondary-cyber">
+            <i class="ph-bold ph-github-logo"></i> GITHUB
+          </a>
+        </div>
+      </article>
+
     </div>
 
     <!-- Info Banner -->
@@ -790,7 +1103,7 @@
       <div>
         <h3 class="banner-title">⚡ INCUBADORA DE NUEVOS EXPERIMENTOS</h3>
         <p class="banner-text">
-          ¿Tienes una idea o necesitas un microservicio a medida en <strong>Rust</strong> o <strong>Docker</strong>? Explora nuestro ecosistema en producción o colabora directamente en nuestros repositorios.
+          ¿Tienes una idea o necesitas un microservicio a medida en <strong>Rust</strong> o <strong>Go</strong>? Explora nuestro ecosistema en producción o colabora directamente en nuestros repositorios.
         </p>
       </div>
       <a href="/" class="btn-primary-cyber" style="width: auto; padding: 14px 28px; border-color: var(--yellow); color: var(--yellow);">
@@ -800,6 +1113,80 @@
     </section>
 
   </main>
+
+  <!-- =========================================================================
+       Cyber Modal: SophosQuick Setup Guide & Walkthrough
+       ========================================================================= -->
+  <div class="cyber-modal-overlay" id="sophosModal">
+    <div class="cyber-modal-container">
+      
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="ph-bold ph-shield-check" style="color: var(--cyan);"></i>
+          <span>SOPHOSQUICK // GUÍA RÁPIDA DE USO</span>
+        </div>
+        <button class="btn-modal-close" id="btnCloseSophosModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <div class="steps-grid">
+          
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-num">1</div>
+              <h3 class="step-title">Descarga & Descompresión</h3>
+            </div>
+            <p class="step-desc">
+              Descarga el paquete <code>sophosquick-windows-amd64.zip</code> y descomprímelo en cualquier carpeta. Ejecuta <code>sophosquick.exe</code> sin instaladores ni privilegios de administrador.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-num" style="background: var(--yellow);">2</div>
+              <h3 class="step-title">Configuración de Credenciales</h3>
+            </div>
+            <p class="step-desc">
+              Haz clic en <code>🔑 Configurar Credenciales / Usuario</code>. Guarda tu contraseña corporativa (cifrada con DPAPI) y marca <em>"Personalizar usuario"</em> si difiere de tu usuario de Windows.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-num" style="background: var(--green);">3</div>
+              <h3 class="step-title">Código MFA / TOTP & Conexión</h3>
+            </div>
+            <p class="step-desc">
+              Selecciona tu perfil de VPN, digita tu código de 6 dígitos de la app autenticadora y presiona <code>Enter</code> o <code>🚀 Conectar VPN</code>. Para desconectar, pulsa <code>🛑 Desconectar</code>.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="tech-specs-box">
+          <div class="tech-specs-title">⚡ ESPECIFICACIONES TÉCNICAS & COMPATIBILIDAD</div>
+          <ul class="specs-list">
+            <li><i class="ph-bold ph-check-circle" style="color: var(--green);"></i> Windows 10 & 11 (x64)</li>
+            <li><i class="ph-bold ph-check-circle" style="color: var(--green);"></i> Compatible con RDP & VMs</li>
+            <li><i class="ph-bold ph-check-circle" style="color: var(--green);"></i> 0% Consumo GPU / OpenGL</li>
+            <li><i class="ph-bold ph-check-circle" style="color: var(--green);"></i> Tamaño Binario: ~3.5 MB</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <a href="https://github.com/asterion30/SophosQuick/releases/latest" target="_blank" class="btn-primary-cyber" style="padding: 10px 18px; text-decoration: none;">
+          <i class="ph-bold ph-download-simple"></i> VER TODOS LOS RELEASES
+        </a>
+        <button class="btn-secondary-cyber" id="btnCloseSophosModalBottom" style="cursor: pointer; padding: 10px 18px;">
+          CERRAR GUÍA
+        </button>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer>
