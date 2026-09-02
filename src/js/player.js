@@ -1,10 +1,12 @@
 // ==============================================================================
 // 🎵 SAPATE HUB // ASTERION30 AUDIO STREAMER (Barra 02: Header Streamer Ticker)
-// DevSecOps Hardened: No inline scripts, CSP compliant, youtube-nocookie.com host
+// DevSecOps Hardened: No inline scripts, CSP compliant, Mobile-Ready
 // ==============================================================================
 
 let player = null;
 let isPlaying = false;
+let isPlayerReady = false;
+let pendingPlay = false;
 let currentVolume = 80;
 let isMuted = false;
 
@@ -32,14 +34,7 @@ export function initAudioStreamer() {
   }
 
   if (btnPlay) {
-    btnPlay.addEventListener('click', () => {
-      if (!player) return;
-      if (isPlaying) {
-        player.pauseVideo();
-      } else {
-        player.playVideo();
-      }
-    });
+    btnPlay.addEventListener('click', handlePlayClick);
   }
 
   if (btnNext) {
@@ -54,21 +49,21 @@ export function initAudioStreamer() {
     btnShuffle.addEventListener('click', () => {
       if (!player) return;
       if (typeof player.setShuffle === 'function') {
-        player.setShuffle(true);
+        try { player.setShuffle(true); } catch(e) {}
       }
       if (typeof player.nextVideo === 'function') {
-        player.nextVideo();
+        try { player.nextVideo(); } catch(e) {}
       }
     });
   }
 
   if (btnMute) {
     btnMute.addEventListener('click', () => {
-      if (!player) return;
-      if (player.isMuted()) {
+      if (!player || !isPlayerReady) return;
+      if (typeof player.isMuted === 'function' && player.isMuted()) {
         player.unMute();
         isMuted = false;
-      } else {
+      } else if (typeof player.mute === 'function') {
         player.mute();
         isMuted = true;
       }
@@ -80,9 +75,9 @@ export function initAudioStreamer() {
     volRange.addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
       currentVolume = val;
-      if (player && typeof player.setVolume === 'function') {
+      if (player && isPlayerReady && typeof player.setVolume === 'function') {
         player.setVolume(currentVolume);
-        if (player.isMuted()) {
+        if (typeof player.isMuted === 'function' && player.isMuted()) {
           player.unMute();
           isMuted = false;
         }
@@ -91,31 +86,37 @@ export function initAudioStreamer() {
     });
   }
 
-  // 2. Registrar el callback de YouTube Iframe API antes de inyectar el script
+  // 2. Registrar el callback global de YouTube Iframe API
   window.onYouTubeIframeAPIReady = () => {
-    player = new YT.Player('youtube-audio-player', {
-      height: '0',
-      width: '0',
-      host: 'https://www.youtube-nocookie.com',
-      playerVars: {
-        listType: 'playlist',
-        list: PLAYLIST_ID,
-        origin: window.location.origin,
-        enablejsapi: 1,
-        autoplay: 0,
-        controls: 0,
-        loop: 1,
-        shuffle: 1,
-        rel: 0
-      },
-      events: {
-        'onReady': onPlayerReady,
-        'onStateChange': onPlayerStateChange
-      }
-    });
+    try {
+      player = new YT.Player('youtube-audio-player', {
+        height: '200',
+        width: '200',
+        host: 'https://www.youtube.com',
+        playerVars: {
+          listType: 'playlist',
+          list: PLAYLIST_ID,
+          origin: window.location.origin,
+          enablejsapi: 1,
+          autoplay: 0,
+          controls: 0,
+          loop: 1,
+          shuffle: 1,
+          playsinline: 1,
+          rel: 0
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange,
+          'onError': onPlayerError
+        }
+      });
+    } catch (err) {
+      console.warn('Error inicializando YouTube Player API:', err);
+    }
   };
 
-  // 3. Inyección dinámica del script de arranque de YouTube API
+  // 3. Inyección dinámica del script de arranque de YouTube API si no existe
   if (!document.getElementById('yt-iframe-api-script')) {
     const scriptTag = document.createElement('script');
     scriptTag.id = 'yt-iframe-api-script';
@@ -125,13 +126,50 @@ export function initAudioStreamer() {
   }
 }
 
+function handlePlayClick() {
+  if (!player || !isPlayerReady) {
+    pendingPlay = true;
+    const trackLabel = document.getElementById('tickerTrackTitle');
+    if (trackLabel) {
+      trackLabel.textContent = 'Asterion30 — Conectando audio...';
+    }
+    return;
+  }
+
+  if (isPlaying) {
+    if (typeof player.pauseVideo === 'function') {
+      player.pauseVideo();
+    }
+  } else {
+    try {
+      const state = typeof player.getPlayerState === 'function' ? player.getPlayerState() : -1;
+      if (state === -1 || state === 5 || state === 0) {
+        if (typeof player.playVideo === 'function') {
+          player.playVideo();
+        }
+      } else {
+        if (typeof player.playVideo === 'function') {
+          player.playVideo();
+        }
+      }
+    } catch (e) {
+      console.warn('Error al iniciar reproducción:', e);
+    }
+  }
+}
+
 function onPlayerReady(event) {
+  isPlayerReady = true;
   if (player) {
     if (typeof player.setShuffle === 'function') {
-      player.setShuffle(true);
+      try { player.setShuffle(true); } catch (e) {}
     }
     if (typeof player.setVolume === 'function') {
-      player.setVolume(currentVolume);
+      try { player.setVolume(currentVolume); } catch (e) {}
+    }
+    if (pendingPlay) {
+      pendingPlay = false;
+      handlePlayClick();
     }
   }
 }
@@ -144,20 +182,32 @@ function onPlayerStateChange(event) {
   } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
     isPlaying = false;
     updateUIState(false);
+  } else if (event.data === YT.PlayerState.BUFFERING) {
+    updateTrackInfo();
+  }
+}
+
+function onPlayerError(event) {
+  console.warn('YouTube Player Event Error Code:', event.data);
+  // Si una pista no está disponible o tiene restricción de inserción en mobile, avanzar a la siguiente
+  if (player && typeof player.nextVideo === 'function') {
+    setTimeout(() => {
+      try { player.nextVideo(); } catch (e) {}
+    }, 500);
   }
 }
 
 function updateTrackInfo() {
   if (!player) return;
   try {
-    const videoData = player.getVideoData();
-    const title = videoData && videoData.title ? videoData.title : 'Asterion30 (Pista Aleatoria)';
+    const videoData = typeof player.getVideoData === 'function' ? player.getVideoData() : null;
+    const title = videoData && videoData.title ? videoData.title : 'Audio Matrix Activo';
     const trackLabel = document.getElementById('tickerTrackTitle');
     if (trackLabel) {
       trackLabel.textContent = 'Asterion30 — ' + title;
     }
   } catch (e) {
-    // metadata fallback
+    // fallback
   }
 }
 

@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sapate Projects Hub — Portafolio de Proyectos & Aplicaciones Web</title>
   <meta name="description" content="Portal principal de proyectos digitales, aplicaciones web y laboratorio de ideas por sapate.net.ar — Cyberpunk Architecture Edition">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" href="/favicon.ico">
   
-  <!-- Google Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Orbitron:wght@500;700;800;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1" integrity="sha384-cPFV+/abYd3INVFHPmSKpBmcnH+Q+bTZW7dv/EiuShUNPkHyFmRF8PsL7Ibfvunk" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" crossorigin="anonymous">
 
   <style>
     :root {
@@ -637,17 +638,29 @@
       color: var(--cyan);
       font-family: 'Share Tech Mono', monospace;
       font-size: 12px;
-      padding: 4px 10px;
+      padding: 5px 10px;
+      min-height: 30px;
+      min-width: 32px;
       border-radius: 4px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
+      gap: 6px;
       transition: all 0.2s;
       text-decoration: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .btn-ticker-ctrl:hover {
+    .btn-ticker-ctrl i {
+      font-size: 14px;
+      line-height: 1;
+      display: inline-block;
+    }
+
+    .btn-ticker-ctrl:hover,
+    .btn-ticker-ctrl:active {
       background: var(--cyan);
       color: #000;
       box-shadow: 0 0 10px var(--glow-cyan);
@@ -659,6 +672,7 @@
       gap: 6px;
       background: rgba(0, 0, 0, 0.4);
       padding: 3px 8px;
+      min-height: 30px;
       border: 1px solid rgba(0, 240, 255, 0.2);
       border-radius: 4px;
     }
@@ -700,12 +714,30 @@
       .header-audio-ticker {
         flex-direction: column;
         align-items: stretch;
-        gap: 8px;
-        padding: 10px 16px;
+        gap: 10px;
+        padding: 10px 14px;
+      }
+      .ticker-track-info {
+        font-size: 11px;
       }
       .ticker-controls {
+        display: flex;
+        align-items: center;
         justify-content: space-between;
+        gap: 6px;
         flex-wrap: wrap;
+      }
+      .ticker-controls .btn-ticker-ctrl {
+        padding: 6px 9px;
+        min-height: 32px;
+        font-size: 11px;
+      }
+      .ticker-volume-wrapper {
+        padding: 3px 6px;
+        min-height: 32px;
+      }
+      .cyber-range {
+        width: 50px;
       }
     }
   </style>
@@ -961,7 +993,7 @@
   </footer>
 
   <!-- YouTube Iframe API Hidden Player for background audio stream -->
-  <div id="yt-hidden-player-container" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;" aria-hidden="true">
+  <div id="yt-hidden-player-container" style="position: fixed; bottom: 0; right: 0; width: 200px; height: 200px; opacity: 0.001; pointer-events: none; z-index: -999; overflow: hidden;" aria-hidden="true">
     <div id="youtube-audio-player"></div>
   </div>
 
