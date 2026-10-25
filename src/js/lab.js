@@ -78,6 +78,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Modal OSI Layer 8 (ILP)
+  const openOsiBtn = document.getElementById('btnOpenOsiModal');
+  const closeOsiBtn = document.getElementById('btnCloseOsiModal');
+  const closeOsiBottomBtn = document.getElementById('btnCloseOsiModalBottom');
+  const osiModal = document.getElementById('osiModal');
+
+  if (osiModal) {
+    const openOsi = () => osiModal.classList.add('active');
+    const closeOsi = () => osiModal.classList.remove('active');
+
+    openOsiBtn?.addEventListener('click', openOsi);
+    closeOsiBtn?.addEventListener('click', closeOsi);
+    closeOsiBottomBtn?.addEventListener('click', closeOsi);
+
+    osiModal.addEventListener('click', (e) => {
+      if (e.target === osiModal) closeOsi();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && osiModal.classList.contains('active')) {
+        closeOsi();
+      }
+    });
+  }
+
   // Opcional: Fetch dinámico a GitHub API para mantener siempre el último tag
   const sophosBadge = document.getElementById('sophosVersionBadge');
   if (sophosBadge) {

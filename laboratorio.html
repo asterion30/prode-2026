@@ -728,6 +728,36 @@
       box-shadow: 0 0 10px var(--yellow);
     }
 
+    .btn-neon-pdf {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 0, 85, 0.08);
+      border: 1.5px solid var(--magenta);
+      border-radius: 30px;
+      padding: 4px 6px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 16px rgba(255, 0, 85, 0.25);
+    }
+
+    .btn-neon-pdf:hover {
+      background: rgba(255, 0, 85, 0.2);
+      box-shadow: 0 0 25px rgba(255, 0, 85, 0.6), inset 0 0 10px rgba(255, 0, 85, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .neon-pill-tag-magenta {
+      background: var(--magenta);
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 10px var(--magenta);
+    }
+
     /* Cyber Modal */
     .cyber-modal-overlay {
       position: fixed;
@@ -939,7 +969,7 @@
 
       <div class="hero-metrics">
         <div class="metric-item">
-          <span class="metric-value">02</span>
+          <span class="metric-value">03</span>
           <span class="metric-label">Proyectos Activos en Lab</span>
         </div>
         <div class="metric-item">
@@ -963,6 +993,7 @@
         <button class="btn-cyber-filter active" data-category="all">[TODOS]</button>
         <button class="btn-cyber-filter" data-category="rust">[RUST & SYS]</button>
         <button class="btn-cyber-filter" data-category="cybersec">[CYBERSEC & GO]</button>
+        <button class="btn-cyber-filter" data-category="ia">[IA & PROTOCOLOS]</button>
       </div>
 
       <div class="cyber-search">
@@ -1098,6 +1129,80 @@
         </div>
       </article>
 
+      <!-- =========================================================================
+           Project 3: OSI Layer 8 Protocol (PRJ-07_OSI_L8_ILP) - Semantic Networking & AI
+           ========================================================================= -->
+      <article class="lab-card" data-category="ia" style="--card-accent: #ff0055; --card-border: rgba(255, 0, 85, 0.35);">
+        <div>
+          <div class="card-top-bar">
+            <div class="project-icon-box" style="border-color: var(--magenta); color: var(--magenta);">🧠</div>
+            <span class="category-badge badge-magenta">IA &amp; REDES COGNITIVAS</span>
+          </div>
+
+          <div class="project-meta-id">[ID // PRJ-07_OSI_L8_ILP]</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div>
+              <h2 class="project-title" style="margin-bottom: 0;">OSI Layer 8 (ILP)</h2>
+              <span style="font-family: 'Chakra Petch', sans-serif; font-size: 12px; color: var(--magenta);">Interaction Layer Protocol · RFC-ILP-2026</span>
+            </div>
+            <span style="font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyan); background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); padding: 2px 8px; border-radius: 4px;">ISO-7498-8 Draft</span>
+          </div>
+
+          <p class="project-description">
+            Extensión formal del modelo OSI con una Capa 8 de Interacción Semántica y Gobernanza Agéntica (ILP). Supera los límites sintácticos de la Capa 7 (HTTP/gRPC) implementando enrutamiento de intenciones en el espacio de skills (LSH SimHash / DHT semántica), protocolo de consenso de 3 vías (3-Way Intent Handshake), y firewall cognitivo en el kernel mediante eBPF/LSM (MSAC) para evitar fugas de privacidad antes del cifrado de red.
+          </p>
+
+          <!-- Security Badges -->
+          <div class="security-badges-row">
+            <span class="sec-badge">🔒 Kernel MSAC (eBPF)</span>
+            <span class="sec-badge">🌐 Semantic Anycast</span>
+            <span class="sec-badge sec-badge-cyan">🛡️ 256-bit I-PDU</span>
+            <span class="sec-badge">⚡ 3-Way Handshake</span>
+          </div>
+
+          <!-- Tags -->
+          <div class="project-tags">
+            <span class="tag" style="color: var(--magenta);">#OSI_LAYER_8</span>
+            <span class="tag" style="color: var(--magenta);">#AI_AGENTS</span>
+            <span class="tag" style="color: var(--magenta);">#EBPF</span>
+            <span class="tag" style="color: var(--magenta);">#SEMANTIC_NET</span>
+            <span class="tag" style="color: var(--magenta);">#GOVERNANCE</span>
+          </div>
+
+          <!-- Fast 1-Line Snippet Box -->
+          <div class="install-snippet-box">
+            <div class="snippet-header">
+              <span>CLONAR ESPECIFICACIÓN &amp; REPOSITORIO:</span>
+              <button class="btn-copy" data-copy="git clone https://github.com/asterion30/osi-l8-interaction-protocol.git">
+                <i class="ph-bold ph-copy"></i> Copiar
+              </button>
+            </div>
+            <code class="cmd-text">git clone https://github.com/asterion30/osi-l8-interaction-protocol.git</code>
+          </div>
+
+          <!-- Glowing Download Buttons -->
+          <div class="glow-download-stack" style="margin-bottom: 20px;">
+            <a href="https://raw.githubusercontent.com/asterion30/osi-l8-interaction-protocol/main/Paper%20de%20Referencia%20-%20Capa%208%20de%20Interaccion%20OSI%20(ILP).pdf" target="_blank" rel="noopener noreferrer" class="btn-neon-pdf">
+              <div class="neon-pill-tag-magenta">.PDF</div>
+              <div class="neon-pill-text">
+                <i class="ph-bold ph-file-pdf"></i>
+                <span>DESCARGAR PAPER DE REFERENCIA [PDF]</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card-actions-grid">
+          <button class="btn-primary-cyber" id="btnOpenOsiModal" style="cursor: pointer; background: rgba(255, 0, 85, 0.08); border-color: var(--magenta); color: var(--magenta);">
+            <i class="ph-bold ph-book-open-text"></i> ESPECIFICACIÓN
+          </button>
+          <a href="https://github.com/asterion30/osi-l8-interaction-protocol" target="_blank" rel="noopener noreferrer" class="btn-secondary-cyber">
+            <i class="ph-bold ph-github-logo"></i> GITHUB
+          </a>
+        </div>
+      </article>
+
     </div>
 
     <!-- Info Banner -->
@@ -1189,6 +1294,86 @@
         </a>
         <button class="btn-secondary-cyber" id="btnCloseSophosModalBottom" style="cursor: pointer; padding: 10px 18px;">
           CERRAR GUÍA
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       Cyber Modal: OSI Layer 8 (ILP) Specification & Pillars
+       ========================================================================= -->
+  <div class="cyber-modal-overlay" id="osiModal">
+    <div class="cyber-modal-container" style="border-color: var(--magenta); box-shadow: 0 0 40px rgba(255, 0, 85, 0.25), inset 0 0 20px rgba(255, 0, 85, 0.05);">
+      
+      <div class="modal-header" style="border-bottom-color: rgba(255, 0, 85, 0.2); background: rgba(255, 0, 85, 0.04);">
+        <div class="modal-title" style="color: var(--magenta);">
+          <i class="ph-bold ph-cpu" style="color: var(--magenta);"></i>
+          <span>OSI LAYER 8 (ILP) // ESPECIFICACIÓN ARQUITECTÓNICA</span>
+        </div>
+        <button class="btn-modal-close" id="btnCloseOsiModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <div class="steps-grid">
+          
+          <div class="step-card" style="border-left-color: var(--magenta);">
+            <div class="step-header">
+              <div class="step-num" style="background: var(--magenta); color: #fff;">1</div>
+              <h3 class="step-title">Arquitectura de Encapsulamiento: I-PDU (256 bits)</h3>
+            </div>
+            <p class="step-desc">
+              Cabecera binaria determinista de 32 bytes alineada a 32 bits con campos <code>VER</code>, <code>PERFORMATIVE</code> (DISCOVER, PROPOSE, COMMIT, ATTEST), <code>AUTONOMY_TIER</code>, <code>COGNITIVE_POLICY_FLAGS</code> (bitmask DLP en hardware), <code>SKILL_NAMESPACE_HASH</code> (LSH SimHash 64-bit), <code>MAX_BUDGET_CAP</code> y <code>USER_RULE_SIG_HASH</code> (ZKP/DID). Permite validación a velocidad de línea sin recurrir a inferencia LLM en cada salto.
+            </p>
+          </div>
+
+          <div class="step-card" style="border-left-color: var(--cyan);">
+            <div class="step-header">
+              <div class="step-num" style="background: var(--cyan); color: #000;">2</div>
+              <h3 class="step-title">Enrutamiento Semántico Anycast &amp; 3-Way Handshake</h3>
+            </div>
+            <p class="step-desc">
+              Supera la resolución estática URI/DNS de Capa 7. Enruta capacidades cognitivas mediante DHT semántica (HNSW sobre Kademlia) y similitud coseno sobre tensores de intención. Antes de procesar, sincroniza un <em>3-Way Intent Handshake</em> bilateral acordando objetivos, presupuesto máximo ($/tokens) y SLA semántico garantizado con escrow tokens.
+            </p>
+          </div>
+
+          <div class="step-card" style="border-left-color: var(--green);">
+            <div class="step-header">
+              <div class="step-num" style="background: var(--green); color: #000;">3</div>
+              <h3 class="step-title">Firewall Cognitivo MSAC en Kernel (eBPF / LSM)</h3>
+            </div>
+            <p class="step-desc">
+              Traslada la gobernanza y privacidad desde la aplicación hacia el subsistema de red del Sistema Operativo. Implementa <em>Taint Tracking</em> y hooks eBPF/LSM pre-TLS: si un proceso agéntico intenta exfiltrar datos marcados como sensibles (ej. PII médico o financiero), el kernel descarta el paquete con error <code>-EPERM_COGNITIVE_POLICY</code> de forma inmediata.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="tech-specs-box" style="border-color: rgba(255, 0, 85, 0.4);">
+          <div class="tech-specs-title" style="color: var(--magenta);">⚡ ESPECIFICACIONES FORMALES &amp; COMPARATIVA CON ESTADO DEL ARTE</div>
+          <ul class="specs-list">
+            <li><i class="ph-bold ph-check-circle" style="color: var(--green);"></i> <strong>Estándar:</strong> RFC-ILP-2026 / ISO-7498-8 Draft</li>
+            <li><i class="ph-bold ph-check-circle" style="color: var(--green);"></i> <strong>vs Anthropic MCP:</strong> Supera topología cliente-servidor estática</li>
+            <li><i class="ph-bold ph-check-circle" style="color: var(--green);"></i> <strong>vs Google A2A:</strong> Intercepción en Kernel antes de HTTP/TLS</li>
+            <li><i class="ph-bold ph-check-circle" style="color: var(--green);"></i> <strong>Seguridad L8:</strong> Mitiga Prompt Injection y BGP Hijacking</li>
+            <li><i class="ph-bold ph-check-circle" style="color: var(--green);"></i> <strong>Licenciamiento:</strong> CC BY 4.0 (Docs) &amp; MIT (Código)</li>
+            <li><i class="ph-bold ph-check-circle" style="color: var(--green);"></i> <strong>Paper de Referencia:</strong> PDF disponible en el repositorio</li>
+          </ul>
+        </div>
+
+        <div style="padding: 10px 14px; background: rgba(255, 0, 85, 0.05); border: 1px dashed rgba(255, 0, 85, 0.3); border-radius: 6px; font-size: 11px; color: #94a3b8; font-family: 'Share Tech Mono', monospace; line-height: 1.4;">
+          🌐 <strong>ÁREA DE INVESTIGACIÓN:</strong> Arquitectura de Redes Cognitivas &amp; Sistemas Agénticos Autónomos. Especificación técnica de referencia para la gobernanza y comunicación inter-agente nativa en sistemas operativos de próxima generación.
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <a href="https://raw.githubusercontent.com/asterion30/osi-l8-interaction-protocol/main/Paper%20de%20Referencia%20-%20Capa%208%20de%20Interaccion%20OSI%20(ILP).pdf" target="_blank" class="btn-primary-cyber" style="padding: 10px 18px; text-decoration: none; border-color: var(--magenta); color: var(--magenta);">
+          <i class="ph-bold ph-file-pdf"></i> VER PAPER (PDF)
+        </a>
+        <button class="btn-secondary-cyber" id="btnCloseOsiModalBottom" style="cursor: pointer; padding: 10px 18px;">
+          CERRAR ESPECIFICACIÓN
         </button>
       </div>
 
